@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"><style>body{margin:0;background:#EFEAE4;font-family:'Nunito',system-ui,sans-serif}a{color:#B8404F}a:hover{color:#8E2F3C}</style></helmet>
+
+<div style="min-height:100vh;box-sizing:border-box;display:flex;align-items:flex-start;justify-content:center;gap:34px;padding:40px 30px 60px;background:#EFEAE4">
+
+<div style="display:flex;flex-direction:column;gap:14px;padding-top:6px;width:250px">
+<div style="font-size:22px;font-weight:900;letter-spacing:-.02em;color:#241E1C">Lympha — prototype</div>
+<div style="font-size:14px;font-weight:600;line-height:1.6;color:#5F534E">Live doses. Change the volume or the recipe and the numbers recompute, the bars re-colour, and the rounding line changes state.</div>
+<div style="display:flex;flex-direction:column;gap:9px;padding-top:4px">
+<div style="font-size:12.5px;font-weight:800;letter-spacing:.04em;color:#8A7C75">TRY</div>
+<div style="font-size:14px;font-weight:600;line-height:1.55;color:#5F534E">Pick <b>Ultra Light</b>, tap <b>Edit</b> and type 250 — the nudge card rises when a bottle would round away.</div>
+<div style="font-size:14px;font-weight:600;line-height:1.55;color:#5F534E">Tap the recipe header, switch to <b>Apax</b> — bars morph, rows stagger in.</div>
+<div style="font-size:14px;font-weight:600;line-height:1.55;color:#5F534E">Tap a dose row once you've added it — it dims and the progress bar fills.</div>
+<div style="font-size:14px;font-weight:600;line-height:1.55;color:#5F534E">Settings switches appearance and per-brand units live.</div>
+</div>
+</div>
+
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" hint-size="402px,874px">
+<div style="position:relative;min-height:100%;box-sizing:border-box;overflow:hidden;font-family:'Nunito',system-ui,sans-serif;background:var(--bg,#161211);color:var(--tx,#F4EFEB);--bg:{{ vbg }};--cd:{{ vcd }};--ch:{{ vch }};--tx:{{ vtx }};--sb:{{ vsb }}">
+
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:60px 18px 40px;gap:13px;transition:transform .34s cubic-bezier(.22,1,.36,1),opacity .24s ease;transform:{{ mainShift }};opacity:{{ mainFade }}">
+
+<div onClick="{{ openRecipes }}" style="background:var(--cd,#211C1A);border-radius:22px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;flex:none">
+<div style="display:flex;gap:3px">
+<sc-for list="{{ headerBars }}" as="bar" hint-placeholder-count="4"><div style="width:5px;height:18px;border-radius:3px;transition:background .35s ease;background:{{ bar.c }}"></div></sc-for>
+</div>
+<div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:800;letter-spacing:-.01em">{{ recipeName }}</div><div style="font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85)">{{ brandLine }}</div></div>
+<div style="font-size:15px;font-weight:800;color:var(--sb,#9C8D85)">▾</div>
+</div>
+
+<div style="background:var(--cd,#211C1A);border-radius:22px;padding:18px 20px;display:flex;align-items:flex-end;justify-content:space-between;flex:none">
+<div><div style="font-size:13.5px;font-weight:700;color:var(--sb,#9C8D85);margin-bottom:4px">Water</div>
+<div style="display:flex;align-items:baseline;gap:7px"><div style="font-size:54px;font-weight:900;letter-spacing:-.035em;line-height:.88;font-variant-numeric:tabular-nums;transition:transform .16s cubic-bezier(.3,1.6,.5,1);transform:{{ volPulse }}">{{ volume }}</div><div style="font-size:19px;font-weight:700;color:var(--sb,#9C8D85)">ml</div></div></div>
+<div onClick="{{ openVolume }}" style="height:44px;padding:0 20px;border-radius:22px;background:var(--ch,#332B28);display:flex;align-items:center;font-size:16px;font-weight:800;color:var(--tx,#F0E9E4);cursor:pointer">Edit</div>
+</div>
+
+<div style="display:flex;gap:5px;flex:none;height:4px">
+<sc-for list="{{ progress }}" as="p" hint-placeholder-count="4"><div style="flex:1;height:4px;border-radius:2px;transition:background .3s ease;background:{{ p.c }}"></div></sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px;flex:none">
+<sc-for list="{{ rows }}" as="row" hint-placeholder-count="4">
+<div onClick="{{ row.toggle }}" style="background:var(--cd,#211C1A);border-radius:20px;display:flex;align-items:stretch;overflow:hidden;cursor:pointer;transition:opacity .28s ease,transform .28s cubic-bezier(.22,1,.36,1);opacity:{{ row.opacity }};transform:{{ row.shift }}">
+<div style="width:12px;flex:none;transition:background .35s ease;background:{{ row.color }}"></div>
+<div style="flex:1;padding:18px 20px;display:flex;align-items:center;gap:16px;min-width:0">
+<div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800;letter-spacing:-.01em;transition:text-decoration-color .2s ease;text-decoration:{{ row.strike }}">{{ row.name }}</div><div style="font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85);margin-top:2px">{{ row.sub }}</div></div>
+<div style="display:flex;align-items:baseline;gap:5px"><div style="font-size:40px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;transition:transform .16s cubic-bezier(.3,1.6,.5,1);transform:{{ volPulse }}">{{ row.value }}</div><div style="font-size:13px;font-weight:700;color:var(--sb,#9C8D85)">{{ row.unit }}</div></div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="margin-top:auto;display:flex;align-items:center;gap:9px;padding:0 8px;flex:none">
+<div style="width:9px;height:9px;border-radius:5px;flex:none;transition:background .3s ease;background:{{ dotColor }}"></div>
+<div style="flex:1;font-size:14.5px;font-weight:600;color:var(--sb,#9C8D85)">{{ roundingLine }}</div>
+<div onClick="{{ openSettings }}" style="font-size:14.5px;font-weight:800;cursor:pointer;color:{{ accent }}">Settings</div>
+</div>
+</div>
+
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg,#161211);padding:60px 0 26px;transition:transform .40s cubic-bezier(.22,1,.36,1);transform:{{ volX }}">
+<div style="padding:0 20px 14px;display:flex;align-items:flex-end;gap:8px">
+<div style="font-size:60px;font-weight:900;letter-spacing:-.04em;line-height:.86;font-variant-numeric:tabular-nums">{{ entryDisplay }}</div>
+<div style="width:3px;height:42px;border-radius:2px;transition:opacity .5s steps(1,end);opacity:{{ caretFade }};background:{{ accent }}"></div>
+<div style="margin-left:auto;font-size:18px;font-weight:800;color:var(--sb,#9C8D85)">ml</div>
+<div onClick="{{ closeVolume }}" style="margin-left:14px;height:40px;padding:0 18px;border-radius:20px;display:flex;align-items:center;font-size:15px;font-weight:800;cursor:pointer;background:var(--tx,#F4EFEB);color:var(--bg,#161211)">Done</div>
+</div>
+<div style="padding:0 16px 12px;display:flex;gap:8px">
+<sc-for list="{{ presets }}" as="p" hint-placeholder-count="4">
+<div onClick="{{ p.pick }}" style="flex:1;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;cursor:pointer;transition:background .2s ease,color .2s ease;background:{{ p.bg }};color:{{ p.fg }}">{{ p.label }}</div>
+</sc-for>
+</div>
+<div style="padding:0 16px 12px;overflow:hidden;transition:max-height .38s cubic-bezier(.22,1,.36,1),opacity .28s ease;max-height:{{ nudgeH }};opacity:{{ nudgeFade }}">
+<div style="border-radius:18px;background:var(--cd,#241D1B);display:flex;align-items:stretch;overflow:hidden">
+<div style="width:12px;background:#D99A4E;flex:none"></div>
+<div style="flex:1;padding:15px 17px;display:flex;flex-direction:column;gap:11px">
+<div style="font-size:16px;font-weight:800;letter-spacing:-.01em">{{ nudgeTitle }}</div>
+<div style="font-size:14px;font-weight:600;line-height:1.5;color:var(--sb,#9C8D85)">{{ nudgeBody }}</div>
+<div style="display:flex;gap:8px"><div onClick="{{ takeNudge }}" style="flex:1;height:44px;border-radius:22px;align-items:center;display:{{ nudgeCtaShow }};justify-content:center;font-size:15px;font-weight:800;cursor:pointer;background:var(--tx,#F4EFEB);color:var(--bg,#161211)">{{ nudgeCta }}</div><div onClick="{{ dismissNudge }}" style="height:44px;padding:0 18px;border-radius:22px;background:var(--ch,#332B28);display:flex;align-items:center;font-size:15px;font-weight:800;cursor:pointer">{{ nudgeDismissLabel }}</div></div>
+</div>
+</div>
+</div>
+<div style="margin-top:auto;padding:8px 4px 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:{{ padBg }}">
+<sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.press }}" style="height:46px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:-apple-system,system-ui,sans-serif;font-size:25px;cursor:pointer;transition:filter .12s ease;background:{{ k.bg }};color:{{ k.fg }};box-shadow:{{ k.shadow }}">{{ k.label }}</div>
+</sc-for>
+</div>
+</div>
+
+<div style="position:absolute;inset:0;background:var(--bg,#161211);display:flex;flex-direction:column;padding:60px 0 40px;transition:transform .38s cubic-bezier(.22,1,.36,1);transform:{{ recipeY }}">
+<div style="padding:0 20px 16px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:24px;font-weight:900;letter-spacing:-.02em">Recipe</div><div onClick="{{ closeOverlay }}" style="font-size:16px;font-weight:800;cursor:pointer;color:{{ accent }}">Done</div></div>
+<div style="padding:0 20px 16px;display:flex;gap:8px">
+<sc-for list="{{ brands }}" as="b" hint-placeholder-count="2">
+<div onClick="{{ b.pick }}" style="height:42px;padding:0 16px;border-radius:21px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;cursor:pointer;flex:none;transition:background .25s ease,color .25s ease;background:{{ b.bg }};color:{{ b.fg }}">
+<div style="display:flex;gap:2.5px"><sc-for list="{{ b.bars }}" as="bar" hint-placeholder-count="3"><div style="width:4px;height:15px;border-radius:2px;background:{{ bar.c }}"></div></sc-for></div>{{ b.name }}
+</div>
+</sc-for>
+</div>
+<div style="padding:0 16px;display:flex;flex-direction:column;gap:9px;overflow:auto">
+<sc-for list="{{ recipeList }}" as="r" hint-placeholder-count="5">
+<div onClick="{{ r.pick }}" style="background:var(--cd,#211C1A);border-radius:20px;padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),opacity .3s ease;transform:{{ r.enter }};opacity:{{ r.fade }};outline:{{ r.ring }}">
+<div style="flex:1;min-width:0"><div style="font-size:18px;font-weight:800;letter-spacing:-.01em">{{ r.name }}</div><div style="font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85);margin-top:2px">{{ r.sub }}</div></div>
+<div style="display:flex;gap:3px"><sc-for list="{{ r.bars }}" as="bar" hint-placeholder-count="3"><div style="width:5px;height:20px;border-radius:3px;background:{{ bar.c }}"></div></sc-for></div>
+</div>
+</sc-for>
+</div>
+<div style="margin-top:auto;padding:18px 22px 0;font-size:14px;font-weight:600;line-height:1.5;color:var(--sb,#9C8D85)">Switching brand keeps your volume. The bars are that recipe's bottles.</div>
+</div>
+
+<div style="position:absolute;inset:0;background:var(--bg,#161211);display:flex;flex-direction:column;padding:60px 0 40px;transition:transform .38s cubic-bezier(.22,1,.36,1);transform:{{ settingsY }}">
+<div style="padding:0 20px 18px;display:flex;align-items:center;justify-content:space-between"><div style="font-size:24px;font-weight:900;letter-spacing:-.02em">Settings</div><div onClick="{{ closeOverlay }}" style="font-size:16px;font-weight:800;cursor:pointer;color:{{ accent }}">Done</div></div>
+<div style="padding:0 16px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font-size:13.5px;font-weight:800;color:var(--sb,#9C8D85);padding:0 8px">APPEARANCE</div>
+<div style="background:var(--cd,#211C1A);border-radius:20px;padding:14px">
+<div style="display:flex;gap:6px;background:var(--ch,#2A2422);border-radius:14px;padding:4px">
+<sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+<div onClick="{{ m.pick }}" style="flex:1;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;transition:background .22s ease,box-shadow .22s ease;background:{{ m.bg }};box-shadow:{{ m.shadow }}">{{ m.label }}</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font-size:13.5px;font-weight:800;color:var(--sb,#9C8D85);padding:0 8px">UNITS</div>
+<div style="background:var(--cd,#211C1A);border-radius:20px;overflow:hidden">
+<sc-for list="{{ unitBrands }}" as="u" hint-placeholder-count="2">
+<div style="padding:16px 20px;display:flex;align-items:center;gap:14px;border-top:{{ u.divider }}">
+<div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:800">{{ u.name }}</div><div style="font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85);margin-top:2px">{{ u.hint }}</div></div>
+<div style="display:flex;gap:4px;background:var(--ch,#2A2422);border-radius:12px;padding:3px">
+<div onClick="{{ u.pickDrops }}" style="height:34px;padding:0 13px;border-radius:9px;display:flex;align-items:center;font-size:14px;font-weight:800;cursor:pointer;transition:background .2s ease;background:{{ u.dropsBg }}">drops</div>
+<div onClick="{{ u.pickGrams }}" style="height:34px;padding:0 13px;border-radius:9px;display:flex;align-items:center;font-size:14px;font-weight:800;cursor:pointer;transition:background .2s ease;background:{{ u.gramsBg }}">grams</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font-size:13.5px;font-weight:800;color:var(--sb,#9C8D85);padding:0 8px">BREWING</div>
+<div style="background:var(--cd,#211C1A);border-radius:20px;overflow:hidden">
+<div onClick="{{ toggleSuggest }}" style="display:flex;align-items:center;padding:17px 20px;gap:14px;cursor:pointer">
+<div style="flex:1"><div style="font-size:17px;font-weight:800">Suggest a cleaner volume</div><div style="font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85);margin-top:2px">Offer a nearby volume that divides evenly</div></div>
+<div style="width:52px;height:31px;border-radius:16px;padding:3px;display:flex;align-items:center;transition:background .25s ease;background:{{ suggestBg }}"><div style="width:25px;height:25px;border-radius:13px;background:#fff;transition:transform .25s cubic-bezier(.22,1,.36,1);transform:{{ suggestKnob }}"></div></div>
+</div>
+</div>
+</div>
+</div>
+<div style="margin-top:auto;padding:20px 22px 0;font-size:13.5px;font-weight:600;color:var(--sb,#9C8D85)">Lympha 1.0 · prototype</div>
+</div>
+
+</div>
+</x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:980}}">
+const DROP_ML = 0.3375;
+
+const BRANDS = {
+  lotus: {
+    name: 'Lotus Water', short: 'Lotus', accent: { light: '#B8404F', dark: '#E4707E' },
+    bottles: {
+      mg: { name: 'Magnesium', light: '#B8404F', dark: '#E4707E' },
+      ca: { name: 'Calcium', light: '#EBB093', dark: '#EBB093' },
+      na: { name: 'Sodium', light: '#F0DADC', dark: '#EBD3D5' },
+      k: { name: 'Potassium', light: '#4E9E98', dark: '#5AB3AC' }
+    },
+    recipes: [
+      { id: 'simple', name: 'Simple and Sweet', doses: { mg: 4, ca: 7, na: 6, k: 4 } },
+      { id: 'light', name: 'Light and Bright', doses: { mg: 3, ca: 5, na: 4, k: 3 } },
+      { id: 'juicy', name: 'Bright and Juicy', doses: { mg: 5, ca: 6, na: 5, k: 4 } },
+      { id: 'ultra', name: 'Ultra Light', doses: { mg: 2, ca: 3, na: 1.4 } },
+      { id: 'rao', name: "Rao's Recipe", doses: { mg: 6, ca: 8, na: 5, k: 3 } }
+    ]
+  },
+  apax: {
+    name: 'Apax Lab', short: 'Apax', accent: { light: '#2F7A45', dark: '#93CFA0' },
+    bottles: {
+      t: { name: 'TONIK', light: '#6FB87F', dark: '#93CFA0' },
+      j: { name: 'JAMM', light: '#E86A58', dark: '#FA8B7C' },
+      l: { name: 'LYLAC', light: '#B9A3D6', dark: '#D6C7E8' }
+    },
+    recipes: [
+      { id: 'cupping', name: 'Standard cupping', doses: { t: 8, j: 3, l: 1 } },
+      { id: 'washed', name: 'Washed processed', doses: { t: 8, j: 1, l: 3 } },
+      { id: 'natural', name: 'Natural processed', doses: { t: 3, j: 8, l: 1 } },
+      { id: 'honey', name: 'Honey processed', doses: { t: 3, j: 1, l: 8 } },
+      { id: 'fermented', name: 'Heavily fermented', doses: { t: 3, j: 6, l: 3 } },
+      { id: 'lightroast', name: 'Light roasted', doses: { t: 3, j: 9 } },
+      { id: 'darkroast', name: 'Dark roasted', doses: { t: 9, l: 3 } }
+    ]
+  }
+};
+
+const THEME = {
+  dark: { bg: '#161211', cd: '#211C1A', ch: '#332B28', tx: '#F4EFEB', sb: '#9C8D85', keyBg: '#6B6B6E', keyFg: '#fff', padBg: '#2C2C2E', keyShadow: '0 1px 0 rgba(0,0,0,.5)', chipOff: '#2A2422', chipOffFg: '#C6B7AF', segOn: '#463C37' },
+  light: { bg: '#FBF8F4', cd: '#FFFFFF', ch: '#F1E9E2', tx: '#241E1C', sb: '#7D6D66', keyBg: '#FFFFFF', keyFg: '#000', padBg: '#D1D3DA', keyShadow: '0 1px 0 rgba(0,0,0,.28)', chipOff: '#F1E9E2', chipOffFg: '#5C4C45', segOn: '#FFFFFF' }
+};
+
+class Component extends DCLogic {
+  state = {
+    mode: 'dark', volume: 1000, brandId: 'lotus', recipeId: 'simple',
+    overlay: null, sheet: false, entry: null, done: {}, pulse: false,
+    units: { lotus: 'drops', apax: 'grams' }, suggest: true,
+    nudgeDismissed: false, listNonce: 0, caret: true
+  };
+
+  componentDidMount() {
+    this.caretTimer = setInterval(() => this.setState(s => ({ caret: !s.caret })), 550);
+  }
+  componentWillUnmount() {
+    clearInterval(this.caretTimer);
+    clearTimeout(this.pulseTimer);
+  }
+
+  bump() {
+    clearTimeout(this.pulseTimer);
+    this.setState({ pulse: true, done: {} });
+    this.pulseTimer = setTimeout(() => this.setState({ pulse: false }), 150);
+  }
+
+  recipe() {
+    const b = BRANDS[this.state.brandId];
+    return b.recipes.find(r => r.id === this.state.recipeId) || b.recipes[0];
+  }
+
+  computed(volume, recipe, brandId) {
+    const b = BRANDS[brandId];
+    const unit = this.state.units[brandId];
+    return Object.keys(recipe.doses).map(key => {
+      const perL = recipe.doses[key];
+      const exact = perL * volume / 1000;
+      const drops = Math.round(exact);
+      const gap = exact > 0 ? Math.abs(drops - exact) / exact : 0;
+      return {
+        key, name: b.bottles[key].name, color: b.bottles[key][this.state.mode],
+        exact, drops, gap, zeroed: drops === 0 && exact > 0,
+        grams: (exact * DROP_ML).toFixed(2), unit
+      };
+    });
+  }
+
+  cleanVolume(recipe) {
+    const base = this.state.volume;
+    for (let d = 25; d <= 900; d += 25) {
+      for (const v of [base - d, base + d]) {
+        if (v < 150) continue;
+        const rows = this.computed(v, recipe, this.state.brandId);
+        if (rows.every(r => r.exact > 0.5 && Math.abs(r.drops - r.exact) < 0.06)) return v;
+      }
+    }
+    return null;
+  }
+
+  setVolume(v) { this.setState({ volume: v, entry: null, nudgeDismissed: false }); this.bump(); }
+
+  renderVals() {
+    const s = this.state, t = THEME[s.mode], brand = BRANDS[s.brandId], recipe = this.recipe();
+    const rows = this.computed(s.volume, recipe, s.brandId);
+    const unit = s.units[s.brandId];
+    const grams = unit === 'grams';
+    const worst = grams ? 0 : rows.reduce((m, r) => Math.max(m, r.gap), 0);
+    const zeroed = grams ? null : rows.find(r => r.zeroed);
+    const accent = brand.accent[s.mode];
+    const clean = s.suggest ? this.cleanVolume(recipe) : null;
+    const showNudge = s.sheet && !s.nudgeDismissed && s.suggest && (zeroed || worst > 0.1);
+    const entryStr = s.entry === null ? String(s.volume) : (s.entry || '0');
+
+    const press = (label) => () => {
+      if (label === '⌫') {
+        const cur = s.entry === null ? String(s.volume) : s.entry;
+        const next = cur.slice(0, -1);
+        this.setState({ entry: next, volume: Number(next) || 0, nudgeDismissed: false });
+      } else {
+        const cur = s.entry === null ? '' : s.entry;
+        if (cur.length >= 5) return;
+        const next = cur + label;
+        this.setState({ entry: next, volume: Number(next), nudgeDismissed: false });
+      }
+      this.bump();
+    };
+
+    return {
+      isDark: s.mode === 'dark',
+      vbg: t.bg, vcd: t.cd, vch: t.ch, vtx: t.tx, vsb: t.sb,
+      accent,
+      recipeName: recipe.name,
+      brandLine: brand.name + (unit === 'grams' ? ' · shown in grams' : ''),
+      volume: s.volume,
+      volPulse: s.pulse ? 'scale(1.05)' : 'scale(1)',
+      mainShift: s.overlay === 'recipe' ? 'translateY(14px) scale(.97)'
+        : s.overlay === 'settings' ? 'translateY(-14px) scale(.97)'
+        : s.sheet ? 'translateX(-16px) scale(.97)' : 'translateX(0) scale(1)',
+      mainFade: s.overlay || s.sheet ? '0' : '1',
+
+      headerBars: Object.keys(recipe.doses).map(k => ({ c: brand.bottles[k][s.mode] })),
+      progress: rows.map(r => ({ c: s.done[r.key] ? accent : (s.mode === 'dark' ? '#332B28' : '#EDE4DB') })),
+
+      rows: rows.map(r => ({
+        name: r.name,
+        color: r.color,
+        value: unit === 'grams' ? r.grams : r.drops,
+        unit: unit === 'grams' ? 'g' : (r.drops === 1 ? 'drop' : 'drops'),
+        sub: unit === 'grams' ? (r.drops === 0 ? 'under half a drop' : r.drops + (r.drops === 1 ? ' drop' : ' drops')) : (r.zeroed ? 'would round away' : (r.exact * DROP_ML).toFixed(2) + ' g'),
+        opacity: s.done[r.key] ? '.42' : '1',
+        shift: s.done[r.key] ? 'translateX(6px)' : 'translateX(0)',
+        strike: s.done[r.key] ? 'line-through' : 'none',
+        toggle: () => this.setState(st => ({ done: Object.assign({}, st.done, { [r.key]: !st.done[r.key] }) }))
+      })),
+
+      dotColor: zeroed || worst > 0.1 ? '#D99A4E' : '#78A566',
+      roundingLine: zeroed
+        ? zeroed.name + ' would round to zero'
+        : worst > 0.001
+          ? 'Rounded to whole drops — ' + Math.round(worst * 100) + '% off target'
+          : (unit === 'grams' ? 'Exact — nothing rounded' : 'Rounds clean at ' + s.volume + ' ml'),
+
+      openVolume: () => this.setState({ sheet: true, entry: null, nudgeDismissed: false }),
+      closeVolume: () => this.setState({ sheet: false, entry: null }),
+      openRecipes: () => this.setState({ overlay: 'recipe', listNonce: s.listNonce + 1 }),
+      openSettings: () => this.setState({ overlay: 'settings' }),
+      closeOverlay: () => this.setState({ overlay: null }),
+
+      volX: s.sheet ? 'translateX(0)' : 'translateX(100%)',
+      padBg: t.padBg,
+      recipeY: s.overlay === 'recipe' ? 'translateY(0)' : 'translateY(-100%)',
+      settingsY: s.overlay === 'settings' ? 'translateY(0)' : 'translateY(100%)',
+
+      entryDisplay: entryStr,
+      caretFade: s.caret ? '1' : '0',
+      presets: [250, 350, 500, 1000].map(v => ({
+        label: v,
+        bg: s.volume === v ? t.tx : t.chipOff,
+        fg: s.volume === v ? t.bg : t.chipOffFg,
+        pick: () => this.setVolume(v)
+      })),
+      keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(label => ({
+        label,
+        bg: label === '' || label === '⌫' ? 'transparent' : t.keyBg,
+        fg: t.keyFg,
+        shadow: label === '' || label === '⌫' ? 'none' : t.keyShadow,
+        press: label === '' ? () => {} : press(label)
+      })),
+
+      nudgeH: showNudge ? '260px' : '0px',
+      nudgeFade: showNudge ? '1' : '0',
+      nudgeTitle: zeroed ? zeroed.name + ' would round to zero' : 'Rounding is getting loud',
+      nudgeBody: clean
+        ? (zeroed
+            ? 'At ' + s.volume + ' ml this recipe asks for less than half a drop. ' + clean + ' ml lands every bottle on a whole drop.'
+            : 'At ' + s.volume + ' ml you are ' + Math.round(worst * 100) + '% off. ' + clean + ' ml divides evenly.')
+        : (zeroed
+            ? 'No nearby volume fixes this — ' + zeroed.name + ' stays under half a drop around ' + s.volume + ' ml. Switch to grams, or brew a much larger batch.'
+            : 'No nearby volume divides evenly for this recipe. You are ' + Math.round(worst * 100) + '% off target at ' + s.volume + ' ml.'),
+      nudgeCta: clean ? 'Use ' + clean + ' ml' : '',
+      nudgeCtaShow: clean ? 'flex' : 'none',
+      nudgeDismissLabel: clean ? 'Keep it' : 'Got it',
+      takeNudge: () => { if (clean) this.setVolume(clean); },
+      dismissNudge: () => this.setState({ nudgeDismissed: true }),
+
+      brands: Object.keys(BRANDS).map(id => ({
+        name: BRANDS[id].short,
+        bars: Object.keys(BRANDS[id].bottles).map(k => ({ c: BRANDS[id].bottles[k][s.mode] })),
+        bg: s.brandId === id ? t.tx : t.chipOff,
+        fg: s.brandId === id ? t.bg : t.chipOffFg,
+        pick: () => { const b = BRANDS[id]; this.setState({ brandId: id, recipeId: b.recipes[0].id, listNonce: s.listNonce + 1 }); this.bump(); }
+      })),
+
+      recipeList: brand.recipes.map((r, i) => ({
+        name: r.name,
+        sub: Object.keys(r.doses).length + ' bottles' + (r.id === s.recipeId ? ' · in use' : ''),
+        bars: Object.keys(r.doses).map(k => ({ c: brand.bottles[k][s.mode] })),
+        ring: r.id === s.recipeId ? '2px solid ' + t.tx : '0px solid transparent',
+        enter: 'translateY(0)',
+        fade: '1',
+        pick: () => { this.setState({ recipeId: r.id }); this.bump(); setTimeout(() => this.setState({ overlay: null }), 200); }
+      })),
+
+      modes: [{ id: 'light', label: 'Light' }, { id: 'dark', label: 'Dark' }].map(m => ({
+        label: m.label,
+        bg: s.mode === m.id ? t.segOn : 'transparent',
+        shadow: s.mode === m.id && s.mode === 'light' ? '0 1px 4px rgba(70,45,30,.14)' : 'none',
+        pick: () => this.setState({ mode: m.id })
+      })),
+
+      unitBrands: Object.keys(BRANDS).map((id, i) => ({
+        name: BRANDS[id].name,
+        hint: s.units[id] === 'grams' ? 'Needs a 0.01 g scale' : 'Counted from the dropper',
+        divider: i === 0 ? '0px solid transparent' : '1px solid ' + (s.mode === 'dark' ? '#2C2523' : '#F2EBE4'),
+        dropsBg: s.units[id] === 'drops' ? t.segOn : 'transparent',
+        gramsBg: s.units[id] === 'grams' ? t.segOn : 'transparent',
+        pickDrops: () => this.setState({ units: Object.assign({}, s.units, { [id]: 'drops' }) }),
+        pickGrams: () => this.setState({ units: Object.assign({}, s.units, { [id]: 'grams' }) })
+      })),
+
+      suggestBg: s.suggest ? '#78A566' : (s.mode === 'dark' ? '#3A322F' : '#DED3CA'),
+      suggestKnob: s.suggest ? 'translateX(21px)' : 'translateX(0)',
+      toggleSuggest: () => this.setState({ suggest: !s.suggest })
+    };
+  }
+}
+</script>
+</body>
+</html>
