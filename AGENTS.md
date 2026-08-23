@@ -87,6 +87,23 @@ number in the app.
 
 ## Data
 
-`docs/water-schema-v0.md` is the source of truth for anything numeric. The design handoff
-was written without sight of it and its recipe numbers, dose units and gram conversions
-are wrong. `docs/plan-v1.md` tabulates every divergence.
+The vendor research documents are the source of truth for anything numeric, and the
+design handoff is not — it was written without sight of them, and its recipe numbers,
+dose units and gram conversions are wrong. `docs/plan-v1.md` tabulates every divergence.
+
+Where the research documents disagree with each other, **the more recent and more
+specific one wins**:
+
+| Vendor | Authority |
+|---|---|
+| Lotus | `docs/water-schema-v0.md` |
+| Apax | `docs/apax-lab-brief.md` + `docs/apax-lab-recipes.json` — these **supersede** the Apax section of `water-schema-v0.md`, which was taken from the printed card that the brief rules out as a data source |
+
+**Never silently correct vendor data.** Where a published value breaks the vendor's own
+pattern, ship it as published and record it as an anomaly on the record. A number that is
+wrong should be traceably wrong in the same way the vendor's own table is — otherwise the
+app and the bottle in the user's hand disagree, and the app is the one nobody can check.
+
+Guard invariants with an **allowlist of known exceptions** rather than a blanket
+assertion: that ships the documented oddities untouched while still failing loudly on a
+new, undocumented one.

@@ -1,0 +1,107 @@
+{
+  "$schema_version": "1.0",
+  "generated": "2026-08-23",
+  "vendor": "Apax Lab",
+  "units": {
+    "gram_to_drops": 15,
+    "note": "1.000 g of concentrate = 15 drops. drops = round(g_per_litre * 15), half-up.",
+    "base_volume_ml": 1000
+  },
+  "validation": {
+    "expected_total_g_per_litre": 4.0,
+    "rule": "warn_only",
+    "note": "Every Apax recipe totals 4.0 g/L except two documented exceptions (see anomalies). Treat deviation as a warning, never auto-correct."
+  },
+  "brands": [
+    {
+      "id": "apax-lab",
+      "name": "Apax Lab",
+      "subtitle": "Current 4-concentrate range",
+      "default": true,
+      "source": "Official Apax Lab water recipe calculator, current as of 2026-08-23. Unchanged since the Apr 2026 revision.",
+      "concentrates": [
+        { "id": "tonik", "name": "TONIK", "order": 1 },
+        { "id": "jamm", "name": "JAMM", "order": 2 },
+        { "id": "lylac", "name": "LYLAC", "order": 3 },
+        { "id": "konflux", "name": "KONFLUX", "order": 4 }
+      ],
+      "recipes": [
+        { "id": "standard-cupping", "name": "Standard Cupping", "group": "process", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 1.0, "konflux": 1.0 } },
+        { "id": "washed", "name": "Washed", "group": "process", "doses": { "tonik": 2.0, "jamm": 0.5, "lylac": 0.5, "konflux": 1.0 } },
+        { "id": "natural", "name": "Natural", "group": "process", "doses": { "tonik": 0.5, "jamm": 2.0, "lylac": 0.5, "konflux": 1.0 } },
+        { "id": "honey", "name": "Honey", "group": "process", "doses": { "tonik": 0.5, "jamm": 0.5, "lylac": 2.0, "konflux": 1.0 } },
+        { "id": "heavily-fermented", "name": "Heavily Fermented", "group": "process", "doses": { "tonik": 0.0, "jamm": 2.0, "lylac": 0.0, "konflux": 2.0 } },
+        { "id": "light-roast", "name": "Light Roast", "group": "roast", "doses": { "tonik": 1.0, "jamm": 0.0, "lylac": 1.0, "konflux": 2.0 } },
+        { "id": "dark-roast", "name": "Dark Roast", "group": "roast", "doses": { "tonik": 0.0, "jamm": 2.0, "lylac": 1.0, "konflux": 1.0 } },
+        { "id": "espresso", "name": "Espresso", "group": "brew-method", "doses": { "tonik": 2.0, "jamm": 0.0, "lylac": 1.0, "konflux": 1.0 } },
+        { "id": "milk-drinks", "name": "Latte / Flat White / Cappuccino", "group": "brew-method", "doses": { "tonik": 0.0, "jamm": 2.0, "lylac": 1.0, "konflux": 1.0 } },
+        { "id": "washed-geisha", "name": "Washed Geisha", "group": "varietal", "doses": { "tonik": 1.0, "jamm": 0.0, "lylac": 2.0, "konflux": 1.0 } },
+        { "id": "natural-geisha", "name": "Natural Geisha", "group": "varietal", "doses": { "tonik": 0.0, "jamm": 1.0, "lylac": 2.0, "konflux": 1.0 } },
+        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "signature", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0, "konflux": 0.0 },
+          "note": "Identical in both the legacy and current ranges, and uses no KONFLUX." },
+        { "id": "simon-gautherin", "name": "Simon Gautherin go-to", "group": "signature", "doses": { "tonik": 0.5, "jamm": 0.5, "lylac": 1.5, "konflux": 1.5 } },
+        { "id": "carlos-escobar", "name": "Carlos Escobar go-to", "group": "signature", "doses": { "tonik": 0.0, "jamm": 2.5, "lylac": 0.0, "konflux": 1.5 } },
+        { "id": "nemo-pop", "name": "Némo Pop go-to", "group": "signature", "doses": { "tonik": 0.0, "jamm": 0.5, "lylac": 2.0, "konflux": 1.0 },
+          "note": "Totals 3.5 g/L rather than 4.0. Published as-is; likely intentional for a personal recipe." }
+      ]
+    },
+    {
+      "id": "apax-lab-original",
+      "name": "Apax Lab (Original 3-drop)",
+      "subtitle": "Pre-KONFLUX range",
+      "default": false,
+      "source": "Official Apax Lab water recipe calculator as archived 2025-12-08 (Wayback Machine). Independently corroborated by a third-party calculator with identical values.",
+      "display_note": "Taken from the latest version of the official Apax Lab calculator. Differs slightly from supplied card.",
+      "concentrates": [
+        { "id": "tonik", "name": "TONIK", "order": 1 },
+        { "id": "jamm", "name": "JAMM", "order": 2 },
+        { "id": "lylac", "name": "LYLAC", "order": 3 }
+      ],
+      "recipes": [
+        { "id": "standard-cupping", "name": "Standard Cupping", "group": "process", "doses": { "tonik": 2.5, "jamm": 1.0, "lylac": 0.5 } },
+        { "id": "washed", "name": "Washed", "group": "process", "doses": { "tonik": 2.5, "jamm": 0.5, "lylac": 1.0 } },
+        { "id": "natural", "name": "Natural", "group": "process", "doses": { "tonik": 1.0, "jamm": 2.6, "lylac": 0.5 },
+          "note": "Totals 4.1 g/L. Published as-is; the supplied card gives 2.7 for this dose." },
+        { "id": "honey", "name": "Honey", "group": "process", "doses": { "tonik": 1.0, "jamm": 0.5, "lylac": 2.5 } },
+        { "id": "heavily-fermented", "name": "Heavily Fermented", "group": "process", "doses": { "tonik": 1.0, "jamm": 2.0, "lylac": 1.0 } },
+        { "id": "light-roast", "name": "Light Roast", "group": "roast", "doses": { "tonik": 1.0, "jamm": 3.0, "lylac": 0.0 } },
+        { "id": "dark-roast", "name": "Dark Roast", "group": "roast", "doses": { "tonik": 3.0, "jamm": 0.0, "lylac": 1.0 } },
+        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "signature", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0 } }
+      ]
+    }
+  ],
+  "anomalies": [
+    {
+      "brand": "apax-lab-original",
+      "recipe": "natural",
+      "type": "total-mismatch",
+      "detail": "JAMM 2.6 g/L gives a 4.1 g/L total, the only legacy row that breaks the 4.0 invariant. Supplied card says 2.7; the surrounding pattern would suggest 2.5. Shipped as published.",
+      "action": "none"
+    },
+    {
+      "brand": "apax-lab",
+      "recipe": "nemo-pop",
+      "type": "total-mismatch",
+      "detail": "Totals 3.5 g/L. Only exception in the current range. Plausibly a deliberate lighter dilution. Shipped as published.",
+      "action": "none"
+    },
+    {
+      "brand": "both",
+      "recipe": "light-roast, dark-roast",
+      "type": "cross-version-inversion",
+      "detail": "Legacy Light Roast is JAMM-dominant (3.0) with TONIK 1.0; current Light Roast has JAMM 0.0. Legacy Dark Roast is TONIK-dominant (3.0) with JAMM 0.0; current Dark Roast has TONIK 0.0 and JAMM 2.0. The two roast profiles effectively swapped character between versions, unlike rows 1-4 which were gentle rebalances. Faithfully transcribed from both sources.",
+      "action": "none"
+    }
+  ],
+  "excluded": {
+    "supplied_card": {
+      "description": "Printed card shipped with the original 3-concentrate set. Not used as a data source.",
+      "variance": "Where the archived calculator gives 2.5 / 0.5, the card gives 2.7 / 0.3 — an 8:3:1 ratio against the calculator's 5:2:1. Same recipe shape, same 4.0 g/L total. Card values appear back-calculated from drops-per-200mL-cup. Card contains no Martin Wölfl row.",
+      "card_units": "g/L | drops per 200 mL cup"
+    },
+    "limited_editions": {
+      "known": ["TANAT", "HYDRANGEA", "NEMO AEROPRESS"],
+      "status": "Out of scope for v1. Interaction model with the standard range is unconfirmed — additive, standalone, or substitutive."
+    }
+  }
+}

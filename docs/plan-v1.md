@@ -78,7 +78,7 @@ Claude Design was not given the data model. These are the divergences, and how v
 | 2 | Lotus "Light and Bright" = 3/5/4/3 drops | 0 / 60 / 0 / 25 ppm → 0/7/0/6 drops at 1 L | Use schema. Magnesium and Sodium are genuinely absent from that recipe and get **omitted from the list**, per the design's own zero-dose rule. |
 | 3 | Lotus "Ultra Light" = `{mg:2, ca:3, na:1.4}` | 15/20/0/10 ppm → 2/2/0/2 drops | Use schema. (A fractional drop count was never physical.) |
 | 4 | Apax is drops-first; grams via `exact * 0.3375` | Apax is **dose-first in grams**; 1 drop ≈ **0.0667 g** (15 drops/g, from their own table) | Invert it: grams are the source, drops are derived. `0.3375` appears to be a Lotus drop volume misapplied to Apax — using it would be wrong by ~5×. |
-| 5 | Seven Apax recipes with invented ratios | Only "Washed processed" (2.7 / 0.3 / 1.0 g/L) is specified; all seven sum to 4.0 g/L | **Awaiting your numbers.** Build-time test asserts every Apax recipe sums to 4.0. |
+| 5 | Seven Apax recipes with invented ratios | **Superseded** by `apax-lab-brief.md`: Apax is *two* ranges — 15 current recipes (4 concentrates incl. KONFLUX) and 8 pre-KONFLUX ones (3 concentrates), 23 in total | All shipped, mapped from `apax-lab-recipes.json`. The schema's own "Washed processed" (2.7/0.3/1.0) came from the printed card, which the brief rules out as a source; the archived calculator gives 2.5/0.5/1.0. |
 | 6 | Rounding messaging "suppressed in grams mode" | The real rule is the dispenser's `allow_partial` / `step` | Generalise: suppress when the active dispenser allows partial doses. Same behaviour today, correct for future brands. |
 | 7 | Detail screen shows Hardness / Alkalinity / **TDS** | TDS is not derivable; Apax publishes no ion quantities at all | Per your call: universal **asked vs delivered per bottle** table, plus a GH/KA block only where ion data exists. No TDS. |
 | 8 | Third Wave Water cut from v1 | Schema models sachets as `step:1, allow_partial:false` | Cut from v1 content, **kept in the type system** so it's a data addition later, not a refactor. |
@@ -139,7 +139,7 @@ light/dark token module wired to `useColorScheme`.
 Types mirroring `water-schema-v0`: Brand, Component, Dispenser, Recipe, Addition.
 Zod schemas. Lotus content: 4 components with `ions_per_dose_unit_per_litre`, 7 recipes as
 ppm CaCO₃ (excluding the `Custom Recipe` sentinel), attribution stored, not marketing copy.
-Apax content when the numbers land. Build-time invariant tests.
+Apax content mapped from `apax-lab-recipes.json`. Build-time invariant tests.
 
 ### Slice 3 — Dose engine *(pure TS, test-first)* ← the heart of the app
 `resolve → scale → quantise → report`. Plus `cleanVolume` and magnitude-based unit choice.
@@ -149,7 +149,9 @@ Golden tests come straight out of the schema, which is unusually generous here:
 - The quantisation table at 1 L: all seven recipes' drop counts and GH/KA errors,
   including Ultra Light at −19.6% alkalinity.
 - Rao's at 250 ml drops potassium to **zero** — the zeroed case.
-- Apax: every recipe sums to 4.0 g/L; ~60 drops at 1 L; ~12 at 200 ml.
+- Apax: the 4.0 g/L envelope holds except for the two published exceptions, and
+  validation is on grams — a valid 4.0 g/L recipe can total 61 drops, so drop totals are
+  not an invariant.
 
 ### Slice 4 — Design system
 Tokens (light / dark / semantic), type scale with letter-spacing multiplied out per size,
@@ -197,7 +199,16 @@ Icon, splash, EAS build config, TestFlight + Play internal track.
 
 ## 5. Open items
 
-1. **Apax recipe numbers** — blocks Slice 2's Apax half only. Everything else proceeds.
+1. ~~Apax recipe numbers~~ — delivered as `docs/apax-lab-brief.md` and
+   `docs/apax-lab-recipes.json`, and shipped in Slice 2. Three consequences worth carrying
+   forward:
+   - **KONFLUX has no published label colour.** It post-dates the design handoff, so it
+     takes the handoff's documented fallback of neutral slate. Needs a real value.
+   - **Three brands, not two**, and two of them are the same vendor. The brand chip row and
+     the "Bottles" settings section were designed for two.
+   - **Fifteen recipes in one range**, grouped process / roast / brew-method / varietal /
+     signature. The Brand + recipe screen was designed as a flat list of five to seven; it
+     needs section headers.
 2. ~~Nunito tabular figures~~ — resolved by Slice 0: Nunito's default figures are already
    tabular, no feature needed.
 3. **Non-zero starting water** — parked in the schema, out of v1, but it's the most likely
