@@ -1,0 +1,6 @@
+node_modules/
+.expo/
+dist/
+package-lock.json
+# Documents are authored by hand; formatting them is not ours to do.
+docs/
