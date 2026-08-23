@@ -1,8 +1,9 @@
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from '@/design';
 import { fonts } from '@/design/fonts';
-import Gallery from '@/dev/Gallery';
+import { DoseScreen } from '@/screens/DoseScreen';
 
 export default function App() {
   const [loaded] = useFonts(fonts);
@@ -13,8 +14,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="auto" />
-      <Gallery />
+      {/* Follows the device until Slice 6 gives the setting somewhere to live. */}
+      <ThemeProvider mode="system">
+        <StatusBar style="auto" />
+        <DoseScreen />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

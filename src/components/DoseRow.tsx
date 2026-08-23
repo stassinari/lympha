@@ -3,10 +3,10 @@
  *
  * The value and its unit share a baseline; the name is optically centred against
  * the value rather than sharing that baseline. Baseline-aligning them looks
- * wrong — React Native pins the descent and puts all line-height slack above the
- * baseline, so a 40px numeral's marks sit far higher in its box than a 20px
- * name's do, and the name reads about 7px low. `capBoxPadding` squares both boxes
- * about their cap blocks so plain centring aligns what the eye actually sees.
+ * wrong — the platforms distribute line-height slack differently and neither puts
+ * a text box on its own marks, so a 40px numeral and a 20px name never line up by
+ * accident. `capBoxPadding` squares both boxes about their cap blocks so plain
+ * centring aligns what the eye actually sees.
  */
 
 import { View } from 'react-native';
@@ -44,6 +44,23 @@ const ROW_PADDING = opticalPadding(
   { top: VALUE_INSET, bottom: VALUE_INSET },
 );
 
+/**
+ * A row marked as added recedes rather than disappearing, so the list keeps its
+ * shape and you can still see what you poured.
+ *
+ * The handoff expresses this as `opacity: 0.42` on the whole row. That is a web
+ * idiom, and on Android a group alpha over a card, its elevation shadow and its
+ * text children composites badly — measured on a Pixel 8 it leaves a pale band,
+ * exactly the height of the numeral's cap block, across an otherwise grey row.
+ *
+ * The same recession is expressed in colour instead: the card drops to the page
+ * background so it stops reading as a raised surface, its shadow goes with it,
+ * the text steps down to the secondary tone, and only the colour bar actually
+ * fades — a leaf view with nothing behind it, where alpha is unambiguous. No
+ * offscreen layers, and no platform divergence.
+ */
+const DONE_BAR_OPACITY = 0.42;
+
 export type DoseRowProps = {
   line: DoseLine;
   /** Marked off as poured. Changing volume, brand or recipe clears these. */
@@ -52,28 +69,31 @@ export type DoseRowProps = {
 };
 
 export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
-  const { scheme } = useTheme();
+  const { colour, scheme } = useTheme();
   const { bar, edge } = resolveBarColour(line.component.colour, scheme);
 
   const amount = formatDoseAmount(line.delivered, line.dispenser.step);
   const unit = formatUnit(line.dispenser.unit, line.delivered);
   const alternative = line.alternative;
+  const tone = done ? 'secondary' : 'primary';
 
   return (
     <BarRow
       barColour={bar}
       barEdgeColour={edge}
+      barOpacity={done ? DONE_BAR_OPACITY : 1}
+      surfaceColour={done ? colour.background : undefined}
+      elevated={!done}
       onPress={onPress}
       paddingVertical={0}
       paddingHorizontal={space.cardH}
       contentStyle={ROW_PADDING}
       accessibilityLabel={`${line.component.name}, ${amount} ${unit}`}
       accessibilityState={{ checked: done }}
-      style={done ? { opacity: 0.42 } : undefined}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={[{ flex: 1 }, TITLE_BOX]}>
-          <RowTitle style={done ? { textDecorationLine: 'line-through' } : undefined}>
+          <RowTitle tone={tone} style={done ? { textDecorationLine: 'line-through' } : undefined}>
             {line.component.name}
           </RowTitle>
           {alternative ? (
@@ -84,7 +104,7 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
           ) : null}
         </View>
         <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, VALUE_BOX]}>
-          <DoseValue>{amount}</DoseValue>
+          <DoseValue tone={tone}>{amount}</DoseValue>
           <UnitLabel tone="secondary" style={{ marginLeft: 6 }}>
             {unit}
           </UnitLabel>

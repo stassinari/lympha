@@ -22,6 +22,13 @@ export type BarRowProps = {
   /** Inner edge for a label too pale to hold its own against a white card. */
   barEdgeColour?: string;
   onPress?: () => void;
+  /** Overrides the card surface — used to let a completed row recede into the page. */
+  surfaceColour?: string;
+  /** Opacity applied to the colour bar alone. Safe because the bar is a leaf with
+   *  nothing behind it; group opacity over a whole row is not (see `DoseRow`). */
+  barOpacity?: number;
+  /** A row that has receded should not still be casting a shadow. */
+  elevated?: boolean;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   paddingVertical?: number;
@@ -35,6 +42,9 @@ export function BarRow({
   barColour,
   barEdgeColour,
   onPress,
+  surfaceColour,
+  barOpacity = 1,
+  elevated = true,
   style,
   contentStyle,
   paddingVertical = space.cardV,
@@ -46,7 +56,7 @@ export function BarRow({
 
   const body = (
     <>
-      <View style={{ width: COLOUR_BAR_WIDTH, backgroundColor: barColour }}>
+      <View style={{ width: COLOUR_BAR_WIDTH, backgroundColor: barColour, opacity: barOpacity }}>
         {barEdgeColour ? (
           <View
             style={{
@@ -68,18 +78,20 @@ export function BarRow({
 
   // `overflow: hidden` is what clips the bar to the radius. Verified on both
   // platforms in the Slice 0 spike; Android needs no workaround.
+  const shadow = elevated ? cardShadow : null;
+
   const surface: ViewStyle = {
-    backgroundColor: colour.card,
+    backgroundColor: surfaceColour ?? colour.card,
     borderRadius: radius.row,
     overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'stretch',
   };
 
-  if (!onPress) return <View style={[surface, cardShadow, style]}>{body}</View>;
+  if (!onPress) return <View style={[surface, shadow, style]}>{body}</View>;
 
   return (
-    <View style={[cardShadow, { borderRadius: radius.row }]}>
+    <View style={[shadow, { borderRadius: radius.row }]}>
       <Touchable
         radius={radius.row}
         onPress={onPress}

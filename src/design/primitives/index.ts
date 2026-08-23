@@ -1,6 +1,7 @@
 export * from './BarCluster';
 export * from './BarRow';
 export * from './Card';
+export * from './Chevron';
 export * from './Chip';
 export * from './Divider';
 export * from './Dot';
