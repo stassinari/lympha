@@ -30,6 +30,20 @@
 
 export type NunitoWeight = '400' | '600' | '700' | '800' | '900';
 
+/**
+ * The two platforms position a line of text differently inside an explicit
+ * `lineHeight`, and no amount of `includeFontPadding: false` reconciles them.
+ * Measured on device (Nunito Black 40px, lineHeight 43):
+ *
+ *   iOS      ascent 28.88   descent 14.12
+ *   Android  ascent 34.67   descent  8.38
+ *
+ * iOS pins the descent at the font's own and takes the entire difference off the
+ * ascent. Android splits the difference evenly between the two — it removed 5.71
+ * above and 5.72 below. Everything else in this module derives from that.
+ */
+export type TextPlatform = 'ios' | 'android';
+
 export const FONT_FAMILY: Record<NunitoWeight, string> = {
   '400': 'Nunito_400Regular',
   '600': 'Nunito_600SemiBold',
@@ -38,8 +52,8 @@ export const FONT_FAMILY: Record<NunitoWeight, string> = {
   '900': 'Nunito_900Black',
 };
 
-/** Distance from the baseline to the bottom of the text box. Constant, and — because
- *  RN clamps the ascent rather than the descent — independent of lineHeight. */
+/** The font's own descent, in em. What sits below the baseline on iOS at any
+ *  line height, and the starting point for Android's even split. */
 export const DESCENT = 0.353;
 
 export const ASCENT = 1.011;
@@ -105,18 +119,129 @@ export const minLineHeightRatio = (weight: NunitoWeight, extent: InkExtent = 'te
  * numeral at lineHeight 59 has ~2px of slack above its digits and ~19px below —
  * pad it symmetrically and it will look badly top-heavy.
  */
-export function inkInsets(
+export function inkInsetsFor(
+  platform: TextPlatform,
   fontSize: number,
   lineHeight: number,
   weight: NunitoWeight,
   extent: InkExtent = 'text',
 ): { top: number; bottom: number } {
-  const spaceAboveBaseline = lineHeight - DESCENT * fontSize;
   return {
-    top: spaceAboveBaseline - inkTop(weight, extent) * fontSize,
-    bottom: DESCENT * fontSize + inkBottom(weight, extent) * fontSize,
+    top: ascentPxFor(platform, fontSize, lineHeight) - inkTop(weight, extent) * fontSize,
+    bottom: descentPxFor(platform, fontSize, lineHeight) + inkBottom(weight, extent) * fontSize,
   };
 }
 
 /** The handoff specifies letter-spacing in em; RN takes absolute px. */
 export const trackingPx = (em: number, fontSize: number) => em * fontSize;
+
+/**
+ * Space below the baseline, in px, for a given line height.
+ *
+ * The one function that knows the platforms disagree. Everything above it is
+ * font data; everything below it is layout, and gets this right for free.
+ */
+export function descentPxFor(platform: TextPlatform, fontSize: number, lineHeight: number): number {
+  const natural = DESCENT * fontSize;
+  if (platform === 'ios') return natural;
+  // Android moves half the difference between the natural box and the requested
+  // line height onto each side of the baseline.
+  return natural - (CONTENT_BOX * fontSize - lineHeight) / 2;
+}
+
+/** Space above the baseline. The rest of the box, by definition. */
+export const ascentPxFor = (platform: TextPlatform, fontSize: number, lineHeight: number) =>
+  lineHeight - descentPxFor(platform, fontSize, lineHeight);
+
+/**
+ * Distance from the baseline to the top of the *cap block* — capital height for
+ * prose, digit height for numerals.
+ *
+ * Deliberately not the full ink extent: descenders are excluded, because a word
+ * containing a "g" does not read as sitting lower on the line than one without.
+ * Optical alignment is judged on the cap block, so that is what these helpers use.
+ */
+export function capTop(weight: NunitoWeight, extent: InkExtent): number {
+  return extent === 'digits' ? DIGIT_TOP[weight] : CAP_HEIGHT;
+}
+
+/**
+ * Padding that makes a line box symmetric about its cap block.
+ *
+ * Why this is needed: React Native pins the space below the baseline to the
+ * font's descent and puts all line-height slack above it, so a text box is never
+ * centred on the marks inside it — and the taller the type, the further out it
+ * is. Baseline-aligning a 20px name against a 40px numeral leaves the name
+ * looking about 7px low, and box-centring them is no better.
+ *
+ * Pad each box symmetric first and plain `alignItems: 'center'` then aligns what
+ * a reader actually sees. Always positive, because the deficit is always on top.
+ */
+export function capBoxPaddingFor(
+  platform: TextPlatform,
+  fontSize: number,
+  lineHeight: number,
+  weight: NunitoWeight,
+  extent: InkExtent,
+): { paddingTop: number; paddingBottom: number } {
+  const below = descentPxFor(platform, fontSize, lineHeight);
+  const above = lineHeight - below - capTop(weight, extent) * fontSize;
+  return {
+    paddingTop: Math.max(0, below - above),
+    paddingBottom: Math.max(0, above - below),
+  };
+}
+
+/**
+ * Slack left on each side of a box squared by `capBoxPadding`.
+ *
+ * Equal on both sides by construction — that is what "squared" means — and always
+ * the font's descent. Pass this to `opticalPadding` when padding a container
+ * around a cap-squared box; passing the *padding* instead double-counts one side
+ * and leaves the row visibly bottom-heavy.
+ */
+export function capBoxInsetFor(
+  platform: TextPlatform,
+  fontSize: number,
+  lineHeight: number,
+  weight: NunitoWeight,
+  extent: InkExtent,
+): number {
+  const below = descentPxFor(platform, fontSize, lineHeight);
+  const above = lineHeight - below - capTop(weight, extent) * fontSize;
+  return Math.max(above, below);
+}
+
+/**
+ * Margin between two stacked blocks of text, measured between their marks rather
+ * than between their boxes. The same idea as `opticalPadding`, one axis up.
+ */
+export function opticalGap(
+  desired: number,
+  aboveInsets: { bottom: number },
+  belowInsets: { top: number },
+): number {
+  return Math.max(0, desired - aboveInsets.bottom - belowInsets.top);
+}
+
+/**
+ * Container padding that measures to the ink rather than to the text box.
+ *
+ * `desired` is the gap you want to see between the card edge and the visible
+ * marks; the text box already contributes `insets`, so the padding is whatever is
+ * left. This is the whole reason the handoff crushed its line heights, and doing
+ * it here instead means no negative margins and no per-screen fudge factors.
+ *
+ * Clamped at zero: at the tightest legal line height a display numeral's natural
+ * descent slack can already exceed the gap asked for, and the honest answer is
+ * "no extra padding" rather than pulling the layout apart.
+ */
+export function opticalPadding(
+  desired: { top: number; bottom: number },
+  insets: { top: number; bottom: number },
+): { paddingTop: number; paddingBottom: number } {
+  return {
+    paddingTop: Math.max(0, desired.top - insets.top),
+    paddingBottom: Math.max(0, desired.bottom - insets.bottom),
+  };
+}

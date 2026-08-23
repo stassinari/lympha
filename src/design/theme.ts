@@ -26,6 +26,17 @@ export const space = {
   /** Inside a card. */
   cardV: 18,
   cardH: 20,
+  /**
+   * Gap between a row's edge and the *visible marks* inside it, as opposed to the
+   * invisible text box. Fed through `opticalPadding`, which is what keeps a dose
+   * row from looking top-heavy: a 40px numeral carries ~14px of descent slack
+   * below its digits, and padding both sides equally would push the ink upwards.
+   */
+  rowInk: 20,
+  /** Between a field label and the large value beneath it. Chosen to clear the
+   *  intrinsic slack both platforms leave above a display numeral — see
+   *  `VolumeCard` — so the two render the same gap. */
+  labelGap: 10,
   /** Small internal gaps. */
   tight: 6,
   snug: 8,

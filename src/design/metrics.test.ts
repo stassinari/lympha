@@ -1,15 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CAP_HEIGHT,
   CONTENT_BOX,
   DESCENT,
   FONT_FAMILY,
-  inkInsets,
+  ascentPxFor,
+  capBoxInsetFor,
+  capBoxPaddingFor,
+  capTop,
+  descentPxFor,
+  inkInsetsFor,
   minLineHeightRatio,
+  opticalGap,
+  opticalPadding,
   trackingPx,
 } from './metrics';
-import type { NunitoWeight } from './metrics';
+import type { NunitoWeight, TextPlatform } from './metrics';
 import { typeScale, typeSpecs } from './typography';
 import type { TypeRole } from './typography';
+
+/** The existing expectations were all written against iOS; bind them explicitly
+ *  now that the module models both platforms. */
+const inkInsets = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text' = 'text') =>
+  inkInsetsFor('ios', fs, lh, w, e);
+const capBoxPadding = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text') =>
+  capBoxPaddingFor('ios', fs, lh, w, e);
+const capBoxInset = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text') =>
+  capBoxInsetFor('ios', fs, lh, w, e);
 
 const WEIGHTS: NunitoWeight[] = ['400', '600', '700', '800', '900'];
 
@@ -101,5 +118,250 @@ describe('the type scale', () => {
     // The handoff's `line-height: 0.88` is the case this guards against.
     const spec = typeSpecs.volume;
     expect(0.88).toBeLessThan(minLineHeightRatio(spec.weight, spec.extent));
+  });
+});
+
+describe('opticalPadding', () => {
+  it('subtracts the slack the text box already contributes', () => {
+    expect(opticalPadding({ top: 18, bottom: 18 }, { top: 4, bottom: 6 })).toEqual({
+      paddingTop: 14,
+      paddingBottom: 12,
+    });
+  });
+
+  it('clamps rather than going negative', () => {
+    // A 54px numeral at the tightest legal line height already carries ~19px of
+    // descent slack below its digits, which is more than the 18px the handoff
+    // asks for. Zero is the right answer; a negative margin is not.
+    const insets = inkInsets(54, typeScale.volume.lineHeight, '900', 'digits');
+    expect(insets.bottom).toBeGreaterThan(18);
+    expect(opticalPadding({ top: 18, bottom: 18 }, insets).paddingBottom).toBe(0);
+  });
+
+  it('leaves the volume card within a pixel of the designed height', () => {
+    // The check that the no-hack approach actually reproduces the design: the
+    // padding we can legally apply lands almost exactly on the intended gap.
+    const insets = inkInsets(54, typeScale.volume.lineHeight, '900', 'digits');
+    const { paddingTop, paddingBottom } = opticalPadding({ top: 18, bottom: 18 }, insets);
+    const visibleGapTop = paddingTop + insets.top;
+    const visibleGapBottom = paddingBottom + insets.bottom;
+    expect(visibleGapTop).toBeCloseTo(18, 6);
+    expect(Math.abs(visibleGapBottom - 18)).toBeLessThan(1.5);
+  });
+});
+
+describe('capBoxPadding', () => {
+  it('squares a box about its cap block', () => {
+    const size = 40;
+    const lineHeight = typeScale.doseValue.lineHeight;
+    const pad = capBoxPadding(size, lineHeight, '900', 'digits');
+
+    const below = DESCENT * size;
+    const above = lineHeight - below - capTop('900', 'digits') * size;
+    // With the padding applied, the space above the cap block equals the space
+    // below the baseline — which is what makes plain centring optically correct.
+    expect(above + pad.paddingTop).toBeCloseTo(below + pad.paddingBottom, 9);
+  });
+
+  it('only ever pads, never pulls', () => {
+    // RN puts every bit of line-height slack above the baseline, so the shortfall
+    // is always on top. A negative margin is never the answer.
+    for (const role of ['doseValue', 'volume', 'hero', 'rowTitle', 'cardTitle'] as const) {
+      const t = typeScale[role];
+      const pad = capBoxPadding(t.fontSize, t.lineHeight, t.weight, t.extent);
+      expect(pad.paddingTop).toBeGreaterThanOrEqual(0);
+      expect(pad.paddingBottom).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it('brings a name and a numeral onto the same optical centre', () => {
+    // The bug this exists to fix: baseline-aligning a 20px name against a 40px
+    // numeral leaves the name reading about 7px low.
+    const title = typeScale.rowTitle;
+    const value = typeScale.doseValue;
+
+    const centre = (t: (typeof typeScale)[keyof typeof typeScale]) => {
+      const pad = capBoxPadding(t.fontSize, t.lineHeight, t.weight, t.extent);
+      const height = t.lineHeight + pad.paddingTop + pad.paddingBottom;
+      const capBlockTop =
+        pad.paddingTop +
+        (t.lineHeight - DESCENT * t.fontSize) -
+        capTop(t.weight, t.extent) * t.fontSize;
+      const capBlockBottom = pad.paddingTop + (t.lineHeight - DESCENT * t.fontSize);
+      // Distance from the centre of the padded box to the centre of the cap block.
+      return (capBlockTop + capBlockBottom) / 2 - height / 2;
+    };
+
+    expect(centre(title)).toBeCloseTo(0, 6);
+    expect(centre(value)).toBeCloseTo(0, 6);
+  });
+
+  it('ignores descenders, which do not make a word read as lower', () => {
+    expect(capTop('800', 'text')).toBe(CAP_HEIGHT);
+    expect(capTop('900', 'digits')).toBeGreaterThan(CAP_HEIGHT);
+  });
+});
+
+describe('opticalGap', () => {
+  it('measures between the marks, not between the boxes', () => {
+    expect(opticalGap(10, { bottom: 2 }, { top: 3 })).toBe(5);
+  });
+
+  it('clamps when the boxes already sit further apart than asked', () => {
+    expect(opticalGap(4, { bottom: 3 }, { top: 3 })).toBe(0);
+  });
+});
+
+describe('capBoxInset', () => {
+  it('is the slack a squared box actually leaves, on both sides', () => {
+    const t = typeScale.doseValue;
+    const pad = capBoxPadding(t.fontSize, t.lineHeight, t.weight, 'digits');
+    const raw = inkInsets(t.fontSize, t.lineHeight, t.weight, 'digits');
+    expect(pad.paddingTop + raw.top).toBeCloseTo(
+      capBoxInset(t.fontSize, t.lineHeight, t.weight, 'digits'),
+      9,
+    );
+    expect(pad.paddingBottom + raw.bottom).toBeCloseTo(
+      capBoxInset(t.fontSize, t.lineHeight, t.weight, 'digits'),
+      9,
+    );
+  });
+
+  it('keeps a squared row the same height as an unsquared one', () => {
+    // Squaring the box moves slack around; it must not make the row grow. If this
+    // fails, the row is bottom-heavy — which is exactly the bug it was written for.
+    const t = typeScale.doseValue;
+    const pad = capBoxPadding(t.fontSize, t.lineHeight, t.weight, 'digits');
+    const boxHeight = t.lineHeight + pad.paddingTop + pad.paddingBottom;
+    const inset = capBoxInset(t.fontSize, t.lineHeight, t.weight, 'digits');
+    const rowPad = opticalPadding({ top: 20, bottom: 20 }, { top: inset, bottom: inset });
+    expect(rowPad.paddingTop + boxHeight + rowPad.paddingBottom).toBeCloseTo(68.6, 1);
+  });
+});
+
+/**
+ * Measured on device with `onTextLayout`, Expo SDK 57 / RN 0.86, iPhone 16 Pro
+ * (iOS 18.1) and Pixel 8 (Android 16). These are the numbers the renderers
+ * actually produced; the model exists to reproduce them, not the other way round.
+ */
+const MEASURED: {
+  label: string;
+  platform: TextPlatform;
+  fontSize: number;
+  lineHeight: number;
+  ascent: number;
+  descent: number;
+}[] = [
+  {
+    label: 'doseValue',
+    platform: 'ios',
+    fontSize: 40,
+    lineHeight: 43,
+    ascent: 28.88,
+    descent: 14.12,
+  },
+  {
+    label: 'doseValue',
+    platform: 'android',
+    fontSize: 40,
+    lineHeight: 43,
+    ascent: 34.67,
+    descent: 8.38,
+  },
+  { label: 'volume', platform: 'ios', fontSize: 54, lineHeight: 58, ascent: 38.94, descent: 19.06 },
+  {
+    label: 'volume',
+    platform: 'android',
+    fontSize: 54,
+    lineHeight: 58,
+    ascent: 47.24,
+    descent: 11.05,
+  },
+  {
+    label: 'rowTitle',
+    platform: 'ios',
+    fontSize: 20,
+    lineHeight: 24,
+    ascent: 16.94,
+    descent: 7.06,
+  },
+  {
+    label: 'rowTitle',
+    platform: 'android',
+    fontSize: 20,
+    lineHeight: 24,
+    ascent: 18.67,
+    descent: 5.33,
+  },
+];
+
+describe('the two platforms position text differently', () => {
+  it.each(MEASURED)('$label on $platform matches what the device reported', (m) => {
+    // Half a pixel. The residual is display-density rounding, not model error:
+    // the Pixel 8 runs at 2.625x, so one device pixel is 0.38dp and the renderer
+    // snaps line boxes to it — the 54px case measured a box of 58.29 for a
+    // requested 58. Sub-pixel, and invisible.
+    const TOLERANCE = 0.5;
+    expect(Math.abs(descentPxFor(m.platform, m.fontSize, m.lineHeight) - m.descent)).toBeLessThan(
+      TOLERANCE,
+    );
+    expect(Math.abs(ascentPxFor(m.platform, m.fontSize, m.lineHeight) - m.ascent)).toBeLessThan(
+      TOLERANCE,
+    );
+  });
+
+  it('leaves iOS pinning the descent at the font’s own', () => {
+    for (const fs of [13.5, 20, 40, 54]) {
+      for (const lh of [fs * 1.08, fs * 1.2, fs * 1.5]) {
+        expect(descentPxFor('ios', fs, lh)).toBeCloseTo(DESCENT * fs, 9);
+      }
+    }
+  });
+
+  it('has Android split the difference evenly about the baseline', () => {
+    const fs = 40;
+    const lh = 43;
+    const lostBelow = DESCENT * fs - descentPxFor('android', fs, lh);
+    const lostAbove = ASCENT_PX(fs) - ascentPxFor('android', fs, lh);
+    expect(lostBelow).toBeCloseTo(lostAbove, 9);
+  });
+
+  it('agrees with iOS when no line height is imposed', () => {
+    // At the natural box there is no slack to distribute, so the platforms
+    // converge — which the device measurements confirm to within 0.05px.
+    for (const fs of [20, 40, 54]) {
+      const natural = CONTENT_BOX * fs;
+      expect(descentPxFor('android', fs, natural)).toBeCloseTo(descentPxFor('ios', fs, natural), 9);
+    }
+  });
+});
+
+/** The font's ascent in px, for the even-split check above. */
+const ASCENT_PX = (fontSize: number) => (CONTENT_BOX - DESCENT) * fontSize;
+
+describe('the same layout lands on both platforms', () => {
+  const t = typeScale.doseValue;
+
+  it('gives a dose row the same height either way', () => {
+    // The row is the case that went wrong: identical code rendered top-heavy on
+    // Android because the model only knew iOS's rule.
+    const height = (platform: TextPlatform) => {
+      const pad = capBoxPaddingFor(platform, t.fontSize, t.lineHeight, t.weight, 'digits');
+      const inset = capBoxInsetFor(platform, t.fontSize, t.lineHeight, t.weight, 'digits');
+      const rowPad = opticalPadding({ top: 20, bottom: 20 }, { top: inset, bottom: inset });
+      return (
+        rowPad.paddingTop + t.lineHeight + pad.paddingTop + pad.paddingBottom + rowPad.paddingBottom
+      );
+    };
+    expect(height('android')).toBeCloseTo(height('ios'), 6);
+  });
+
+  it('centres the marks on both, which is the point', () => {
+    for (const platform of ['ios', 'android'] as const) {
+      const pad = capBoxPaddingFor(platform, t.fontSize, t.lineHeight, t.weight, 'digits');
+      const below = descentPxFor(platform, t.fontSize, t.lineHeight);
+      const above = t.lineHeight - below - capTop(t.weight, 'digits') * t.fontSize;
+      expect(above + pad.paddingTop).toBeCloseTo(below + pad.paddingBottom, 9);
+    }
   });
 });

@@ -1,0 +1,94 @@
+/**
+ * The row anatomy: a flush colour bar on the leading edge, then content.
+ *
+ * This is the single most reused shape in the app. Dose rows are made of it, and
+ * so are the volume nudge, the unit-override callout and the rounding-detail hero
+ * — a warning is deliberately the same family as a dose rather than a different
+ * kind of object, which is how the app stays calm about rounding at 6am.
+ *
+ * The bar is exactly 12px, full height, and touches the card edge. An inset bar
+ * was tested during design and reads too quietly.
+ */
+
+import { View } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
+import { COLOUR_BAR_WIDTH, cardShadow, radius, space, useTheme } from '../theme';
+import { Touchable } from './Touchable';
+
+export type BarRowProps = {
+  children: React.ReactNode;
+  /** Already resolved for the active scheme — see `resolveBarColour`. */
+  barColour: string;
+  /** Inner edge for a label too pale to hold its own against a white card. */
+  barEdgeColour?: string;
+  onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  paddingVertical?: number;
+  paddingHorizontal?: number;
+  accessibilityLabel?: string;
+  accessibilityState?: { selected?: boolean; checked?: boolean };
+};
+
+export function BarRow({
+  children,
+  barColour,
+  barEdgeColour,
+  onPress,
+  style,
+  contentStyle,
+  paddingVertical = space.cardV,
+  paddingHorizontal = space.cardH,
+  accessibilityLabel,
+  accessibilityState,
+}: BarRowProps) {
+  const { colour } = useTheme();
+
+  const body = (
+    <>
+      <View style={{ width: COLOUR_BAR_WIDTH, backgroundColor: barColour }}>
+        {barEdgeColour ? (
+          <View
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              backgroundColor: barEdgeColour,
+            }}
+          />
+        ) : null}
+      </View>
+      <View style={[{ flex: 1, paddingVertical, paddingHorizontal }, contentStyle]}>
+        {children}
+      </View>
+    </>
+  );
+
+  // `overflow: hidden` is what clips the bar to the radius. Verified on both
+  // platforms in the Slice 0 spike; Android needs no workaround.
+  const surface: ViewStyle = {
+    backgroundColor: colour.card,
+    borderRadius: radius.row,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  };
+
+  if (!onPress) return <View style={[surface, cardShadow, style]}>{body}</View>;
+
+  return (
+    <View style={[cardShadow, { borderRadius: radius.row }]}>
+      <Touchable
+        radius={radius.row}
+        onPress={onPress}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={accessibilityState}
+        style={[surface, style]}
+      >
+        {body}
+      </Touchable>
+    </View>
+  );
+}

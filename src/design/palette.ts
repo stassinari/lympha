@@ -23,6 +23,12 @@ export type SemanticTokens = {
   warning: string;
 };
 
+/**
+ * Where a bottle has no sampleable label colour, per the handoff's fallback rule.
+ * Cool enough to stay distinct from the warm neutrals of the surface palette.
+ */
+export const NEUTRAL_SLATE = { light: '#7E8A8C', dark: '#9DAAAC' } as const;
+
 export const light: ColourTokens = {
   background: '#FBF8F4',
   card: '#FFFFFF',

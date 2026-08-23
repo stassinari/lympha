@@ -24,7 +24,9 @@ export type TypeRole =
   | 'body'
   | 'caption'
   | 'sectionHeader'
-  | 'unitLabel';
+  | 'unitLabel'
+  | 'volumeUnit'
+  | 'cardLabel';
 
 type RoleSpec = {
   weight: NunitoWeight;
@@ -71,7 +73,13 @@ const ROLES: Record<TypeRole, RoleSpec> = {
     extent: 'text',
     uppercase: true,
   },
+  /** Names the field above a large value — "Water" over the volume. Heavier than
+   *  `caption` so it holds its own beneath a 54px numeral. */
+  cardLabel: { weight: '700', size: 13.5, lineHeightRatio: 1.35, trackingEm: 0, extent: 'text' },
+  /** Sits beside a dose value on a shared baseline, so it stays small. */
   unitLabel: { weight: '700', size: 13, lineHeightRatio: 1.35, trackingEm: 0, extent: 'text' },
+  /** Sits beside the volume, which is far larger, so it is scaled up to match. */
+  volumeUnit: { weight: '700', size: 19, lineHeightRatio: 1.3, trackingEm: 0, extent: 'text' },
 };
 
 export type ResolvedType = {
@@ -115,3 +123,15 @@ export const typeScale: Record<TypeRole, ResolvedType> = Object.fromEntries(
 ) as Record<TypeRole, ResolvedType>;
 
 export const typeSpecs = ROLES;
+
+/**
+ * Just the React Native style properties for a role.
+ *
+ * `ResolvedType` also carries `weight` and `extent`, which are metric metadata
+ * for layout rather than style props. Spreading the whole record into a `style`
+ * would pass them to the renderer, where they are meaningless at best.
+ */
+export function styleForRole(role: TypeRole): Omit<ResolvedType, 'weight' | 'extent'> {
+  const { weight: _weight, extent: _extent, ...style } = typeScale[role];
+  return style;
+}

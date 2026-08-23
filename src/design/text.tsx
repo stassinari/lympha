@@ -12,7 +12,7 @@
 
 import { Text as RNText } from 'react-native';
 import type { StyleProp, TextProps as RNTextProps, TextStyle } from 'react-native';
-import { typeScale } from './typography';
+import { styleForRole } from './typography';
 import type { TypeRole } from './typography';
 import { useTheme } from './theme';
 
@@ -36,9 +36,7 @@ export function AppText({
   ...rest
 }: TextProps & { variant: TypeRole }) {
   const { colour } = useTheme();
-  // `weight` and `extent` are metric metadata for layout, not RN style props;
-  // spreading them into a style would be silently ignored at best.
-  const { weight: _weight, extent: _extent, ...typeStyle } = typeScale[variant];
+  const typeStyle = styleForRole(variant);
 
   const colours: Record<Tone, string> = {
     primary: colour.text,
@@ -76,3 +74,5 @@ export const Body = variantComponent('body', 'Body');
 export const Caption = variantComponent('caption', 'Caption');
 export const SectionHeader = variantComponent('sectionHeader', 'SectionHeader');
 export const UnitLabel = variantComponent('unitLabel', 'UnitLabel');
+export const VolumeUnit = variantComponent('volumeUnit', 'VolumeUnit');
+export const CardLabel = variantComponent('cardLabel', 'CardLabel');
