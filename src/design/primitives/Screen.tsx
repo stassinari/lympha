@@ -19,6 +19,15 @@ export type ScreenProps = {
   topPadding?: number;
   /** Screens that scroll handle their own bottom inset. */
   applyBottomInset?: boolean;
+  /**
+   * Set to 0 when the screen's content lives in a ScrollView.
+   *
+   * A ScrollView clips to its own bounds, so a card sitting flush against the
+   * padding edge has its shadow sliced off down both sides. Giving the scroller
+   * the full width and moving the inset into its content container leaves the
+   * shadows somewhere to fall.
+   */
+  horizontalPadding?: number;
 };
 
 export function Screen({
@@ -26,6 +35,7 @@ export function Screen({
   style,
   topPadding = space.snug,
   applyBottomInset = true,
+  horizontalPadding = space.screenH,
 }: ScreenProps) {
   const insets = useSafeAreaInsets();
   const { colour } = useTheme();
@@ -38,8 +48,8 @@ export function Screen({
           backgroundColor: colour.background,
           paddingTop: insets.top + topPadding,
           paddingBottom: applyBottomInset ? insets.bottom : 0,
-          paddingLeft: Math.max(insets.left, space.screenH),
-          paddingRight: Math.max(insets.right, space.screenH),
+          paddingLeft: Math.max(insets.left, horizontalPadding),
+          paddingRight: Math.max(insets.right, horizontalPadding),
         },
         style,
       ]}

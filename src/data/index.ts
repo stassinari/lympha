@@ -12,7 +12,7 @@
 
 import { apaxBrands, apaxComponents, apaxRecipes } from './apax';
 import { lotusBrand, lotusComponents, lotusRecipes } from './lotus';
-import type { Brand, Component, Recipe } from './types';
+import type { Brand, Component, Recipe, RecipeGroup } from './types';
 
 export * from './types';
 
@@ -37,8 +37,10 @@ export const recipesForBrand = (brandId: string): Recipe[] =>
 
 /** Recipes for a brand, in the vendor's own grouping. Apax's current range has
  *  fifteen, which is too many to read as one flat list. */
-export function groupedRecipesForBrand(brandId: string): { group?: string; recipes: Recipe[] }[] {
-  const groups: { group?: string; recipes: Recipe[] }[] = [];
+export function groupedRecipesForBrand(
+  brandId: string,
+): { group?: RecipeGroup; recipes: Recipe[] }[] {
+  const groups: { group?: RecipeGroup; recipes: Recipe[] }[] = [];
   for (const recipe of recipesForBrand(brandId)) {
     const last = groups[groups.length - 1];
     if (last && last.group === recipe.group) last.recipes.push(recipe);

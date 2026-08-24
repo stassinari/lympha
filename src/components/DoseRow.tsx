@@ -25,6 +25,7 @@ import {
   useTheme,
 } from '@/design';
 import { formatDoseAmount, formatUnit } from '@/format/units';
+import type { DoseUnit } from '@/data/types';
 import type { DoseLine } from '@/engine';
 
 const value = typeScale.doseValue;
@@ -61,12 +62,52 @@ const ROW_PADDING = opticalPadding(
  */
 const DONE_BAR_OPACITY = 0.42;
 
+/** Generous enough that no unit label wraps; it is left-aligned, so the unused
+ *  remainder is never drawn. */
+const UNIT_OVERLAY_WIDTH = 200;
+
 export type DoseRowProps = {
   line: DoseLine;
   /** Marked off as poured. Changing volume, brand or recipe clears these. */
   done?: boolean;
   onPress?: () => void;
 };
+
+/**
+ * The unit, always occupying the width of its longest form.
+ *
+ * The value and unit are right-aligned as a pair, so a wider unit pushes the
+ * numeral left: "2 drops" and "1 drop" put their digits at different x, and a
+ * column of doses reads ragged for no reason.
+ *
+ * The plural is laid out invisibly to fix the column's width and give the row its
+ * baseline; the real label is drawn over it. Two earlier attempts failed for
+ * instructive reasons — hiding a nested "s" with `opacity` does nothing, because a
+ * nested Text is a span rather than a view, and hiding it with `color:
+ * 'transparent'` does nothing either on Android's text renderer.
+ *
+ * The explicit width on the overlay is what stops it wrapping: left to inherit the
+ * sizer's width it measures a fraction of a pixel wider than the identical string
+ * beneath it, and wraps or truncates its last letter. It is left-aligned, so the
+ * surplus is never drawn.
+ */
+function UnitColumn({ unit, count }: { unit: DoseUnit; count: number }) {
+  const widest = formatUnit(unit, 2);
+
+  return (
+    <View style={{ marginLeft: 6 }}>
+      <UnitLabel tone="secondary" style={{ opacity: 0 }}>
+        {widest}
+      </UnitLabel>
+      <UnitLabel
+        tone="secondary"
+        style={{ position: 'absolute', left: 0, top: 0, width: UNIT_OVERLAY_WIDTH }}
+      >
+        {formatUnit(unit, count)}
+      </UnitLabel>
+    </View>
+  );
+}
 
 export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const { colour, scheme } = useTheme();
@@ -105,9 +146,7 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
         </View>
         <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, VALUE_BOX]}>
           <DoseValue tone={tone}>{amount}</DoseValue>
-          <UnitLabel tone="secondary" style={{ marginLeft: 6 }}>
-            {unit}
-          </UnitLabel>
+          <UnitColumn unit={line.dispenser.unit} count={line.delivered} />
         </View>
       </View>
     </BarRow>

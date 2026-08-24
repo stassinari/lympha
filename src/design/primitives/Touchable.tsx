@@ -1,9 +1,12 @@
 /**
  * Press feedback, which is the main thing that differs between the platforms.
  *
+ * Note the Android ripple is *not* clipped by this component. `overflow: 'hidden'`
+ * bounds a view's children, and the ripple is the view's own background drawable,
+ * so it needs a clipping parent. Every rounded caller supplies one — see `Card`.
+ *
  * The handoff keeps one visual language across iOS and Android and varies only
- * mechanics: iOS dims on press, Android draws a Material ripple. Ripple is
- * clipped by the parent's radius, so anything with a radius must also clip.
+ * mechanics: iOS dims on press, Android draws a Material ripple.
  */
 
 import { Platform, Pressable } from 'react-native';

@@ -28,37 +28,45 @@ const CHIP_RADIUS = Platform.select({ android: radius.chipAndroid, default: radi
 export function Chip({ label, selected, onPress, leading, style }: ChipProps) {
   const { colour } = useTheme();
 
+  // The border is always present and only changes colour. Adding or removing it
+  // with the selection would change the box geometry on every tap, and on Android
+  // that re-lays-out a clipped view mid-ripple.
+  const border: ViewStyle =
+    Platform.OS === 'android'
+      ? { borderWidth: 1, borderColor: selected ? 'transparent' : colour.divider }
+      : {};
+
   const unselected: ViewStyle =
     Platform.OS === 'android'
-      ? { backgroundColor: 'transparent', borderWidth: 1, borderColor: colour.divider }
+      ? { backgroundColor: 'transparent' }
       : { backgroundColor: colour.control };
 
   return (
-    <Touchable
-      radius={CHIP_RADIUS}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      style={[
-        {
-          minHeight: MIN_TARGET,
-          paddingHorizontal: 16,
-          borderRadius: CHIP_RADIUS,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-        },
-        selected ? { backgroundColor: colour.text } : unselected,
-        style,
-      ]}
-    >
-      {leading ? <View pointerEvents="none">{leading}</View> : null}
-      <CardTitle
-        style={{ color: selected ? colour.background : colour.textSecondary }}
-        pointerEvents="none"
+    // The wrapper clips the Android ripple to the chip's shape; see `Touchable`.
+    <View style={[{ borderRadius: CHIP_RADIUS, overflow: 'hidden' }, style]}>
+      <Touchable
+        radius={CHIP_RADIUS}
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityState={{ selected }}
+        style={[
+          {
+            alignSelf: 'stretch',
+            minHeight: MIN_TARGET,
+            paddingHorizontal: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+          },
+          border,
+          selected ? { backgroundColor: colour.text } : unselected,
+        ]}
       >
-        {label}
-      </CardTitle>
-    </Touchable>
+        {leading}
+        <CardTitle style={{ color: selected ? colour.background : colour.textSecondary }}>
+          {label}
+        </CardTitle>
+      </Touchable>
+    </View>
   );
 }

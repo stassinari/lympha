@@ -4,6 +4,10 @@
  * Height differs by platform: 44pt is Apple's minimum target, 48dp is Material's.
  * Both are floors, not preferences, so the larger one wins on each platform
  * rather than being averaged into one number.
+ *
+ * The outer view exists to clip the Android ripple to the pill's shape, and takes
+ * the caller's layout styling — the presets pass `flex: 1` and it has to land on
+ * the element that participates in the row, not on the pressable inside it.
  */
 
 import { Platform, View } from 'react-native';
@@ -39,27 +43,26 @@ export function Pill({
   const inverted = selected || emphasis === 'primary';
 
   return (
-    <Touchable
-      radius={radius.pill}
-      onPress={onPress}
-      disabled={disabled}
-      accessibilityState={{ selected, disabled: !!disabled }}
-      accessibilityHint={accessibilityHint}
-      style={[
-        {
+    <View style={[{ borderRadius: radius.pill, overflow: 'hidden' }, style]}>
+      <Touchable
+        radius={radius.pill}
+        onPress={onPress}
+        disabled={disabled}
+        accessibilityState={{ selected, disabled: !!disabled }}
+        accessibilityHint={accessibilityHint}
+        style={{
+          // Stretches to whatever the wrapper's layout gives it, and sizes to its
+          // own content when the wrapper has no opinion.
+          alignSelf: 'stretch',
           minHeight: MIN_TARGET,
           paddingHorizontal: 18,
-          borderRadius: radius.pill,
           backgroundColor: inverted ? colour.text : colour.control,
           alignItems: 'center',
           justifyContent: 'center',
-        },
-        style,
-      ]}
-    >
-      <View pointerEvents="none">
+        }}
+      >
         <CardTitle style={{ color: inverted ? colour.background : colour.text }}>{label}</CardTitle>
-      </View>
-    </Touchable>
+      </Touchable>
+    </View>
   );
 }

@@ -90,17 +90,22 @@ export function BarRow({
 
   if (!onPress) return <View style={[surface, shadow, style]}>{body}</View>;
 
+  // The clipping layer between shadow and pressable is what bounds the Android
+  // ripple to the rounded corners — see `Card` for why it cannot be merged into
+  // either neighbour.
   return (
     <View style={[shadow, { borderRadius: radius.row }]}>
-      <Touchable
-        radius={radius.row}
-        onPress={onPress}
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={accessibilityState}
-        style={[surface, style]}
-      >
-        {body}
-      </Touchable>
+      <View style={{ borderRadius: radius.row, overflow: 'hidden' }}>
+        <Touchable
+          radius={radius.row}
+          onPress={onPress}
+          accessibilityLabel={accessibilityLabel}
+          accessibilityState={accessibilityState}
+          style={[surface, style]}
+        >
+          {body}
+        </Touchable>
+      </View>
     </View>
   );
 }

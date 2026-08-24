@@ -14,7 +14,6 @@
 import { ScrollView, View } from 'react-native';
 import { Screen, space } from '@/design';
 import { DoseProgress, DoseRow, RecipeHeader, RoundingLine, VolumeCard } from '@/components';
-import { recipesForBrand } from '@/data';
 import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
 
 export type DoseScreenProps = {
@@ -30,29 +29,24 @@ export function DoseScreen({ onEditVolume, onChangeRecipe }: DoseScreenProps) {
 
   const done = useStore((s) => s.done);
   const toggleDone = useStore((s) => s.toggleDone);
-  const setRecipe = useStore((s) => s.setRecipe);
-
-  // TEMPORARY — replaced by the brand and recipe screen in the next slice.
-  const cycleRecipe = () => {
-    const all = recipesForBrand(brand.id);
-    const next = all[(all.findIndex((r) => r.id === recipe.id) + 1) % all.length];
-    if (next) setRecipe(brand.id, next.id);
-    onChangeRecipe();
-  };
 
   const doneCount = dose.lines.filter((l) => done[l.component.id]).length;
 
   return (
-    <Screen>
+    <Screen horizontalPadding={0}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: space.blocks, paddingBottom: space.blocks }}
+        contentContainerStyle={{
+          gap: space.blocks,
+          paddingBottom: space.blocks,
+          paddingHorizontal: space.screenH,
+        }}
       >
         <RecipeHeader
           recipeName={recipe.name}
           brandName={brand.name}
           bottleColours={dose.lines.map((l) => l.component.colour)}
-          onPress={cycleRecipe}
+          onPress={onChangeRecipe}
         />
 
         <VolumeCard volumeMl={dose.volumeMl} onEdit={onEditVolume} />
@@ -70,7 +64,9 @@ export function DoseScreen({ onEditVolume, onChangeRecipe }: DoseScreenProps) {
         </View>
       </ScrollView>
 
-      <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={() => {}} />
+      <View style={{ paddingHorizontal: space.screenH }}>
+        <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={() => {}} />
+      </View>
     </Screen>
   );
 }

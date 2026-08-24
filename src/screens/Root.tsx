@@ -14,6 +14,7 @@ import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Overlay } from '@/design';
 import { DoseScreen } from './DoseScreen';
+import { RecipeScreen } from './RecipeScreen';
 import { VolumeScreen } from './VolumeScreen';
 
 export type OverlayName = 'volume' | 'recipe' | 'settings';
@@ -24,7 +25,16 @@ export function Root() {
 
   return (
     <View style={{ flex: 1 }}>
-      <DoseScreen onEditVolume={() => setOverlay('volume')} onChangeRecipe={() => {}} />
+      <DoseScreen
+        onEditVolume={() => setOverlay('volume')}
+        onChangeRecipe={() => setOverlay('recipe')}
+      />
+
+      {/* Each enters from the direction of the control that opens it: the header
+          is at the top, the Edit pill is mid-screen on the right. */}
+      <Overlay visible={overlay === 'recipe'} from="top" onRequestClose={close}>
+        <RecipeScreen onClose={close} />
+      </Overlay>
 
       <Overlay visible={overlay === 'volume'} from="right" onRequestClose={close}>
         <VolumeScreen onClose={close} />
