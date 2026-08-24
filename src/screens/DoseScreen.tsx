@@ -17,14 +17,12 @@ import { DoseProgress, DoseRow, RecipeHeader, RoundingLine, VolumeCard } from '@
 import { recipesForBrand } from '@/data';
 import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
 
-/**
- * Temporary stand-ins so the store can be exercised before the screens that
- * replace them exist. Both are one line each in `DoseScreen` and go away in the
- * slices that build the volume and brand-and-recipe screens.
- */
-const PRESET_VOLUMES = [250, 350, 500, 1000];
+export type DoseScreenProps = {
+  onEditVolume: () => void;
+  onChangeRecipe: () => void;
+};
 
-export function DoseScreen() {
+export function DoseScreen({ onEditVolume, onChangeRecipe }: DoseScreenProps) {
   const brand = useBrand();
   const recipe = useRecipe();
   const dose = useDose();
@@ -32,21 +30,14 @@ export function DoseScreen() {
 
   const done = useStore((s) => s.done);
   const toggleDone = useStore((s) => s.toggleDone);
-  const setVolume = useStore((s) => s.setVolume);
   const setRecipe = useStore((s) => s.setRecipe);
 
-  // TEMPORARY — replaced by the volume screen.
-  const cycleVolume = () => {
-    const next =
-      PRESET_VOLUMES[(PRESET_VOLUMES.indexOf(dose.volumeMl) + 1) % PRESET_VOLUMES.length];
-    setVolume(next ?? PRESET_VOLUMES[0]!);
-  };
-
-  // TEMPORARY — replaced by the brand and recipe screen.
+  // TEMPORARY — replaced by the brand and recipe screen in the next slice.
   const cycleRecipe = () => {
     const all = recipesForBrand(brand.id);
     const next = all[(all.findIndex((r) => r.id === recipe.id) + 1) % all.length];
     if (next) setRecipe(brand.id, next.id);
+    onChangeRecipe();
   };
 
   const doneCount = dose.lines.filter((l) => done[l.component.id]).length;
@@ -64,7 +55,7 @@ export function DoseScreen() {
           onPress={cycleRecipe}
         />
 
-        <VolumeCard volumeMl={dose.volumeMl} onEdit={cycleVolume} />
+        <VolumeCard volumeMl={dose.volumeMl} onEdit={onEditVolume} />
 
         <View style={{ gap: space.rows }}>
           <DoseProgress done={doneCount} total={dose.lines.length} brandAccent={brand.accent} />

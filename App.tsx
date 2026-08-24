@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/design';
 import { fonts } from '@/design/fonts';
-import { DoseScreen } from '@/screens/DoseScreen';
+import { Root } from '@/screens/Root';
 import { useHydrated, useStore } from '@/state';
 
 /**
@@ -37,7 +37,7 @@ export default function App() {
     <SafeAreaProvider onLayout={onLayout}>
       <ThemeProvider mode={mode}>
         <StatusBar style="auto" />
-        <DoseScreen />
+        <Root />
       </ThemeProvider>
     </SafeAreaProvider>
   );

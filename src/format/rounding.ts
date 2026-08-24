@@ -29,7 +29,7 @@ const EXACT = 0.005;
  * Without ion data there is no honest statement about the water, so it falls back
  * to the worst single bottle.
  */
-function headlineGap(dose: Dose): number {
+export function headlineGap(dose: Dose): number {
   const profile = dose.profile;
   if (profile) {
     const { hardnessError: h, alkalinityError: a } = profile;

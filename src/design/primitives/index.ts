@@ -5,6 +5,7 @@ export * from './Chevron';
 export * from './Chip';
 export * from './Divider';
 export * from './Dot';
+export * from './Overlay';
 export * from './Pill';
 export * from './Screen';
 export * from './Touchable';
