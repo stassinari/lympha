@@ -7,16 +7,17 @@
 
 import { View } from 'react-native';
 import {
+  AnimatedAppText,
   Card,
   CardLabel,
   Pill,
-  Volume,
   VolumeUnit,
   inkInsets,
   opticalGap,
   opticalPadding,
   space,
   typeScale,
+  usePulse,
 } from '@/design';
 
 /**
@@ -53,13 +54,17 @@ export type VolumeCardProps = {
 };
 
 export function VolumeCard({ volumeMl, onEdit }: VolumeCardProps) {
+  const pulse = usePulse(volumeMl);
+
   return (
     <Card paddingVertical={0} style={CARD_PADDING}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <CardLabel tone="secondary">Water</CardLabel>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: LABEL_GAP }}>
-            <Volume>{String(volumeMl)}</Volume>
+            <AnimatedAppText variant="volume" style={pulse}>
+              {String(volumeMl)}
+            </AnimatedAppText>
             <VolumeUnit tone="secondary" style={{ marginLeft: 6 }}>
               ml
             </VolumeUnit>

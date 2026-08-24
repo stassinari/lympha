@@ -11,7 +11,8 @@
  * create anxiety at 6am.
  */
 
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Easing, View } from 'react-native';
 import { BarRow, Body, CardTitle, Pill, space, useTheme } from '@/design';
 import type { Dose } from '@/engine';
 import { headlineGap } from '@/format/rounding';
@@ -59,27 +60,56 @@ function body(dose: Dose, cleanVolumeMl: number | null): string {
 
 export function VolumeNudge({ dose, cleanVolumeMl, onUseClean, onDismiss }: VolumeNudgeProps) {
   const { colour } = useTheme();
+  const entrance = useEntrance();
 
   return (
-    <BarRow barColour={colour.warning}>
-      <CardTitle>{title(dose)}</CardTitle>
-      <Body tone="onCard" style={{ marginTop: 4 }}>
-        {body(dose, cleanVolumeMl)}
-      </Body>
-      <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.blocks }}>
-        {cleanVolumeMl ? (
-          <>
-            <Pill
-              label={`Use ${cleanVolumeMl} ml`}
-              emphasis="primary"
-              onPress={() => onUseClean(cleanVolumeMl)}
-            />
-            <Pill label={`Keep ${dose.volumeMl}`} onPress={onDismiss} />
-          </>
-        ) : (
-          <Pill label="Got it" onPress={onDismiss} />
-        )}
-      </View>
-    </BarRow>
+    <Animated.View style={entrance}>
+      <BarRow barColour={colour.warning}>
+        <CardTitle>{title(dose)}</CardTitle>
+        <Body tone="onCard" style={{ marginTop: 4 }}>
+          {body(dose, cleanVolumeMl)}
+        </Body>
+        <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.blocks }}>
+          {cleanVolumeMl ? (
+            <>
+              <Pill
+                label={`Use ${cleanVolumeMl} ml`}
+                emphasis="primary"
+                onPress={() => onUseClean(cleanVolumeMl)}
+              />
+              <Pill label={`Keep ${dose.volumeMl}`} onPress={onDismiss} />
+            </>
+          ) : (
+            <Pill label="Got it" onPress={onDismiss} />
+          )}
+        </View>
+      </BarRow>
+    </Animated.View>
   );
+}
+
+/**
+ * The card rises into place rather than appearing.
+ *
+ * The handoff animates its height, which reflows the screen; sliding it up from
+ * behind the keypad reads the same and stays on the native driver, where a height
+ * animation cannot go.
+ */
+function useEntrance() {
+  const [progress] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    const animation = Animated.timing(progress, {
+      toValue: 1,
+      duration: 380,
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+      useNativeDriver: true,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [progress]);
+
+  return {
+    opacity: progress.interpolate({ inputRange: [0, 0.74, 1], outputRange: [0, 1, 1] }),
+    transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
+  };
 }

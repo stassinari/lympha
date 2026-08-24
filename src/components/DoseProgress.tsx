@@ -7,7 +7,8 @@
  * something to look at.
  */
 
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Easing, View } from 'react-native';
 import { resolveAccent, useTheme } from '@/design';
 
 export function DoseProgress({
@@ -21,6 +22,20 @@ export function DoseProgress({
 }) {
   const { colour, scheme } = useTheme();
   const fraction = total > 0 ? done / total : 0;
+
+  // Width is not native-drivable, but this is a three-pixel bar that changes once
+  // per bottle — the JS driver is not going to be noticed here.
+  const [width] = useState(() => new Animated.Value(fraction));
+  useEffect(() => {
+    const animation = Animated.timing(width, {
+      toValue: fraction,
+      duration: 280,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [fraction, width]);
   // Before the first bottle there is no progress to show, and an empty track just
   // reads as a stray rule above the list. The space stays reserved so the rows do
   // not jump when the track appears.
@@ -38,9 +53,9 @@ export function DoseProgress({
         overflow: 'hidden',
       }}
     >
-      <View
+      <Animated.View
         style={{
-          width: `${fraction * 100}%`,
+          width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
           height: '100%',
           backgroundColor: resolveAccent(brandAccent, scheme),
         }}

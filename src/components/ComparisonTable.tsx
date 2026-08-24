@@ -38,9 +38,7 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
 
       {rows.map((row, i) => (
         <View key={row.label}>
-          <View style={{ marginVertical: space.snug }}>
-            {i > 0 ? <Divider /> : null}
-          </View>
+          <View style={{ marginVertical: space.snug }}>{i > 0 ? <Divider /> : null}</View>
           <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
             <CardTitle style={{ flex: 1.4 }} numberOfLines={1}>
               {row.label}

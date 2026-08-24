@@ -6,71 +6,44 @@
  * right because Edit sits mid-screen, settings rises from the bottom. The screen
  * appears to come from the thing you touched.
  *
- * Built on React Native's own `Animated` rather than Reanimated. A slide is a
- * transform, which runs on the native driver here with no extra dependency and no
- * babel configuration. Slice 11 revisits that with the full motion spec in hand.
+ * Two ways in. `Overlay` runs its own transition, which suits a nested layer with
+ * nothing behind it worth moving. A screen that covers another uses
+ * `useOverlayTransition` directly and pairs `OverlayLayer` with `Underlay`, so both
+ * halves read the same progress value.
  */
 
-import { useEffect, useState } from 'react';
-import { Animated, BackHandler, Dimensions, Easing, Platform, View } from 'react-native';
+import { useEffect } from 'react';
+import { Animated, BackHandler, Platform, useWindowDimensions } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
+import { overlayStyle, underlayStyle, useOverlayTransition } from './overlayTransition';
+import type { OverlayDirection } from './overlayTransition';
 
-export type OverlayDirection = 'right' | 'top' | 'bottom';
-
-/** From the handoff: 380–400ms on cubic-bezier(.22, 1, .36, 1). */
-const DURATION = 380;
-const EASING = Easing.bezier(0.22, 1, 0.36, 1);
-
-export type OverlayProps = {
-  visible: boolean;
-  from: OverlayDirection;
-  onRequestClose: () => void;
-  children: React.ReactNode;
-};
-
-export function Overlay({ visible, from, onRequestClose, children }: OverlayProps) {
-  const { colour } = useTheme();
-  // Lazy state rather than a ref: the value is read while rendering the transform,
-  // and a ref read during render is not safe under concurrent rendering.
-  const [progress] = useState(() => new Animated.Value(visible ? 1 : 0));
-
-  // Mount on the render that opens it, so the entrance animates from offscreen
-  // rather than starting a frame late.
-  const [mounted, setMounted] = useState(visible);
-  if (visible && !mounted) setMounted(true);
-
+/** Android's back gesture and button close a layer, as the platform expects. */
+export function useAndroidBack(active: boolean, onBack: () => void) {
   useEffect(() => {
-    const animation = Animated.timing(progress, {
-      toValue: visible ? 1 : 0,
-      duration: DURATION,
-      easing: EASING,
-      useNativeDriver: true,
-    });
-    // Stays mounted until the exit finishes, so it animates out instead of
-    // vanishing on the frame the flag flips.
-    animation.start(({ finished }) => {
-      if (finished && !visible) setMounted(false);
-    });
-    return () => animation.stop();
-  }, [visible, progress]);
-
-  // Android's back gesture and button close the layer, matching the platform's
-  // expectation that back means "up one level" rather than "leave the app".
-  useEffect(() => {
-    if (!visible || Platform.OS !== 'android') return;
+    if (!active || Platform.OS !== 'android') return;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      onRequestClose();
+      onBack();
       return true;
     });
     return () => subscription.remove();
-  }, [visible, onRequestClose]);
+  }, [active, onBack]);
+}
 
-  if (!mounted) return null;
-
-  const { width, height } = Dimensions.get('window');
-  const horizontal = from === 'right';
-  const travel = (horizontal ? width : height) * (from === 'top' ? -1 : 1);
-  const offset = progress.interpolate({ inputRange: [0, 1], outputRange: [travel, 0] });
+export function OverlayLayer({
+  progress,
+  from,
+  children,
+  style,
+}: {
+  progress: Animated.Value;
+  from: OverlayDirection;
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const { colour } = useTheme();
+  const window = useWindowDimensions();
 
   return (
     <Animated.View
@@ -83,12 +56,45 @@ export function Overlay({ visible, from, onRequestClose, children }: OverlayProp
           bottom: 0,
           backgroundColor: colour.background,
         },
-        horizontal
-          ? { transform: [{ translateX: offset }] }
-          : { transform: [{ translateY: offset }] },
+        overlayStyle(progress, from, window),
+        style,
       ]}
     >
-      <View style={{ flex: 1 }}>{children}</View>
+      {children}
     </Animated.View>
+  );
+}
+
+/** The screen being covered, withdrawing along the same axis. */
+export function Underlay({
+  progress,
+  from,
+  children,
+}: {
+  progress: Animated.Value;
+  from: OverlayDirection;
+  children: React.ReactNode;
+}) {
+  return (
+    <Animated.View style={[{ flex: 1 }, underlayStyle(progress, from)]}>{children}</Animated.View>
+  );
+}
+
+export type OverlayProps = {
+  visible: boolean;
+  from: OverlayDirection;
+  onRequestClose: () => void;
+  children: React.ReactNode;
+};
+
+export function Overlay({ visible, from, onRequestClose, children }: OverlayProps) {
+  const { progress, mounted } = useOverlayTransition(visible);
+  useAndroidBack(visible, onRequestClose);
+
+  if (!mounted) return null;
+  return (
+    <OverlayLayer progress={progress} from={from}>
+      {children}
+    </OverlayLayer>
   );
 }

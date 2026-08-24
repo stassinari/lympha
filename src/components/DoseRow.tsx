@@ -9,15 +9,18 @@
  * centring aligns what the eye actually sees.
  */
 
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Easing, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import {
+  AnimatedAppText,
   BarRow,
   Caption,
-  DoseValue,
   RowTitle,
   UnitLabel,
   capBoxInset,
   capBoxPadding,
+  usePulse,
   opticalPadding,
   resolveBarColour,
   space,
@@ -61,6 +64,8 @@ const ROW_PADDING = opticalPadding(
  * offscreen layers, and no platform divergence.
  */
 const DONE_BAR_OPACITY = 0.42;
+const DONE_SHIFT = 6;
+const DONE_MS = 280;
 
 /** Generous enough that no unit label wraps; it is left-aligned, so the unused
  *  remainder is never drawn. */
@@ -109,6 +114,23 @@ function UnitColumn({ unit, count }: { unit: DoseUnit; count: number }) {
   );
 }
 
+/** A row that has been poured slides a little out of the way, as the handoff has
+ *  it. Transform only, so it runs on the native driver and never touches layout. */
+function useDoneNudge(done: boolean) {
+  const [offset] = useState(() => new Animated.Value(done ? DONE_SHIFT : 0));
+  useEffect(() => {
+    const animation = Animated.timing(offset, {
+      toValue: done ? DONE_SHIFT : 0,
+      duration: DONE_MS,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+    animation.start();
+    return () => animation.stop();
+  }, [done, offset]);
+  return { transform: [{ translateX: offset }] };
+}
+
 export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const { colour, scheme } = useTheme();
   const { bar, edge } = resolveBarColour(line.component.colour, scheme);
@@ -117,6 +139,15 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const unit = formatUnit(line.dispenser.unit, line.delivered);
   const alternative = line.alternative;
   const tone = done ? 'secondary' : 'primary';
+  const pulse = usePulse(amount);
+  const nudge = useDoneNudge(done);
+
+  const mark = () => {
+    // A short tap you can feel. The brief's user is not looking at the screen
+    // between bottles — they are counting drops into a jug in the dark.
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress?.();
+  };
 
   return (
     <BarRow
@@ -125,14 +156,14 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
       barOpacity={done ? DONE_BAR_OPACITY : 1}
       surfaceColour={done ? colour.background : undefined}
       elevated={!done}
-      onPress={onPress}
+      onPress={onPress ? mark : undefined}
       paddingVertical={0}
       paddingHorizontal={space.cardH}
       contentStyle={ROW_PADDING}
       accessibilityLabel={`${line.component.name}, ${amount} ${unit}`}
       accessibilityState={{ checked: done }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, nudge]}>
         <View style={[{ flex: 1 }, TITLE_BOX]}>
           <RowTitle tone={tone} style={done ? { textDecorationLine: 'line-through' } : undefined}>
             {line.component.name}
@@ -145,10 +176,12 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
           ) : null}
         </View>
         <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, VALUE_BOX]}>
-          <DoseValue tone={tone}>{amount}</DoseValue>
+          <AnimatedAppText variant="doseValue" tone={tone} style={pulse}>
+            {amount}
+          </AnimatedAppText>
           <UnitColumn unit={line.dispenser.unit} count={line.delivered} />
         </View>
-      </View>
+      </Animated.View>
     </BarRow>
   );
 }
