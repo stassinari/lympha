@@ -83,6 +83,7 @@ Claude Design was not given the data model. These are the divergences, and how v
 | 7 | Detail screen shows Hardness / Alkalinity / **TDS** | TDS is not derivable; Apax publishes no ion quantities at all | Per your call: universal **asked vs delivered per bottle** table, plus a GH/KA block only where ion data exists. No TDS. |
 | 8 | Third Wave Water cut from v1 | Schema models sachets as `step:1, allow_partial:false` | Cut from v1 content, **kept in the type system** so it's a data addition later, not a refactor. |
 | 9 | — | Barista Hustle numbers unverified, "do not ship" | Types support `prepared` components; no BH data ships. |
+| 10 | Clean-volume search may look **up to 900 ml away** | — | Changed to **25% of the requested volume**. A flat allowance is sensible from a litre and absurd from a cup: it produced "Use 800 ml" for someone asking for 350, which is a different drink rather than a nudge. Where nothing qualifies, the card says so — which the design already required. |
 
 ---
 

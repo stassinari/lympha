@@ -6,12 +6,18 @@
  * a slightly different amount, and that is a far better thing to offer than an
  * apology.
  *
- * Search rules come from the design handoff: step ±25 ml outward, up to 900 ml
- * away, never below 150 ml, and accept the first volume where every bottle lands
- * within 0.06 of a whole unit and none is under half a unit. Both directions are
- * searched at each distance, nearer first — a smaller honest volume is often the
- * better answer, and the design is explicit that the search must not prefer
- * "brew more".
+ * Search rules come from the design handoff: step ±25 ml outward, never below
+ * 150 ml, and accept the first volume where every bottle lands within 0.06 of a
+ * whole unit and none is under half a unit. Both directions are searched at each
+ * distance, nearer first — a smaller honest volume is often the better answer,
+ * and the design is explicit that the search must not prefer "brew more".
+ *
+ * How far it will look is **proportional to what was asked for**, rather than the
+ * handoff's flat 900 ml. That figure is sensible from a litre and absurd from a
+ * cup: it produced "Use 800 ml" for someone who asked for 350, which is not the
+ * "slightly different volume" the brief describes — it is a different drink. A
+ * quarter either way keeps the suggestion recognisable as the same brew, and
+ * where nothing qualifies the honest answer is no suggestion at all.
  */
 
 import type { Component, Recipe } from '@/data/types';
@@ -20,7 +26,8 @@ import type { Dose, DoseOptions } from './dose';
 
 export type CleanVolumeOptions = DoseOptions & {
   stepMl?: number;
-  maxDistanceMl?: number;
+  /** How far the search may stray, as a fraction of the requested volume. */
+  maxDistanceFraction?: number;
   minVolumeMl?: number;
   /** How close to a whole unit counts as landing on it, as a fraction of the
    *  dispenser's step. */
@@ -29,7 +36,7 @@ export type CleanVolumeOptions = DoseOptions & {
 
 const DEFAULTS = {
   stepMl: 25,
-  maxDistanceMl: 900,
+  maxDistanceFraction: 0.25,
   minVolumeMl: 150,
   tolerance: 0.06,
 };
@@ -56,7 +63,8 @@ export function findCleanVolume(
   currentVolumeMl: number,
   options: CleanVolumeOptions = {},
 ): number | null {
-  const { stepMl, maxDistanceMl, minVolumeMl, tolerance } = { ...DEFAULTS, ...options };
+  const { stepMl, maxDistanceFraction, minVolumeMl, tolerance } = { ...DEFAULTS, ...options };
+  const maxDistanceMl = currentVolumeMl * maxDistanceFraction;
 
   const current = computeDose(recipe, currentVolumeMl, components, options);
 

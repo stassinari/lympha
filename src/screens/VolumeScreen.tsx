@@ -24,7 +24,7 @@ import {
   ScreenTitle,
   Touchable,
   VolumeUnit,
-  capBoxPadding,
+  capTop,
   resolveAccent,
   space,
   typeScale,
@@ -48,7 +48,19 @@ const CARET_BLINK_MS = 550;
 const MAX_DIGITS = 5;
 
 const hero = typeScale.hero;
-const HERO_BOX = capBoxPadding(hero.fontSize, hero.lineHeight, hero.weight, 'digits');
+
+/**
+ * The caret is exactly as tall as the digits it sits beside — baseline to the top
+ * of the numerals.
+ *
+ * It is placed by baseline alignment rather than by centring. A plain View has no
+ * text baseline, so Yoga aligns its *bottom* edge to the row's baseline; a bar of
+ * cap height therefore spans precisely the same band as the digits. That works
+ * out identically on both platforms without knowing anything about how either
+ * distributes line-height slack, which centring did not — hence the caret sitting
+ * low on iOS and correct on Android.
+ */
+const CARET_HEIGHT = capTop(hero.weight, 'digits') * hero.fontSize;
 
 const clampVolume = (ml: number) => Math.min(VOLUME_MAX_ML, Math.max(VOLUME_MIN_ML, ml));
 
@@ -61,11 +73,13 @@ function Caret({ colour }: { colour: string }) {
   }, []);
   return (
     <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
       style={{
         width: 3,
-        height: hero.fontSize * 0.72,
+        height: CARET_HEIGHT,
         borderRadius: 2,
-        marginLeft: 6,
+        marginLeft: 8,
         backgroundColor: on ? colour : 'transparent',
       }}
     />
@@ -150,16 +164,21 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
         ) : null}
       </View>
 
-      <View
-        style={[{ flexDirection: 'row', alignItems: 'center' }, HERO_BOX]}
+      {/* Tapping the value brings the keypad back. Without this there is no way to
+          recover once the keyboard has been dismissed, since the field is offscreen. */}
+      <Touchable
+        onPress={() => inputRef.current?.focus()}
         accessibilityLabel={`${pendingMl} millilitres`}
+        accessibilityHint="Edit the volume"
+        style={{ flexDirection: 'row', alignItems: 'baseline' }}
       >
         <AppText variant="hero">{display}</AppText>
-        <VolumeUnit tone="secondary" style={{ marginLeft: 8 }}>
-          ml
-        </VolumeUnit>
+        {/* Immediately after the digits, where the next one will appear. */}
         <Caret colour={accent} />
-      </View>
+        {/* Anchored right, so the unit holds still as the number gains digits. */}
+        <View style={{ flex: 1 }} />
+        <VolumeUnit tone="secondary">ml</VolumeUnit>
+      </Touchable>
 
       <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.loose }}>
         {PRESETS.map((preset) => (

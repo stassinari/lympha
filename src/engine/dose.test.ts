@@ -194,11 +194,32 @@ describe('profiles', () => {
 });
 
 describe('the clean volume search', () => {
-  it("finds a volume where Rao's Recipe keeps its potassium", () => {
-    const found = findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 250);
+  it('finds a volume that lands clean, and it really does land clean', () => {
+    const raos = recipe('lotus-raos-recipe');
+    const found = findCleanVolume(raos, componentMap, 1100);
     expect(found).not.toBeNull();
-    expect(computeDose(recipe('lotus-raos-recipe'), found!, componentMap).zeroed).toEqual([]);
-    expect(landsCleanly(computeDose(recipe('lotus-raos-recipe'), found!, componentMap))).toBe(true);
+    const fixed = computeDose(raos, found!, componentMap);
+    expect(fixed.zeroed).toEqual([]);
+    expect(landsCleanly(fixed)).toBe(true);
+  });
+
+  it('stays within a quarter of what was asked for', () => {
+    // A flat allowance is sensible from a litre and absurd from a cup: it once
+    // answered "use 800 ml" to someone asking for 350, which is a different drink
+    // rather than a nudge.
+    for (const recipeId of ['lotus-raos-recipe', 'lotus-simple-and-sweet', 'lotus-ultra-light']) {
+      for (const volumeMl of [200, 250, 350, 500, 1000, 1500, 2000]) {
+        const found = findCleanVolume(recipe(recipeId), componentMap, volumeMl);
+        if (found === null) continue;
+        expect(Math.abs(found - volumeMl)).toBeLessThanOrEqual(volumeMl * 0.25);
+      }
+    }
+  });
+
+  it('says nothing rather than sending you to a different drink', () => {
+    // Rao's at a cup has no clean volume nearby — the nearest is 1000 ml, four
+    // times what was asked for. The nudge is required to admit that plainly.
+    expect(findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 250)).toBeNull();
   });
 
   it('searches downward as well as upward', () => {
