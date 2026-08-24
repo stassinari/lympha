@@ -52,6 +52,26 @@ export function groupedRecipesForBrand(
 export const componentsForBrand = (brandId: string): Component[] =>
   components.filter((c) => c.brand === brandId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
+/** Brands sharing one concentrate-unit preference. */
+export const unitGroupOf = (brandId: string): string => getBrand(brandId)?.unitGroup ?? brandId;
+
+/**
+ * One entry per unit preference the user can actually set, rather than one per
+ * brand — Apax's two ranges are the same jars and share a setting.
+ */
+export function unitGroups(): { id: string; label: string; brandIds: string[] }[] {
+  const groups = new Map<string, { id: string; label: string; brandIds: string[] }>();
+  for (const brand of brands) {
+    const id = unitGroupOf(brand.id);
+    const existing = groups.get(id);
+    if (existing) existing.brandIds.push(brand.id);
+    // The first brand in a group names it, which gives "Apax Lab" rather than
+    // "Apax Lab (Original 3-drop)".
+    else groups.set(id, { id, label: brand.name, brandIds: [brand.id] });
+  }
+  return [...groups.values()];
+}
+
 /** The dispenser a component uses unless the user has chosen otherwise. */
 export function defaultDispenser(component: Component) {
   return component.dispensers.find((d) => d.isDefault) ?? component.dispensers[0];

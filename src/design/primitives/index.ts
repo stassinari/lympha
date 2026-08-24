@@ -8,4 +8,6 @@ export * from './Dot';
 export * from './Overlay';
 export * from './Pill';
 export * from './Screen';
+export * from './Segmented';
+export * from './SettingsIcon';
 export * from './Touchable';

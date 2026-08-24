@@ -10,7 +10,15 @@
  * brew, which means everything below survives a cold start.
  */
 
-import { brands, getBrand, getComponent, getRecipe, recipesForBrand } from '@/data';
+import {
+  brands,
+  getBrand,
+  getComponent,
+  getRecipe,
+  recipesForBrand,
+  unitGroupOf,
+  unitGroups,
+} from '@/data';
 import type { DoseUnit } from '@/data/types';
 import type { UnitPreference } from '@/engine';
 
@@ -34,6 +42,12 @@ export type PersistedState = {
   units: Record<string, UnitPreference>;
   /** Offer a nearby volume that divides evenly. */
   suggest: boolean;
+  /**
+   * The volume the app opens on. `null` means whatever you last brewed, which is
+   * what the brief's "opens to the answer" asks for — but someone who always makes
+   * the same amount is better served by pinning it.
+   */
+  defaultVolumeMl: number | null;
   /** Rounding gap above which the line turns amber. */
   flagAbove: number;
 };
@@ -47,6 +61,7 @@ export const DEFAULTS: PersistedState = {
   recipeIds: {},
   units: {},
   suggest: true,
+  defaultVolumeMl: null,
   flagAbove: 0.1,
 };
 
@@ -64,16 +79,20 @@ export function recipeIdFor(state: PersistedState, brandId: string): string | un
 }
 
 export function unitPreferenceFor(state: PersistedState, brandId: string): UnitPreference {
-  return state.units[brandId] ?? 'auto';
+  // Keyed by unit group, so Apax's two ranges answer as one.
+  return state.units[unitGroupOf(brandId)] ?? 'auto';
 }
 
-/** Units a brand can actually be dosed in, for validating a stored override. */
-function unitsOfferedBy(brandId: string): Set<DoseUnit> {
+/** Units a unit group can actually be dosed in, for validating a stored override. */
+function unitsOfferedByGroup(groupId: string): Set<DoseUnit> {
   const offered = new Set<DoseUnit>();
-  for (const recipe of recipesForBrand(brandId)) {
-    for (const addition of recipe.additions) {
-      for (const dispenser of getComponent(addition.component)?.dispensers ?? []) {
-        offered.add(dispenser.unit);
+  const group = unitGroups().find((g) => g.id === groupId);
+  for (const brandId of group?.brandIds ?? []) {
+    for (const recipe of recipesForBrand(brandId)) {
+      for (const addition of recipe.additions) {
+        for (const dispenser of getComponent(addition.component)?.dispensers ?? []) {
+          offered.add(dispenser.unit);
+        }
       }
     }
   }
@@ -119,10 +138,14 @@ export function repair(raw: unknown): PersistedState {
 
   const units: Record<string, UnitPreference> = {};
   if (isRecord(raw.units)) {
-    for (const [brand, preference] of Object.entries(raw.units)) {
-      if (typeof preference !== 'string' || !getBrand(brand)) continue;
-      if (preference === 'auto' || unitsOfferedBy(brand).has(preference as DoseUnit)) {
-        units[brand] = preference as UnitPreference;
+    const known = new Set(unitGroups().map((g) => g.id));
+    for (const [group, preference] of Object.entries(raw.units)) {
+      // Keys are unit groups. A build that stored them per brand — as an earlier
+      // one did — leaves entries under ids that are no longer keys, and they are
+      // dropped rather than trusted.
+      if (typeof preference !== 'string' || !known.has(group)) continue;
+      if (preference === 'auto' || unitsOfferedByGroup(group).has(preference as DoseUnit)) {
+        units[group] = preference as UnitPreference;
       }
     }
   }
@@ -133,6 +156,12 @@ export function repair(raw: unknown): PersistedState {
       ? flag
       : DEFAULTS.flagAbove;
 
+  const preferred = raw.defaultVolumeMl;
+  const defaultVolumeMl =
+    typeof preferred === 'number' && Number.isFinite(preferred)
+      ? Math.min(VOLUME_MAX_ML, Math.max(VOLUME_MIN_ML, Math.round(preferred)))
+      : null;
+
   return {
     mode,
     volumeMl,
@@ -140,9 +169,13 @@ export function repair(raw: unknown): PersistedState {
     recipeIds,
     units,
     suggest: typeof raw.suggest === 'boolean' ? raw.suggest : DEFAULTS.suggest,
+    defaultVolumeMl,
     flagAbove,
   };
 }
+
+/** Thresholds offered for flagging a rounding gap. */
+export const FLAG_CHOICES = [0.05, 0.1, 0.15, 0.2] as const;
 
 /** Guards against shipping a default that names data we do not have. */
 export function defaultsAreValid(): boolean {

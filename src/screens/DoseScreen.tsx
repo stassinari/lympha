@@ -12,16 +12,17 @@
  */
 
 import { ScrollView, View } from 'react-native';
-import { Screen, space } from '@/design';
+import { Screen, SettingsIcon, Touchable, space } from '@/design';
 import { DoseProgress, DoseRow, RecipeHeader, RoundingLine, VolumeCard } from '@/components';
 import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
 
 export type DoseScreenProps = {
   onEditVolume: () => void;
   onChangeRecipe: () => void;
+  onOpenSettings: () => void;
 };
 
-export function DoseScreen({ onEditVolume, onChangeRecipe }: DoseScreenProps) {
+export function DoseScreen({ onEditVolume, onChangeRecipe, onOpenSettings }: DoseScreenProps) {
   const brand = useBrand();
   const recipe = useRecipe();
   const dose = useDose();
@@ -64,8 +65,27 @@ export function DoseScreen({ onEditVolume, onChangeRecipe }: DoseScreenProps) {
         </View>
       </ScrollView>
 
-      <View style={{ paddingHorizontal: space.screenH }}>
-        <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={() => {}} />
+      {/* The rounding line and the way out of the screen share the bottom edge, as
+          the handoff has them: the settings affordance sits bottom-right, which is
+          also the direction its screen rises from. */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: space.screenH,
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={() => {}} />
+        </View>
+        <Touchable
+          onPress={onOpenSettings}
+          hitSlop={16}
+          accessibilityLabel="Settings"
+          style={{ paddingLeft: space.blocks, paddingVertical: space.blocks }}
+        >
+          <SettingsIcon />
+        </Touchable>
       </View>
     </Screen>
   );

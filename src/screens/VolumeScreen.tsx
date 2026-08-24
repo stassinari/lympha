@@ -127,7 +127,14 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
     [recipe, pendingMl, suggest, preference],
   );
 
-  const nudging = previewable && dismissed !== pendingMl && shouldNudge(dose, flagAbove);
+  /**
+   * The nudge is the suggestion, so turning suggestions off removes the card
+   * rather than leaving it to report that no volume divides evenly — which was
+   * both alarming and untrue, since nothing had been looked for.
+   *
+   * Honesty is not lost: the dose screen still reports the gap on every brew.
+   */
+  const nudging = suggest && previewable && dismissed !== pendingMl && shouldNudge(dose, flagAbove);
 
   const commit = (ml: number) => {
     setVolume(clampVolume(ml));

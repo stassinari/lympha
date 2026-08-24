@@ -9,6 +9,7 @@ import {
   unitPreferenceFor,
 } from './model';
 import type { PersistedState } from './model';
+import { brands, unitGroupOf } from '@/data';
 
 const state = (patch: Partial<PersistedState> = {}): PersistedState => ({ ...DEFAULTS, ...patch });
 
@@ -48,9 +49,42 @@ describe('unitPreferenceFor', () => {
   });
 
   it('is per brand, because one global switch would be wrong for one of them', () => {
-    const s = state({ units: { lotus: 'drop', 'apax-lab': 'g' } });
+    const s = state({ units: { lotus: 'drop', apax: 'g' } });
     expect(unitPreferenceFor(s, 'lotus')).toBe('drop');
     expect(unitPreferenceFor(s, 'apax-lab')).toBe('g');
+  });
+
+  it('round-trips with the key the store writes, for every brand', () => {
+    // The bug this guards: the screen read `units[brandId]` while the store wrote
+    // `units[unitGroupOf(brandId)]`. Every option but the default looked
+    // unselected, though the change had in fact been made.
+    for (const brand of brands) {
+      const written = { ...DEFAULTS, units: { [unitGroupOf(brand.id)]: 'drop' as const } };
+      expect(unitPreferenceFor(written, brand.id), brand.id).toBe('drop');
+    }
+  });
+
+  it("answers the same for Apax's two ranges, which are the same jars", () => {
+    const s = state({ units: { apax: 'g' } });
+    expect(unitPreferenceFor(s, 'apax-lab')).toBe('g');
+    expect(unitPreferenceFor(s, 'apax-lab-original')).toBe('g');
+  });
+});
+
+describe('defaultVolumeMl', () => {
+  it('is unset by default, so the app opens on whatever was last brewed', () => {
+    expect(DEFAULTS.defaultVolumeMl).toBeNull();
+  });
+
+  it('is clamped to something brewable when pinned', () => {
+    expect(repair({ ...DEFAULTS, defaultVolumeMl: 0 }).defaultVolumeMl).toBe(VOLUME_MIN_ML);
+    expect(repair({ ...DEFAULTS, defaultVolumeMl: 99999 }).defaultVolumeMl).toBe(VOLUME_MAX_ML);
+    expect(repair({ ...DEFAULTS, defaultVolumeMl: 500 }).defaultVolumeMl).toBe(500);
+  });
+
+  it('falls back to last-used for anything that is not a number', () => {
+    expect(repair({ ...DEFAULTS, defaultVolumeMl: 'always' }).defaultVolumeMl).toBeNull();
+    expect(repair({ ...DEFAULTS, defaultVolumeMl: NaN }).defaultVolumeMl).toBeNull();
   });
 });
 
@@ -68,7 +102,7 @@ describe('repair', () => {
       volumeMl: 350,
       brandId: 'apax-lab',
       recipeIds: { 'apax-lab': 'apax-lab-natural' },
-      units: { 'apax-lab': 'drop' },
+      units: { apax: 'drop' },
       suggest: false,
       flagAbove: 0.05,
     });
@@ -102,7 +136,13 @@ describe('repair', () => {
     // Lotus ships one dropper and no scale; grams is not an option for it.
     expect(repair(state({ units: { lotus: 'g' } })).units).toEqual({});
     expect(repair(state({ units: { lotus: 'drop' } })).units).toEqual({ lotus: 'drop' });
-    expect(repair(state({ units: { 'apax-lab': 'g' } })).units).toEqual({ 'apax-lab': 'g' });
+    expect(repair(state({ units: { apax: 'g' } })).units).toEqual({ apax: 'g' });
+  });
+
+  it('drops a unit stored under a brand rather than a unit group', () => {
+    // An earlier build keyed these per brand. Those entries are not keys any more,
+    // and are discarded rather than half-applied to one Apax range.
+    expect(repair(state({ units: { 'apax-lab': 'g' } })).units).toEqual({});
   });
 
   it('always allows auto', () => {

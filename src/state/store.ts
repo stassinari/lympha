@@ -11,6 +11,7 @@ import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { unitGroupOf } from '@/data';
 import { DEFAULTS, repair } from './model';
 import type { PersistedState, ThemeMode } from './model';
 import type { UnitPreference } from '@/engine';
@@ -24,9 +25,11 @@ type Actions = {
   setVolume: (ml: number) => void;
   setBrand: (brandId: string) => void;
   setRecipe: (brandId: string, recipeId: string) => void;
-  setUnitPreference: (brandId: string, preference: UnitPreference) => void;
+  /** Keyed by unit group, so brands sharing bottles stay in step. */
+  setUnitPreference: (brandOrGroupId: string, preference: UnitPreference) => void;
   setMode: (mode: ThemeMode) => void;
   setSuggest: (suggest: boolean) => void;
+  setDefaultVolume: (ml: number | null) => void;
   setFlagAbove: (flagAbove: number) => void;
   toggleDone: (componentId: string) => void;
   clearDone: () => void;
@@ -53,12 +56,16 @@ export const useStore = create<Store>()(
       setBrand: (brandId) => set({ brandId, done: {} }),
       setRecipe: (brandId, recipeId) =>
         set((s) => ({ recipeIds: { ...s.recipeIds, [brandId]: recipeId }, done: {} })),
-      setUnitPreference: (brandId, preference) =>
-        set((s) => ({ units: { ...s.units, [brandId]: preference }, done: {} })),
+      setUnitPreference: (brandOrGroupId, preference) =>
+        set((s) => ({
+          units: { ...s.units, [unitGroupOf(brandOrGroupId)]: preference },
+          done: {},
+        })),
 
       // Presentation and thresholds leave the pour alone.
       setMode: (mode) => set({ mode }),
       setSuggest: (suggest) => set({ suggest }),
+      setDefaultVolume: (defaultVolumeMl) => set({ defaultVolumeMl }),
       setFlagAbove: (flagAbove) => set({ flagAbove }),
 
       toggleDone: (componentId) =>
@@ -77,11 +84,16 @@ export const useStore = create<Store>()(
         recipeIds: s.recipeIds,
         units: s.units,
         suggest: s.suggest,
+        defaultVolumeMl: s.defaultVolumeMl,
         flagAbove: s.flagAbove,
       }),
       // Storage returns whatever was written by whatever build wrote it, so it is
       // treated as untrusted input rather than as our own type.
-      merge: (persisted, current) => ({ ...current, ...repair(persisted) }),
+      merge: (persisted, current) => {
+        const state = repair(persisted);
+        // A pinned default overrides whatever was last brewed.
+        return { ...current, ...state, volumeMl: state.defaultVolumeMl ?? state.volumeMl };
+      },
     },
   ),
 );

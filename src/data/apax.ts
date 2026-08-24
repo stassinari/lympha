@@ -128,6 +128,9 @@ function buildBrand(sb: SourceBrand): Brand {
     },
     ...('display_note' in sb && sb.display_note ? { displayNote: sb.display_note } : {}),
     ...(sb.default ? { isDefault: true } : {}),
+    // Both ranges are the same physical concentrates on the same scale, so they
+    // share one unit preference.
+    unitGroup: 'apax',
     accent: ACCENT,
   };
 }

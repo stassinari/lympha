@@ -127,6 +127,16 @@ export type Brand = {
   displayNote?: string;
   /** Which range to prefer when one vendor ships more than one. */
   isDefault?: boolean;
+  /**
+   * Brands that share a concentrate-unit preference, defaulting to the brand
+   * itself.
+   *
+   * Apax's two ranges are separate brands because their recipes are not derivable
+   * from one another — but they are the same bottles, dosed on the same scale.
+   * Choosing grams for one and drops for the other would be choosing between two
+   * readings of the same jar.
+   */
+  unitGroup?: string;
   /** Text-safe brand colour for links and active states. Deliberately separate
    *  from bottle colours: a bar colour may be too light to use as text. */
   accent: { light: string; dark: string };

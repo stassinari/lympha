@@ -3,12 +3,24 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { cardShadow, radius, space, useTheme } from '../theme';
 import { Touchable } from './Touchable';
 
+/** Always drawn, transparent when unselected, so geometry never changes. */
+const SELECTION_BORDER = 2;
+
 export type CardProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
   paddingVertical?: number;
   paddingHorizontal?: number;
   onPress?: () => void;
+  /**
+   * Draws the selection outline.
+   *
+   * Handled here rather than by the caller because the border must be present in
+   * both states and only change colour. Adding 2px on selection moves the content
+   * box, which reads as the card twitching — and on Android re-lays-out a clipped,
+   * rippling view and can leave it blank.
+   */
+  selected?: boolean;
   accessibilityLabel?: string;
   accessibilityHint?: string;
 };
@@ -36,6 +48,7 @@ export function Card({
   paddingVertical = space.cardV,
   paddingHorizontal = space.cardH,
   onPress,
+  selected = false,
   accessibilityLabel,
   accessibilityHint,
 }: CardProps) {
@@ -44,8 +57,12 @@ export function Card({
   const surface: ViewStyle = {
     backgroundColor: colour.card,
     borderRadius: radius.card,
-    paddingVertical,
-    paddingHorizontal,
+    borderWidth: SELECTION_BORDER,
+    borderColor: selected ? colour.text : 'transparent',
+    // The border eats into the padding, so it is given back — a selected and an
+    // unselected card must have identical interiors.
+    paddingVertical: paddingVertical - SELECTION_BORDER,
+    paddingHorizontal: paddingHorizontal - SELECTION_BORDER,
   };
 
   if (!onPress) return <View style={[surface, cardShadow, style]}>{children}</View>;
@@ -58,6 +75,7 @@ export function Card({
           onPress={onPress}
           accessibilityLabel={accessibilityLabel}
           accessibilityHint={accessibilityHint}
+          accessibilityState={{ selected }}
           style={[surface, style]}
         >
           {children}

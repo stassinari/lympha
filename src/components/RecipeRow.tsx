@@ -8,7 +8,7 @@
  */
 
 import { View } from 'react-native';
-import { BarCluster, Caption, Card, CardTitle, radius, space, useTheme } from '@/design';
+import { BarCluster, Caption, Card, CardTitle, space } from '@/design';
 import type { SchemeColour } from '@/design';
 import type { RecipeSubtitle } from '@/format/recipeList';
 
@@ -21,8 +21,6 @@ export type RecipeRowProps = {
 };
 
 export function RecipeRow({ name, subtitle, bottleColours, selected, onPress }: RecipeRowProps) {
-  const { colour } = useTheme();
-
   return (
     <Card
       onPress={onPress}
@@ -31,11 +29,7 @@ export function RecipeRow({ name, subtitle, bottleColours, selected, onPress }: 
       accessibilityLabel={subtitle ? `${name}. ${subtitle.text}` : name}
       // Outlined rather than filled: a filled row would fight the bottle colours
       // sitting inside it, and colour is never the only signal.
-      style={
-        selected
-          ? { borderWidth: 2, borderColor: colour.text, borderRadius: radius.card }
-          : undefined
-      }
+      selected={selected}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.blocks }}>
         <View style={{ flex: 1 }}>
