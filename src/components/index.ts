@@ -1,3 +1,4 @@
+export * from './ComparisonTable';
 export * from './DoseProgress';
 export * from './DoseRow';
 export * from './RecipeHeader';

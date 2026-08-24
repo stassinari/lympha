@@ -29,3 +29,18 @@ export function formatDoseAmount(value: number, step: number): string {
   if (decimals === 0) return String(value);
   return String(Number(value.toFixed(decimals)));
 }
+
+/**
+ * What the recipe asks for, before the dispenser has its say.
+ *
+ * Always two decimals. This number exists to be compared against the delivered
+ * one, and rounding the ideal would hide exactly the difference the screen is
+ * there to show.
+ */
+export const formatIdealAmount = (value: number): string => value.toFixed(2);
+
+/** A concentration in ppm. One decimal where it earns one, none where it does not. */
+export function formatPpm(value: number): string {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}

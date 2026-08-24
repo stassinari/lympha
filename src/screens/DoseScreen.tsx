@@ -20,9 +20,15 @@ export type DoseScreenProps = {
   onEditVolume: () => void;
   onChangeRecipe: () => void;
   onOpenSettings: () => void;
+  onOpenDetails: () => void;
 };
 
-export function DoseScreen({ onEditVolume, onChangeRecipe, onOpenSettings }: DoseScreenProps) {
+export function DoseScreen({
+  onEditVolume,
+  onChangeRecipe,
+  onOpenSettings,
+  onOpenDetails,
+}: DoseScreenProps) {
   const brand = useBrand();
   const recipe = useRecipe();
   const dose = useDose();
@@ -76,7 +82,7 @@ export function DoseScreen({ onEditVolume, onChangeRecipe, onOpenSettings }: Dos
         }}
       >
         <View style={{ flex: 1 }}>
-          <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={() => {}} />
+          <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
         </View>
         <Touchable
           onPress={onOpenSettings}

@@ -13,12 +13,13 @@
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Overlay } from '@/design';
+import { DetailScreen } from './DetailScreen';
 import { DoseScreen } from './DoseScreen';
 import { RecipeScreen } from './RecipeScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { VolumeScreen } from './VolumeScreen';
 
-export type OverlayName = 'volume' | 'recipe' | 'settings';
+export type OverlayName = 'volume' | 'recipe' | 'settings' | 'detail';
 
 export function Root() {
   const [overlay, setOverlay] = useState<OverlayName | null>(null);
@@ -30,6 +31,7 @@ export function Root() {
         onEditVolume={() => setOverlay('volume')}
         onChangeRecipe={() => setOverlay('recipe')}
         onOpenSettings={() => setOverlay('settings')}
+        onOpenDetails={() => setOverlay('detail')}
       />
 
       {/* Each enters from the direction of the control that opens it: the header
@@ -44,6 +46,10 @@ export function Root() {
 
       <Overlay visible={overlay === 'settings'} from="bottom" onRequestClose={close}>
         <SettingsScreen onClose={close} />
+      </Overlay>
+
+      <Overlay visible={overlay === 'detail'} from="bottom" onRequestClose={close}>
+        <DetailScreen onClose={close} />
       </Overlay>
     </View>
   );

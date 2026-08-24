@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDoseAmount, formatUnit } from './units';
+import { formatDoseAmount, formatIdealAmount, formatPpm, formatUnit } from './units';
 
 describe('formatUnit', () => {
   it('pluralises the units you count', () => {
@@ -30,5 +30,22 @@ describe('formatDoseAmount', () => {
 
   it('does not leak floating-point dust into a displayed value', () => {
     expect(formatDoseAmount(2.7000000000000002, 0.01)).toBe('2.7');
+  });
+});
+
+describe('formatIdealAmount', () => {
+  it('keeps the precision the comparison depends on', () => {
+    // 3.73 against 4 is the whole point; "4 against 4" would say nothing.
+    expect(formatIdealAmount(3.7313)).toBe('3.73');
+    expect(formatIdealAmount(4)).toBe('4.00');
+  });
+});
+
+describe('formatPpm', () => {
+  it('spends a decimal only where there is one to spend', () => {
+    expect(formatPpm(90)).toBe('90');
+    expect(formatPpm(88.393)).toBe('88.4');
+    expect(formatPpm(72.3)).toBe('72.3');
+    expect(formatPpm(0)).toBe('0');
   });
 });
