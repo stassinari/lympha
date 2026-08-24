@@ -12,7 +12,7 @@
  */
 
 import { ScrollView, View } from 'react-native';
-import { Screen, SettingsIcon, Touchable, space } from '@/design';
+import { Screen, SettingsIcon, Touchable, space, useReflowedText } from '@/design';
 import { DoseProgress, DoseRow, RecipeHeader, RoundingLine, VolumeCard } from '@/components';
 import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
 
@@ -38,6 +38,44 @@ export function DoseScreen({
   const toggleDone = useStore((s) => s.toggleDone);
 
   const doneCount = dose.lines.filter((l) => done[l.component.id]).length;
+
+  /**
+   * At accessibility text sizes the bottom bar joins the scroll instead of
+   * holding the screen's bottom edge.
+   *
+   * Pinned, it is a sibling of the list and does not shrink, so at the largest
+   * sizes it grew to eight lines and squeezed the doses off the screen entirely —
+   * the one thing the screen exists to show. Reflowing costs the summary its
+   * permanent visibility, which is the lesser loss: at that text size the whole
+   * screen is a scroll anyway.
+   */
+  const reflowed = useReflowedText();
+
+  /* The rounding line and the way out of the screen share the bottom edge, as the
+     handoff has them: the settings affordance sits bottom-right, which is also
+     the direction its screen rises from. */
+  const bottomBar = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        // Supplied by the scroll container when it lives inside one.
+        paddingHorizontal: reflowed ? 0 : space.screenH,
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
+      </View>
+      <Touchable
+        onPress={onOpenSettings}
+        hitSlop={16}
+        accessibilityLabel="Settings"
+        style={{ paddingLeft: space.blocks, paddingVertical: space.blocks }}
+      >
+        <SettingsIcon />
+      </Touchable>
+    </View>
+  );
 
   return (
     <Screen horizontalPadding={0}>
@@ -69,30 +107,11 @@ export function DoseScreen({
             />
           ))}
         </View>
+
+        {reflowed ? bottomBar : null}
       </ScrollView>
 
-      {/* The rounding line and the way out of the screen share the bottom edge, as
-          the handoff has them: the settings affordance sits bottom-right, which is
-          also the direction its screen rises from. */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: space.screenH,
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
-        </View>
-        <Touchable
-          onPress={onOpenSettings}
-          hitSlop={16}
-          accessibilityLabel="Settings"
-          style={{ paddingLeft: space.blocks, paddingVertical: space.blocks }}
-        >
-          <SettingsIcon />
-        </Touchable>
-      </View>
+      {reflowed ? null : bottomBar}
     </Screen>
   );
 }

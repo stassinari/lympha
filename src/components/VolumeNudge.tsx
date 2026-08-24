@@ -13,7 +13,7 @@
 
 import { useEffect, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
-import { BarRow, Body, CardTitle, Pill, space, useTheme } from '@/design';
+import { BarRow, Body, CardTitle, Pill, space, useReduceMotion, useTheme } from '@/design';
 import type { Dose } from '@/engine';
 import { headlineGap } from '@/format/rounding';
 
@@ -96,6 +96,7 @@ export function VolumeNudge({ dose, cleanVolumeMl, onUseClean, onDismiss }: Volu
  * animation cannot go.
  */
 function useEntrance() {
+  const reduced = useReduceMotion();
   const [progress] = useState(() => new Animated.Value(0));
   useEffect(() => {
     const animation = Animated.timing(progress, {
@@ -108,8 +109,12 @@ function useEntrance() {
     return () => animation.stop();
   }, [progress]);
 
+  const opacity = progress.interpolate({ inputRange: [0, 0.74, 1], outputRange: [0, 1, 1] });
+  // The fade stays — the card has to be noticed — but the rise does not.
+  if (reduced) return { opacity, transform: [] };
+
   return {
-    opacity: progress.interpolate({ inputRange: [0, 0.74, 1], outputRange: [0, 1, 1] }),
+    opacity,
     transform: [{ translateY: progress.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
   };
 }

@@ -18,35 +18,17 @@ import {
   Caption,
   RowTitle,
   UnitLabel,
-  capBoxInset,
-  capBoxPadding,
+  useReduceMotion,
   usePulse,
   opticalPadding,
   resolveBarColour,
   space,
-  typeScale,
   useTheme,
+  useTypeMetrics,
 } from '@/design';
 import { formatDoseAmount, formatUnit } from '@/format/units';
 import type { DoseUnit } from '@/data/types';
 import type { DoseLine } from '@/engine';
-
-const value = typeScale.doseValue;
-const title = typeScale.rowTitle;
-
-/** Both columns squared about their cap blocks, so `alignItems: 'center'` lands. */
-const VALUE_BOX = capBoxPadding(value.fontSize, value.lineHeight, value.weight, 'digits');
-const TITLE_BOX = capBoxPadding(title.fontSize, title.lineHeight, title.weight, 'text');
-
-/**
- * Once the value box is squared its slack is the same on both sides, so the row's
- * own padding is measured against that rather than against the raw line box.
- */
-const VALUE_INSET = capBoxInset(value.fontSize, value.lineHeight, value.weight, 'digits');
-const ROW_PADDING = opticalPadding(
-  { top: space.rowInk, bottom: space.rowInk },
-  { top: VALUE_INSET, bottom: VALUE_INSET },
-);
 
 /**
  * A row marked as added recedes rather than disappearing, so the list keeps its
@@ -114,33 +96,55 @@ function UnitColumn({ unit, count }: { unit: DoseUnit; count: number }) {
   );
 }
 
-/** A row that has been poured slides a little out of the way, as the handoff has
- *  it. Transform only, so it runs on the native driver and never touches layout. */
-function useDoneNudge(done: boolean) {
-  const [offset] = useState(() => new Animated.Value(done ? DONE_SHIFT : 0));
+/**
+ * A row that has been poured slides a little out of the way, as the handoff has
+ * it. Transform only, so it runs on the native driver and never touches layout.
+ *
+ * Suppressed under Reduce Motion, where it is pure decoration: the strike-through
+ * and the row's recession into the page already say the same thing, and neither
+ * of them moves.
+ */
+function useDoneNudge(done: boolean, reduced: boolean) {
+  const [offset] = useState(() => new Animated.Value(done && !reduced ? DONE_SHIFT : 0));
   useEffect(() => {
     const animation = Animated.timing(offset, {
-      toValue: done ? DONE_SHIFT : 0,
-      duration: DONE_MS,
+      toValue: done && !reduced ? DONE_SHIFT : 0,
+      duration: reduced ? 0 : DONE_MS,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     });
     animation.start();
     return () => animation.stop();
-  }, [done, offset]);
+  }, [done, offset, reduced]);
   return { transform: [{ translateX: offset }] };
 }
 
 export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const { colour, scheme } = useTheme();
   const { bar, edge } = resolveBarColour(line.component.colour, scheme);
+  const reduced = useReduceMotion();
+
+  /**
+   * Both columns squared about their cap blocks, so `alignItems: 'center'` lands,
+   * and both read at the reader's text size rather than the nominal one — the
+   * optical centring is only centred if the numbers behind it grew with the type.
+   */
+  const value = useTypeMetrics('doseValue');
+  const title = useTypeMetrics('rowTitle');
+
+  // Once the value box is squared its slack is the same on both sides, so the
+  // row's own padding is measured against that rather than the raw line box.
+  const rowPadding = opticalPadding(
+    { top: space.rowInk, bottom: space.rowInk },
+    { top: value.capBoxInset, bottom: value.capBoxInset },
+  );
 
   const amount = formatDoseAmount(line.delivered, line.dispenser.step);
   const unit = formatUnit(line.dispenser.unit, line.delivered);
   const alternative = line.alternative;
   const tone = done ? 'secondary' : 'primary';
   const pulse = usePulse(amount);
-  const nudge = useDoneNudge(done);
+  const nudge = useDoneNudge(done, reduced);
 
   const mark = () => {
     // A short tap you can feel. The brief's user is not looking at the screen
@@ -159,12 +163,17 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
       onPress={onPress ? mark : undefined}
       paddingVertical={0}
       paddingHorizontal={space.cardH}
-      contentStyle={ROW_PADDING}
+      contentStyle={rowPadding}
+      // A checkbox, not a button: the row's job is to record that this bottle has
+      // gone in, and "checked" is the state a screen reader has a word for. The
+      // strike-through says the same thing to everyone else.
+      accessibilityRole="checkbox"
       accessibilityLabel={`${line.component.name}, ${amount} ${unit}`}
+      accessibilityHint={done ? 'Mark as not added' : 'Mark as added'}
       accessibilityState={{ checked: done }}
     >
       <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, nudge]}>
-        <View style={[{ flex: 1 }, TITLE_BOX]}>
+        <View style={[{ flex: 1 }, title.capBoxPadding]}>
           <RowTitle tone={tone} style={done ? { textDecorationLine: 'line-through' } : undefined}>
             {line.component.name}
           </RowTitle>
@@ -175,7 +184,7 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
             </Caption>
           ) : null}
         </View>
-        <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, VALUE_BOX]}>
+        <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, value.capBoxPadding]}>
           <AnimatedAppText variant="doseValue" tone={tone} style={pulse}>
             {amount}
           </AnimatedAppText>

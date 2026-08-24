@@ -16,20 +16,17 @@ import { Dimensions, Keyboard, Platform, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppText,
-  Body,
   Caption,
-  Chevron,
   Pill,
   Screen,
-  ScreenTitle,
   Touchable,
   VolumeUnit,
-  capTop,
   resolveAccent,
   space,
-  typeScale,
+  useTypeMetrics,
   useTheme,
 } from '@/design';
+import { ScreenHeader } from '@/components';
 import { VolumeNudge, shouldNudge } from '@/components/VolumeNudge';
 import { componentMap } from '@/data';
 import { computeDose, findCleanVolume } from '@/engine';
@@ -47,25 +44,23 @@ const PRESETS = [250, 350, 500, 1000];
 const CARET_BLINK_MS = 550;
 const MAX_DIGITS = 5;
 
-const hero = typeScale.hero;
-
-/**
- * The caret is exactly as tall as the digits it sits beside — baseline to the top
- * of the numerals.
- *
- * It is placed by baseline alignment rather than by centring. A plain View has no
- * text baseline, so Yoga aligns its *bottom* edge to the row's baseline; a bar of
- * cap height therefore spans precisely the same band as the digits. That works
- * out identically on both platforms without knowing anything about how either
- * distributes line-height slack, which centring did not — hence the caret sitting
- * low on iOS and correct on Android.
- */
-const CARET_HEIGHT = capTop(hero.weight, 'digits') * hero.fontSize;
-
 const clampVolume = (ml: number) => Math.min(VOLUME_MAX_ML, Math.max(VOLUME_MIN_ML, ml));
 
-/** A caret bar that blinks in hard steps rather than fading, as a text cursor does. */
-function Caret({ colour }: { colour: string }) {
+/**
+ * A caret bar that blinks in hard steps rather than fading, as a text cursor does.
+ *
+ * It is exactly as tall as the digits it sits beside — baseline to the top of the
+ * numerals — and it is placed by baseline alignment rather than by centring. A
+ * plain View has no text baseline, so Yoga aligns its *bottom* edge to the row's
+ * baseline; a bar of cap height therefore spans precisely the same band as the
+ * digits. That works out identically on both platforms without knowing anything
+ * about how either distributes line-height slack, which centring did not — hence
+ * the caret sitting low on iOS and correct on Android.
+ *
+ * The height is read at the reader's text size rather than the nominal one, or a
+ * reader on large text gets a caret two thirds the height of their digits.
+ */
+function Caret({ colour, height }: { colour: string; height: number }) {
   const [on, setOn] = useState(true);
   useEffect(() => {
     const timer = setInterval(() => setOn((v) => !v), CARET_BLINK_MS);
@@ -77,7 +72,7 @@ function Caret({ colour }: { colour: string }) {
       importantForAccessibility="no-hide-descendants"
       style={{
         width: 3,
-        height: CARET_HEIGHT,
+        height,
         borderRadius: 2,
         marginLeft: 8,
         backgroundColor: on ? colour : 'transparent',
@@ -89,12 +84,13 @@ function Caret({ colour }: { colour: string }) {
 export type VolumeScreenProps = { onClose: () => void };
 
 export function VolumeScreen({ onClose }: VolumeScreenProps) {
-  const { colour, scheme } = useTheme();
+  const { scheme } = useTheme();
   const insets = useSafeAreaInsets();
   const brand = useBrand();
   const recipe = useRecipe();
   const accent = resolveAccent(brand.accent, scheme);
   const keyboardOverlap = useKeyboardOverlap();
+  const hero = useTypeMetrics('hero');
 
   const volumeMl = useStore((s) => s.volumeMl);
   const setVolume = useStore((s) => s.setVolume);
@@ -155,21 +151,13 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
       applyBottomInset={false}
       style={{ paddingBottom: Math.max(keyboardOverlap, insets.bottom) }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: space.loose }}>
-        {Platform.OS === 'android' ? (
-          <Touchable onPress={close} hitSlop={14} accessibilityLabel="Back">
-            <Chevron direction="left" size={12} colour={colour.text} />
-          </Touchable>
-        ) : null}
-        <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
-          Water
-        </ScreenTitle>
-        {Platform.OS === 'ios' ? (
-          <Touchable onPress={close} hitSlop={14} accessibilityLabel="Done">
-            <Body style={{ color: accent }}>Done</Body>
-          </Touchable>
-        ) : null}
-      </View>
+      <ScreenHeader
+        title="Water"
+        onClose={close}
+        accent={accent}
+        inset={0}
+        style={{ marginBottom: space.loose }}
+      />
 
       {/* Tapping the value brings the keypad back. Without this there is no way to
           recover once the keyboard has been dismissed, since the field is offscreen. */}
@@ -181,20 +169,27 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
       >
         <AppText variant="hero">{display}</AppText>
         {/* Immediately after the digits, where the next one will appear. */}
-        <Caret colour={accent} />
+        <Caret colour={accent} height={hero.capHeight} />
         {/* Anchored right, so the unit holds still as the number gains digits. */}
         <View style={{ flex: 1 }} />
         <VolumeUnit tone="secondary">ml</VolumeUnit>
       </Touchable>
 
-      <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.loose }}>
+      <View
+        accessibilityRole="radiogroup"
+        style={{ flexDirection: 'row', gap: space.snug, marginTop: space.loose }}
+      >
         {PRESETS.map((preset) => (
           <Pill
             key={preset}
             label={String(preset)}
+            accessibilityRole="radio"
+            accessibilityLabel={`${preset} millilitres`}
             selected={pendingMl === preset}
             onPress={() => commit(preset)}
-            style={{ flex: 1, paddingHorizontal: 0 }}
+            // The row sets the width; the label gets all of it.
+            paddingHorizontal={0}
+            style={{ flex: 1 }}
           />
         ))}
       </View>

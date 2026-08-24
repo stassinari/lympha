@@ -10,21 +10,17 @@ import { useState } from 'react';
 import { Platform, ScrollView, Switch, View } from 'react-native';
 import {
   BarCluster,
-  Body,
   Caption,
-  Chevron,
   Overlay,
   Pill,
   Screen,
-  ScreenTitle,
   SectionHeader,
   Segmented,
-  Touchable,
   resolveAccent,
   space,
   useTheme,
 } from '@/design';
-import { SettingsRow } from '@/components';
+import { ScreenHeader, SettingsRow } from '@/components';
 import { brands, componentsForBrand, unitGroups } from '@/data';
 import { availableUnits } from '@/engine';
 import { FLAG_CHOICES, useBrand, useStore } from '@/state';
@@ -62,28 +58,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
   return (
     <Screen horizontalPadding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: space.blocks,
-          paddingHorizontal: space.screenH,
-        }}
-      >
-        {Platform.OS === 'android' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Back">
-            <Chevron direction="left" size={12} colour={colour.text} />
-          </Touchable>
-        ) : null}
-        <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
-          Settings
-        </ScreenTitle>
-        {Platform.OS === 'ios' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Done">
-            <Body style={{ color: accent }}>Done</Body>
-          </Touchable>
-        ) : null}
-      </View>
+      <ScreenHeader title="Settings" onClose={onClose} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -133,9 +108,16 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           detail="Pin a volume, or pick up where you left off."
           wide
           control={
-            <View style={{ flexDirection: 'row', gap: space.snug, flexWrap: 'wrap' }}>
+            // Every pill carries the setting's name, because a screen reader
+            // reaches it on its own: "250" alone says nothing about what it does.
+            <View
+              accessibilityRole="radiogroup"
+              style={{ flexDirection: 'row', gap: space.snug, flexWrap: 'wrap' }}
+            >
               <Pill
                 label="Last used"
+                accessibilityRole="radio"
+                accessibilityLabel="Open at the last used volume"
                 selected={defaultVolumeMl === null}
                 onPress={() => setDefaultVolume(null)}
               />
@@ -143,6 +125,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                 <Pill
                   key={ml}
                   label={String(ml)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`Open at ${ml} millilitres`}
                   selected={defaultVolumeMl === ml}
                   onPress={() => setDefaultVolume(ml)}
                 />
@@ -155,11 +139,13 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           detail="How far off the recipe before the dose screen says so."
           wide
           control={
-            <View style={{ flexDirection: 'row', gap: space.snug }}>
+            <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: space.snug }}>
               {FLAG_CHOICES.map((value) => (
                 <Pill
                   key={value}
                   label={`${Math.round(value * 100)}%`}
+                  accessibilityRole="radio"
+                  accessibilityLabel={`Flag rounding above ${Math.round(value * 100)} percent`}
                   selected={Math.abs(flagAbove - value) < 1e-9}
                   onPress={() => setFlagAbove(value)}
                   style={{ flex: 1 }}
@@ -175,6 +161,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             <Switch
               value={suggest}
               onValueChange={setSuggest}
+              // The row's label belongs to a sibling `Text`, and the card is not a
+              // single tap target, so the switch reaches a screen reader on its
+              // own and has to say what it switches.
+              accessibilityLabel="Suggest a cleaner volume"
+              accessibilityHint="Offer a nearby volume that divides evenly"
               trackColor={{ true: accent, false: colour.control }}
               // Android's thumb defaults to the platform accent, which lands a
               // Material blue in the middle of a brand-tinted track. iOS draws its

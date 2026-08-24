@@ -12,7 +12,7 @@
 
 import { Animated, Text as RNText } from 'react-native';
 import type { StyleProp, TextProps as RNTextProps, TextStyle } from 'react-native';
-import { styleForRole } from './typography';
+import { styleForRole, typeScale } from './typography';
 import type { TypeRole } from './typography';
 import { useTheme } from './theme';
 
@@ -24,10 +24,13 @@ export type TextProps = Omit<RNTextProps, 'style'> & {
 };
 
 /**
- * Display variants are sized to fit a specific layout, so unlimited text scaling
- * would break them. Prose scales freely; a fuller dynamic-type pass is Slice 12.
+ * How far the OS text-size setting may take a role, declared by the role itself.
+ *
+ * `undefined` is React Native's "no ceiling", which is what prose wants: at the
+ * largest accessibility sizes a settings row should get tall and wrap, not stay
+ * neat and unreadable. The geometric roles cap — see `maxScale` in the scale.
  */
-const DISPLAY_VARIANTS: ReadonlySet<TypeRole> = new Set<TypeRole>(['hero', 'volume', 'doseValue']);
+const maxScaleFor = (variant: TypeRole) => typeScale[variant].maxScale;
 
 /** The resolved style for a role and tone, shared by the plain and animated texts. */
 function useTextStyle(variant: TypeRole, tone: Tone) {
@@ -50,7 +53,7 @@ export function AppText({
 }: TextProps & { variant: TypeRole }) {
   return (
     <RNText
-      maxFontSizeMultiplier={DISPLAY_VARIANTS.has(variant) ? 1.3 : undefined}
+      maxFontSizeMultiplier={maxScaleFor(variant)}
       style={[useTextStyle(variant, tone), style]}
       {...rest}
     />
@@ -78,18 +81,29 @@ export function AnimatedAppText({
 }) {
   return (
     <AnimatedRNText
-      maxFontSizeMultiplier={DISPLAY_VARIANTS.has(variant) ? 1.3 : undefined}
+      maxFontSizeMultiplier={maxScaleFor(variant)}
       style={[useTextStyle(variant, tone), style]}
       {...rest}
     />
   );
 }
 
-function variantComponent(variant: TypeRole, displayName: string) {
-  const Component = (props: TextProps) => <AppText variant={variant} {...props} />;
+function variantComponent(variant: TypeRole, displayName: string, defaults?: Partial<RNTextProps>) {
+  const Component = (props: TextProps) => <AppText variant={variant} {...defaults} {...props} />;
   Component.displayName = displayName;
   return Component;
 }
+
+/**
+ * Screen titles and section headers are headings, and saying so is most of what
+ * makes a screen navigable without sight: both VoiceOver's rotor and TalkBack's
+ * reading controls offer heading-by-heading movement, which turns the settings
+ * screen from twenty swipes into four.
+ *
+ * Set on the role rather than at each call site, because a `SectionHeader` that
+ * is not a heading is a bug, not a variation.
+ */
+const HEADING: Partial<RNTextProps> = { accessibilityRole: 'header' };
 
 /** Volume value on the volume screen. Numerals only. */
 export const Hero = variantComponent('hero', 'Hero');
@@ -97,12 +111,12 @@ export const Hero = variantComponent('hero', 'Hero');
 export const Volume = variantComponent('volume', 'Volume');
 /** Per-bottle dose. Numerals only. */
 export const DoseValue = variantComponent('doseValue', 'DoseValue');
-export const ScreenTitle = variantComponent('screenTitle', 'ScreenTitle');
+export const ScreenTitle = variantComponent('screenTitle', 'ScreenTitle', HEADING);
 export const RowTitle = variantComponent('rowTitle', 'RowTitle');
 export const CardTitle = variantComponent('cardTitle', 'CardTitle');
 export const Body = variantComponent('body', 'Body');
 export const Caption = variantComponent('caption', 'Caption');
-export const SectionHeader = variantComponent('sectionHeader', 'SectionHeader');
+export const SectionHeader = variantComponent('sectionHeader', 'SectionHeader', HEADING);
 export const UnitLabel = variantComponent('unitLabel', 'UnitLabel');
 export const VolumeUnit = variantComponent('volumeUnit', 'VolumeUnit');
 export const CardLabel = variantComponent('cardLabel', 'CardLabel');

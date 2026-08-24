@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { AccessibilityRole, StyleProp, ViewStyle } from 'react-native';
 import { cardShadow, radius, space, useTheme } from '../theme';
 import { Touchable } from './Touchable';
 
@@ -23,6 +23,8 @@ export type CardProps = {
   selected?: boolean;
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  /** `radio` where the card is one of a mutually exclusive set. */
+  accessibilityRole?: AccessibilityRole;
 };
 
 /**
@@ -51,6 +53,7 @@ export function Card({
   selected = false,
   accessibilityLabel,
   accessibilityHint,
+  accessibilityRole,
 }: CardProps) {
   const { colour } = useTheme();
 
@@ -73,9 +76,10 @@ export function Card({
         <Touchable
           radius={radius.card}
           onPress={onPress}
+          accessibilityRole={accessibilityRole}
           accessibilityLabel={accessibilityLabel}
           accessibilityHint={accessibilityHint}
-          accessibilityState={{ selected }}
+          accessibilityState={{ selected, checked: selected }}
           style={[surface, style]}
         >
           {children}

@@ -11,22 +11,9 @@
  * read as soft water rather than as missing data.
  */
 
-import { Platform, ScrollView, View } from 'react-native';
-import {
-  BarRow,
-  Body,
-  Chevron,
-  DoseValue,
-  Pill,
-  Screen,
-  ScreenTitle,
-  SectionHeader,
-  Touchable,
-  resolveAccent,
-  space,
-  useTheme,
-} from '@/design';
-import { ComparisonTable } from '@/components';
+import { ScrollView, View } from 'react-native';
+import { BarRow, Body, DoseValue, Pill, Screen, SectionHeader, space, useTheme } from '@/design';
+import { ComparisonTable, ScreenHeader } from '@/components';
 import type { ComparisonRow } from '@/components';
 import { formatDoseAmount, formatIdealAmount, formatPpm, formatUnit } from '@/format/units';
 import { headlineGap } from '@/format/rounding';
@@ -35,13 +22,12 @@ import { useBrand, useCleanVolume, useDose, useStore } from '@/state';
 export type DetailScreenProps = { onClose: () => void };
 
 export function DetailScreen({ onClose }: DetailScreenProps) {
-  const { colour, scheme } = useTheme();
+  const { colour } = useTheme();
   const brand = useBrand();
   const dose = useDose();
   const cleanVolumeMl = useCleanVolume();
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
-  const accent = resolveAccent(brand.accent, scheme);
 
   const gap = headlineGap(dose);
   const percent = Math.round(Math.abs(gap) * 100);
@@ -52,6 +38,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
     asked: formatIdealAmount(line.exact),
     got: formatDoseAmount(line.delivered, line.dispenser.step),
     off: line.zeroed || line.relativeError > flagAbove,
+    direction: line.delivered < line.exact ? 'under' : 'over',
   }));
 
   const profile = dose.profile;
@@ -62,12 +49,14 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           asked: formatPpm(profile.target.hardness),
           got: formatPpm(profile.delivered.hardness),
           off: Math.abs(profile.hardnessError) > flagAbove,
+          direction: profile.hardnessError < 0 ? 'under' : 'over',
         },
         {
           label: 'Alkalinity',
           asked: formatPpm(profile.target.alkalinity),
           got: formatPpm(profile.delivered.alkalinity),
           off: Math.abs(profile.alkalinityError) > flagAbove,
+          direction: profile.alkalinityError < 0 ? 'under' : 'over',
         },
       ]
     : [];
@@ -76,28 +65,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
 
   return (
     <Screen horizontalPadding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: space.blocks,
-          paddingHorizontal: space.screenH,
-        }}
-      >
-        {Platform.OS === 'android' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Back">
-            <Chevron direction="left" size={12} colour={colour.text} />
-          </Touchable>
-        ) : null}
-        <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
-          What you&rsquo;ll get
-        </ScreenTitle>
-        {Platform.OS === 'ios' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Done">
-            <Body style={{ color: accent }}>Done</Body>
-          </Touchable>
-        ) : null}
-      </View>
+      <ScreenHeader title="What you’ll get" onClose={onClose} />
 
       <ScrollView
         style={{ flex: 1 }}

@@ -11,7 +11,7 @@
  */
 
 import { View } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { AccessibilityRole, StyleProp, ViewStyle } from 'react-native';
 import { COLOUR_BAR_WIDTH, cardShadow, radius, space, useTheme } from '../theme';
 import { Touchable } from './Touchable';
 
@@ -34,6 +34,8 @@ export type BarRowProps = {
   paddingVertical?: number;
   paddingHorizontal?: number;
   accessibilityLabel?: string;
+  accessibilityHint?: string;
+  accessibilityRole?: AccessibilityRole;
   accessibilityState?: { selected?: boolean; checked?: boolean };
 };
 
@@ -50,6 +52,8 @@ export function BarRow({
   paddingVertical = space.cardV,
   paddingHorizontal = space.cardH,
   accessibilityLabel,
+  accessibilityHint,
+  accessibilityRole,
   accessibilityState,
 }: BarRowProps) {
   const { colour } = useTheme();
@@ -100,6 +104,8 @@ export function BarRow({
           radius={radius.row}
           onPress={onPress}
           accessibilityLabel={accessibilityLabel}
+          accessibilityHint={accessibilityHint}
+          accessibilityRole={accessibilityRole}
           accessibilityState={accessibilityState}
           style={[surface, style]}
         >

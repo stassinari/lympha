@@ -48,7 +48,7 @@ export function Root() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Underlay progress={progress} from={from}>
+      <Underlay progress={progress} from={from} hidden={overlay !== null}>
         <DoseScreen
           onEditVolume={() => setOverlay('volume')}
           onChangeRecipe={() => setOverlay('recipe')}
@@ -58,7 +58,7 @@ export function Root() {
       </Underlay>
 
       {mounted && active ? (
-        <OverlayLayer progress={progress} from={from}>
+        <OverlayLayer progress={progress} from={from} modal={overlay !== null}>
           {active === 'volume' ? <VolumeScreen onClose={close} /> : null}
           {active === 'recipe' ? <RecipeScreen onClose={close} /> : null}
           {active === 'settings' ? <SettingsScreen onClose={close} /> : null}

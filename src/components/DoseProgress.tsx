@@ -9,7 +9,7 @@
 
 import { useEffect, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
-import { resolveAccent, useTheme } from '@/design';
+import { resolveAccent, useReduceMotion, useTheme } from '@/design';
 
 export function DoseProgress({
   done,
@@ -21,6 +21,7 @@ export function DoseProgress({
   brandAccent: { light: string; dark: string };
 }) {
   const { colour, scheme } = useTheme();
+  const reduced = useReduceMotion();
   const fraction = total > 0 ? done / total : 0;
 
   // Width is not native-drivable, but this is a three-pixel bar that changes once
@@ -29,13 +30,13 @@ export function DoseProgress({
   useEffect(() => {
     const animation = Animated.timing(width, {
       toValue: fraction,
-      duration: 280,
+      duration: reduced ? 0 : 280,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     });
     animation.start();
     return () => animation.stop();
-  }, [fraction, width]);
+  }, [fraction, width, reduced]);
   // Before the first bottle there is no progress to show, and an empty track just
   // reads as a stray rule above the list. The space stays reserved so the rows do
   // not jump when the track appears.

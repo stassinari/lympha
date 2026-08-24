@@ -11,22 +11,9 @@
  */
 
 import { useMemo } from 'react';
-import { Platform, ScrollView, View } from 'react-native';
-import {
-  BarCluster,
-  Body,
-  Caption,
-  Chevron,
-  Chip,
-  Screen,
-  ScreenTitle,
-  SectionHeader,
-  Touchable,
-  resolveAccent,
-  space,
-  useTheme,
-} from '@/design';
-import { RecipeRow } from '@/components';
+import { ScrollView, View } from 'react-native';
+import { BarCluster, Caption, Chip, Screen, SectionHeader, space } from '@/design';
+import { RecipeRow, ScreenHeader } from '@/components';
 import { brands, componentMap, componentsForBrand, groupedRecipesForBrand } from '@/data';
 import { computeDose } from '@/engine';
 import { groupLabel, recipeSubtitle } from '@/format/recipeList';
@@ -39,10 +26,8 @@ const clusterFor = (brandId: string) => componentsForBrand(brandId).map((c) => c
 export type RecipeScreenProps = { onClose: () => void };
 
 export function RecipeScreen({ onClose }: RecipeScreenProps) {
-  const { colour, scheme } = useTheme();
   const brand = useBrand();
   const current = useRecipe();
-  const accent = resolveAccent(brand.accent, scheme);
 
   const volumeMl = useStore((s) => s.volumeMl);
   const preference = useStore((s) => unitPreferenceFor(s, s.brandId));
@@ -71,28 +56,7 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
 
   return (
     <Screen horizontalPadding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: space.blocks,
-          paddingHorizontal: space.screenH,
-        }}
-      >
-        {Platform.OS === 'android' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Back">
-            <Chevron direction="left" size={12} colour={colour.text} />
-          </Touchable>
-        ) : null}
-        <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
-          Recipe
-        </ScreenTitle>
-        {Platform.OS === 'ios' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Done">
-            <Body style={{ color: accent }}>Done</Body>
-          </Touchable>
-        ) : null}
-      </View>
+      <ScreenHeader title="Recipe" onClose={onClose} />
 
       <ScrollView
         horizontal

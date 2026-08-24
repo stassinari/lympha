@@ -1,5 +1,6 @@
 export * from './colour';
 export * from './metrics';
+export * from './motion';
 export * from './palette';
 export * from './primitives';
 export * from './text';

@@ -1,6 +1,11 @@
 /**
  * A segmented control. Used for appearance, where the options are few, fixed and
  * mutually exclusive, and seeing all three at once is the point.
+ *
+ * Announced as a radio group rather than as a tab list. They look alike and are
+ * not: a tab changes which view you are looking at, and a radio changes a value.
+ * Choosing "Dark" does not navigate anywhere, and a screen-reader user told they
+ * are on a tab will reasonably expect it to.
  */
 
 import { View } from 'react-native';
@@ -30,7 +35,7 @@ export function Segmented<T extends string>({
 
   return (
     <View
-      accessibilityRole="tablist"
+      accessibilityRole="radiogroup"
       style={[
         {
           flexDirection: 'row',
@@ -53,8 +58,10 @@ export function Segmented<T extends string>({
             <Touchable
               radius={INNER_RADIUS}
               onPress={() => onChange(option.value)}
-              accessibilityRole="tab"
-              accessibilityState={{ selected }}
+              accessibilityRole="radio"
+              // Both, because the platforms read different keys: VoiceOver
+              // announces `selected`, TalkBack announces `checked`.
+              accessibilityState={{ selected, checked: selected }}
               style={{
                 alignSelf: 'stretch',
                 paddingVertical: 10,

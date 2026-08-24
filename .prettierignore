@@ -4,3 +4,7 @@ dist/
 package-lock.json
 # Documents are authored by hand; formatting them is not ours to do.
 docs/
+
+# Vendor research artefacts, shipped byte-identical to the documents they came
+# from. `data.test.ts` asserts that; reformatting them breaks the build.
+src/data/sources/

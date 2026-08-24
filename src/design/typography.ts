@@ -38,18 +38,49 @@ type RoleSpec = {
   /** What the role renders, which sets how tight its line may legally be. */
   extent: InkExtent;
   uppercase?: boolean;
+  /**
+   * Ceiling on the OS text-size multiplier, for roles whose size is a layout
+   * decision rather than a reading one.
+   *
+   * React Native scales `fontSize`, `lineHeight` and `letterSpacing` together, so
+   * dynamic type never clips a glyph here — the whole box grows in proportion.
+   * What it does break is the relationship *between* two roles: a 72px numeral
+   * and the 19px unit beside it are one composition, and letting either move
+   * without the other is not a bigger version of the design, it is a different
+   * one. So the display numerals and the labels that sit beside them share a
+   * ceiling, and everything that is simply read scales without limit.
+   */
+  maxScale?: number;
 };
+
+/** Display numerals and the small labels locked to their baselines. */
+const GEOMETRIC_MAX_SCALE = 1.3;
 
 const ROLES: Record<TypeRole, RoleSpec> = {
   // Display roles — numerals only, so they may use the tighter digit floor (~1.07).
-  hero: { weight: '900', size: 72, lineHeightRatio: 1.08, trackingEm: -0.04, extent: 'digits' },
-  volume: { weight: '900', size: 54, lineHeightRatio: 1.08, trackingEm: -0.035, extent: 'digits' },
+  hero: {
+    weight: '900',
+    size: 72,
+    lineHeightRatio: 1.08,
+    trackingEm: -0.04,
+    extent: 'digits',
+    maxScale: GEOMETRIC_MAX_SCALE,
+  },
+  volume: {
+    weight: '900',
+    size: 54,
+    lineHeightRatio: 1.08,
+    trackingEm: -0.035,
+    extent: 'digits',
+    maxScale: GEOMETRIC_MAX_SCALE,
+  },
   doseValue: {
     weight: '900',
     size: 40,
     lineHeightRatio: 1.08,
     trackingEm: -0.02,
     extent: 'digits',
+    maxScale: GEOMETRIC_MAX_SCALE,
   },
 
   // Prose roles — must clear the taller floor (up to 1.096 at Black).
@@ -75,11 +106,32 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   },
   /** Names the field above a large value — "Water" over the volume. Heavier than
    *  `caption` so it holds its own beneath a 54px numeral. */
-  cardLabel: { weight: '700', size: 13.5, lineHeightRatio: 1.35, trackingEm: 0, extent: 'text' },
+  cardLabel: {
+    weight: '700',
+    size: 13.5,
+    lineHeightRatio: 1.35,
+    trackingEm: 0,
+    extent: 'text',
+    maxScale: GEOMETRIC_MAX_SCALE,
+  },
   /** Sits beside a dose value on a shared baseline, so it stays small. */
-  unitLabel: { weight: '700', size: 13, lineHeightRatio: 1.35, trackingEm: 0, extent: 'text' },
+  unitLabel: {
+    weight: '700',
+    size: 13,
+    lineHeightRatio: 1.35,
+    trackingEm: 0,
+    extent: 'text',
+    maxScale: GEOMETRIC_MAX_SCALE,
+  },
   /** Sits beside the volume, which is far larger, so it is scaled up to match. */
-  volumeUnit: { weight: '700', size: 19, lineHeightRatio: 1.3, trackingEm: 0, extent: 'text' },
+  volumeUnit: {
+    weight: '700',
+    size: 19,
+    lineHeightRatio: 1.3,
+    trackingEm: 0,
+    extent: 'text',
+    maxScale: GEOMETRIC_MAX_SCALE,
+  },
 };
 
 export type ResolvedType = {
@@ -94,6 +146,8 @@ export type ResolvedType = {
   /** Kept so layout can compensate for the asymmetry — see `inkInsets`. */
   weight: NunitoWeight;
   extent: InkExtent;
+  /** Undefined where the role may scale without limit. */
+  maxScale?: number;
 };
 
 function resolve(spec: RoleSpec): ResolvedType {
@@ -113,6 +167,7 @@ function resolve(spec: RoleSpec): ResolvedType {
     ...(spec.uppercase ? { textTransform: 'uppercase' as const } : {}),
     weight: spec.weight,
     extent: spec.extent,
+    maxScale: spec.maxScale,
   };
 }
 
@@ -127,11 +182,11 @@ export const typeSpecs = ROLES;
 /**
  * Just the React Native style properties for a role.
  *
- * `ResolvedType` also carries `weight` and `extent`, which are metric metadata
- * for layout rather than style props. Spreading the whole record into a `style`
- * would pass them to the renderer, where they are meaningless at best.
+ * `ResolvedType` also carries `weight`, `extent` and `maxScale`, which are metric
+ * metadata for layout rather than style props. Spreading the whole record into a
+ * `style` would pass them to the renderer, where they are meaningless at best.
  */
-export function styleForRole(role: TypeRole): Omit<ResolvedType, 'weight' | 'extent'> {
-  const { weight: _weight, extent: _extent, ...style } = typeScale[role];
+export function styleForRole(role: TypeRole): Omit<ResolvedType, 'weight' | 'extent' | 'maxScale'> {
+  const { weight: _weight, extent: _extent, maxScale: _maxScale, ...style } = typeScale[role];
   return style;
 }

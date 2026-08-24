@@ -15,6 +15,7 @@
 import { useEffect } from 'react';
 import { Animated, BackHandler, Platform, useWindowDimensions } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
+import { useReduceMotion } from '../motion';
 import { useTheme } from '../theme';
 import { overlayStyle, underlayStyle, useOverlayTransition } from './overlayTransition';
 import type { OverlayDirection } from './overlayTransition';
@@ -36,17 +37,34 @@ export function OverlayLayer({
   from,
   children,
   style,
+  /**
+   * Whether this layer currently owns the screen reader.
+   *
+   * Visually a layer covers what is beneath it; to VoiceOver and TalkBack it does
+   * not, and swiping past the last control on the settings screen walks straight
+   * into the dose screen underneath it. `accessibilityViewIsModal` is iOS's flag
+   * for exactly this, and it also moves VoiceOver's focus into the layer as it
+   * arrives, so the announcement follows the navigation. Android has no
+   * equivalent, and is handled from the other side — see `Underlay`.
+   *
+   * Dropped as the layer starts to leave, so focus returns to the screen behind
+   * rather than being stranded on a view that is on its way out.
+   */
+  modal = true,
 }: {
   progress: Animated.Value;
   from: OverlayDirection;
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  modal?: boolean;
 }) {
   const { colour } = useTheme();
   const window = useWindowDimensions();
+  const reduced = useReduceMotion();
 
   return (
     <Animated.View
+      accessibilityViewIsModal={modal}
       style={[
         {
           position: 'absolute',
@@ -56,7 +74,7 @@ export function OverlayLayer({
           bottom: 0,
           backgroundColor: colour.background,
         },
-        overlayStyle(progress, from, window),
+        overlayStyle(progress, from, window, reduced),
         style,
       ]}
     >
@@ -70,13 +88,35 @@ export function Underlay({
   progress,
   from,
   children,
+  /**
+   * Taken out of the accessibility tree while something covers it.
+   *
+   * This is the Android half of the modality above: TalkBack has no notion of a
+   * modal view, so the covered screen has to be hidden explicitly or it stays
+   * reachable by swipe. Both props are set because they are the same idea under
+   * two names — `accessibilityElementsHidden` is iOS, `importantForAccessibility`
+   * is Android — and neither platform reads the other's.
+   *
+   * Tied to the flag that opens the overlay rather than to the animation, so the
+   * screen becomes reachable again the moment the way back has been asked for.
+   */
+  hidden = false,
 }: {
   progress: Animated.Value;
   from: OverlayDirection;
   children: React.ReactNode;
+  hidden?: boolean;
 }) {
+  const reduced = useReduceMotion();
+
   return (
-    <Animated.View style={[{ flex: 1 }, underlayStyle(progress, from)]}>{children}</Animated.View>
+    <Animated.View
+      accessibilityElementsHidden={hidden}
+      importantForAccessibility={hidden ? 'no-hide-descendants' : 'auto'}
+      style={[{ flex: 1 }, underlayStyle(progress, from, reduced)]}
+    >
+      {children}
+    </Animated.View>
   );
 }
 
@@ -93,7 +133,7 @@ export function Overlay({ visible, from, onRequestClose, children }: OverlayProp
 
   if (!mounted) return null;
   return (
-    <OverlayLayer progress={progress} from={from}>
+    <OverlayLayer progress={progress} from={from} modal={visible}>
       {children}
     </OverlayLayer>
   );

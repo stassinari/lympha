@@ -16,6 +16,12 @@ import { useTheme } from '../theme';
 
 export type ChevronDirection = 'up' | 'down' | 'left' | 'right';
 
+/**
+ * The space a chevron occupies, for a caller that has to line it up with
+ * something. The rotated square is wider than it is tall once turned.
+ */
+export const chevronBox = (size: number) => ({ width: size * 1.6, height: size * 1.2 });
+
 const ROTATION: Record<ChevronDirection, string> = {
   down: '45deg',
   up: '225deg',
@@ -44,8 +50,7 @@ export function Chevron({
       // The rotated square is wider than it is tall once turned, so the wrapper
       // reserves honest space and keeps the glyph off its neighbours.
       style={{
-        width: size * 1.6,
-        height: size * 1.2,
+        ...chevronBox(size),
         alignItems: 'center',
         justifyContent: 'center',
       }}

@@ -26,6 +26,7 @@ export function RecipeRow({ name, subtitle, bottleColours, selected, onPress }: 
       onPress={onPress}
       paddingVertical={14}
       paddingHorizontal={16}
+      accessibilityRole="radio"
       accessibilityLabel={subtitle ? `${name}. ${subtitle.text}` : name}
       // Outlined rather than filled: a filled row would fight the bottle colours
       // sitting inside it, and colour is never the only signal.

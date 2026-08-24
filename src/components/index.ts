@@ -4,5 +4,6 @@ export * from './DoseRow';
 export * from './RecipeHeader';
 export * from './RecipeRow';
 export * from './RoundingLine';
+export * from './ScreenHeader';
 export * from './SettingsRow';
 export * from './VolumeCard';

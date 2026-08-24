@@ -17,6 +17,15 @@ export type TouchableProps = Omit<PressableProps, 'style'> & {
   style?: StyleProp<ViewStyle>;
   /** Corner radius, so the Android ripple is clipped to the same shape. */
   radius?: number;
+  /**
+   * A bare icon with no surface of its own — a back chevron, the settings glyph.
+   *
+   * Material draws these with an unbounded ripple that spills past the icon
+   * rather than a rectangle around its padding box, which is what an
+   * `overflow: hidden` wrapper would give and what looks like a mistake on a
+   * transparent header.
+   */
+  borderless?: boolean;
   children?: React.ReactNode;
 };
 
@@ -24,16 +33,27 @@ export type TouchableProps = Omit<PressableProps, 'style'> & {
 const RIPPLE_ALPHA = '22';
 const PRESSED_OPACITY = 0.62;
 
-export function Touchable({ style, radius, disabled, ...rest }: TouchableProps) {
+export function Touchable({
+  style,
+  radius,
+  borderless,
+  disabled,
+  // Defaulted here rather than on the element, because a caller that forwards an
+  // optional role passes `undefined` explicitly — and a later spread of
+  // `undefined` overrides an earlier default, which would silently leave the
+  // control with no role at all.
+  accessibilityRole = 'button',
+  ...rest
+}: TouchableProps) {
   const { colour } = useTheme();
 
   return (
     <Pressable
-      accessibilityRole="button"
+      accessibilityRole={accessibilityRole}
       disabled={disabled}
       android_ripple={
         Platform.OS === 'android'
-          ? { color: `${colour.text}${RIPPLE_ALPHA}`, foreground: false }
+          ? { color: `${colour.text}${RIPPLE_ALPHA}`, foreground: false, borderless: !!borderless }
           : undefined
       }
       style={({ pressed }) => [

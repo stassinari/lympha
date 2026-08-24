@@ -11,22 +11,20 @@
  */
 
 import { useMemo } from 'react';
-import { Platform, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import {
   BarRow,
   Body,
   Caption,
   Card,
   CardTitle,
-  Chevron,
   Screen,
-  ScreenTitle,
   SectionHeader,
-  Touchable,
   resolveAccent,
   space,
   useTheme,
 } from '@/design';
+import { ScreenHeader } from '@/components';
 import { componentMap, componentsForBrand, getBrand, getRecipe, recipesForBrand } from '@/data';
 import type { DoseUnit } from '@/data/types';
 import { availableUnits, computeDose } from '@/engine';
@@ -90,28 +88,7 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
 
   return (
     <Screen horizontalPadding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: space.blocks,
-          paddingHorizontal: space.screenH,
-        }}
-      >
-        {Platform.OS === 'android' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Back">
-            <Chevron direction="left" size={12} colour={colour.text} />
-          </Touchable>
-        ) : null}
-        <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
-          {brand?.shortName ?? 'Concentrate'}
-        </ScreenTitle>
-        {Platform.OS === 'ios' ? (
-          <Touchable onPress={onClose} hitSlop={14} accessibilityLabel="Done">
-            <Body style={{ color: accent }}>Done</Body>
-          </Touchable>
-        ) : null}
-      </View>
+      <ScreenHeader title={brand?.shortName ?? 'Concentrate'} onClose={onClose} accent={accent} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -123,21 +100,24 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
         }}
       >
         <SectionHeader tone="secondary">Measure in</SectionHeader>
-        {previews.map((option) => (
-          <Card
-            key={option.key}
-            paddingVertical={14}
-            paddingHorizontal={16}
-            onPress={() => setUnitPreference(brandId, option.key)}
-            accessibilityLabel={`${option.label}. ${option.preview}`}
-            selected={option.key === preference}
-          >
-            <CardTitle>{option.label}</CardTitle>
-            <Caption tone="secondary" style={{ marginTop: 2 }}>
-              {option.preview}
-            </Caption>
-          </Card>
-        ))}
+        <View accessibilityRole="radiogroup" style={{ gap: space.rows }}>
+          {previews.map((option) => (
+            <Card
+              key={option.key}
+              paddingVertical={14}
+              paddingHorizontal={16}
+              onPress={() => setUnitPreference(brandId, option.key)}
+              accessibilityRole="radio"
+              accessibilityLabel={`${option.label}. ${option.preview}`}
+              selected={option.key === preference}
+            >
+              <CardTitle>{option.label}</CardTitle>
+              <Caption tone="secondary" style={{ marginTop: 2 }}>
+                {option.preview}
+              </Caption>
+            </Card>
+          ))}
+        </View>
 
         {offered.includes('drop' as DoseUnit) && offered.length > 1 ? (
           // Kept in the dose-row anatomy so a caution reads as the same family of

@@ -11,7 +11,7 @@
  */
 
 import { Platform, View } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
+import type { AccessibilityRole, StyleProp, ViewStyle } from 'react-native';
 import { radius, useTheme } from '../theme';
 import { CardTitle } from '../text';
 import { Touchable } from './Touchable';
@@ -25,9 +25,25 @@ export type PillProps = {
   selected?: boolean;
   /** The one emphasised action in a nudge card. */
   emphasis?: 'primary' | 'secondary';
+  /**
+   * Set to 0 where the caller sizes the pill itself — a row of four equal
+   * presets, say. The default 18 is right for a pill that sizes to its label and
+   * wrong for one stretched to a fixed column, where it is 36 points the label
+   * cannot use: at large system text "1000" no longer fits a quarter of the
+   * screen and wraps to two lines.
+   */
+  paddingHorizontal?: number;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityHint?: string;
+  /**
+   * `radio` where the pill is one of a mutually exclusive set — the volume
+   * presets, the rounding thresholds — so it is announced as a choice rather
+   * than as a button that happens to look different from its neighbours.
+   */
+  accessibilityRole?: AccessibilityRole;
+  /** Where the visible label needs the setting's name to make sense on its own. */
+  accessibilityLabel?: string;
 };
 
 export function Pill({
@@ -35,9 +51,12 @@ export function Pill({
   onPress,
   selected = false,
   emphasis = 'secondary',
+  paddingHorizontal = 18,
   disabled,
   style,
   accessibilityHint,
+  accessibilityRole,
+  accessibilityLabel,
 }: PillProps) {
   const { colour } = useTheme();
   const inverted = selected || emphasis === 'primary';
@@ -48,20 +67,26 @@ export function Pill({
         radius={radius.pill}
         onPress={onPress}
         disabled={disabled}
-        accessibilityState={{ selected, disabled: !!disabled }}
+        accessibilityRole={accessibilityRole}
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ selected, checked: selected, disabled: !!disabled }}
         accessibilityHint={accessibilityHint}
         style={{
           // Stretches to whatever the wrapper's layout gives it, and sizes to its
           // own content when the wrapper has no opinion.
           alignSelf: 'stretch',
           minHeight: MIN_TARGET,
-          paddingHorizontal: 18,
+          paddingHorizontal,
           backgroundColor: inverted ? colour.text : colour.control,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <CardTitle style={{ color: inverted ? colour.background : colour.text }}>{label}</CardTitle>
+        {/* One line, always. A pill in a fixed grid that wraps is taller than its
+            neighbours and stops reading as one of a set. */}
+        <CardTitle numberOfLines={1} style={{ color: inverted ? colour.background : colour.text }}>
+          {label}
+        </CardTitle>
       </Touchable>
     </View>
   );

@@ -47,8 +47,9 @@ export function Chip({ label, selected, onPress, leading, style }: ChipProps) {
       <Touchable
         radius={CHIP_RADIUS}
         onPress={onPress}
-        accessibilityRole="button"
-        accessibilityState={{ selected }}
+        // One of a mutually exclusive row, so a choice rather than a button.
+        accessibilityRole="radio"
+        accessibilityState={{ selected, checked: selected }}
         style={[
           {
             alignSelf: 'stretch',

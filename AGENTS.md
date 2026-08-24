@@ -78,6 +78,23 @@ These are known platform facts, not things to rediscover:
   honours only `elevation`. `shadowColor` must be opaque — no `rgba()`.
 - **Spacing comes from container `padding` and flex `gap`**, not from manipulating text
   boxes.
+- **Dynamic type scales `lineHeight` and `letterSpacing` along with `fontSize`**, by the
+  same multiplier, on both platforms. Measured: a nominal 17/21 role at `fontScale` 1.786
+  reports a 37.506px line box, which is 21 × 1.786 exactly. So large text never shears a
+  glyph here — the type ratios survive untouched, and what breaks at accessibility sizes
+  is *layout*. Anything derived from the type scale (optical padding, cap-box squaring,
+  the volume caret) must therefore be read at the scaled size, via `useTypeMetrics`, not
+  computed once at module load.
+- **iOS leaves a stale layout when the content size category changes while the app is
+  foregrounded.** Text redraws at the new size inside boxes measured at the old one, which
+  looks exactly like a clipping bug and is not one. Always re-verify dynamic type from a
+  fresh launch before believing a layout is broken.
+- **Reduce Motion on Android is `Settings.Global.TRANSITION_ANIMATION_SCALE == 0`**, which
+  is what `AccessibilityInfo.isReduceMotionEnabled()` reports. The initial read is async on
+  both platforms, so the first frame always animates.
+- **A prop spread overrides an earlier default even when its value is `undefined`.** A
+  component that forwards an optional `accessibilityRole` through `{...rest}` will strip
+  the role it was trying to preserve; default such props at the destructure instead.
 
 Nunito's default figures are already tabular (every digit 600/1000 em at every weight), so
 `fontVariant: ['tabular-nums']` is a no-op. Never enable `onum` — it would break every

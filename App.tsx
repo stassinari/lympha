@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider } from '@/design';
+import { ThemeProvider, ThemedStatusBar } from '@/design';
 import { fonts } from '@/design/fonts';
 import { Root } from '@/screens/Root';
 import { useHydrated, useStore } from '@/state';
@@ -36,7 +35,7 @@ export default function App() {
   return (
     <SafeAreaProvider onLayout={onLayout}>
       <ThemeProvider mode={mode}>
-        <StatusBar style="auto" />
+        <ThemedStatusBar />
         <Root />
       </ThemeProvider>
     </SafeAreaProvider>
