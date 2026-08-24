@@ -13,10 +13,16 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
 *.mobileprovision
+
+# App signing credentials exported from EAS. The keystore in here is the only
+# thing that can ever sign an update to the Play listing — back it up somewhere
+# that is not a git repository.
+credentials.json
 
 # Metro
 .metro-health-check*

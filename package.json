@@ -5,10 +5,10 @@
   "dependencies": {
     "@expo-google-fonts/nunito": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "~57.0.15",
+    "expo": "~57.0.16",
     "expo-font": "~57.0.1",
     "expo-haptics": "~57.0.1",
-    "expo-splash-screen": "~57.0.7",
+    "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-native": "0.86.2",
