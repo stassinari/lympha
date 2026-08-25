@@ -1,9 +1,15 @@
 /**
- * Asked against got.
+ * Asked against got, and how far apart they are.
  *
- * The whole differentiator in one shape: three columns, one row per thing being
- * measured, and the delivered value marked when it misses. Vendor calculators
- * print only the first column.
+ * The whole differentiator in one shape: one row per thing being measured, and
+ * the delivered value marked when it misses. Vendor calculators print only the
+ * first column.
+ *
+ * The last column exists because the headline percentage could not be checked
+ * without it. The screen showed six figures and one summary number, and left the
+ * reader to work out which row it came from and to redo the division themselves —
+ * on figures that had already been rounded for display. Printing the gap on each
+ * row removes both steps.
  */
 
 import { View } from 'react-native';
@@ -18,6 +24,7 @@ import {
   useTheme,
   useTypeMetrics,
 } from '@/design';
+import { formatGapPercent } from '@/format/units';
 
 export type ComparisonRow = {
   label: string;
@@ -27,9 +34,14 @@ export type ComparisonRow = {
   off?: boolean;
   /** Which side of the target it landed on. Only read when `off`. */
   direction?: 'under' | 'over';
+  /** Signed relative error. Omitted on every row hides the column. */
+  gap?: number;
 };
 
 const COLUMN = { flex: 1, alignItems: 'flex-end' } as const;
+const LABEL_COLUMN = { flex: 1.4 } as const;
+
+const MARK_SIZE = 7;
 
 /**
  * A miss is marked with a chevron as well as a colour.
@@ -43,8 +55,6 @@ const COLUMN = { flex: 1, alignItems: 'flex-end' } as const;
  * Drawn rather than set, for the same reason the rest of the app's icons are —
  * Nunito has no arrows, so a text glyph would fall back to the system font.
  */
-const MARK_SIZE = 7;
-
 function MissMark({
   direction,
   colour,
@@ -74,22 +84,25 @@ function MissMark({
 /** What the row says to a screen reader, which cannot see the column headings. */
 function rowLabel(row: ComparisonRow, unit?: string): string {
   const scale = unit ? ` ${unit}` : '';
-  const miss = row.off ? `, ${row.direction ?? 'off'} target` : '';
-  return `${row.label}: asked ${row.asked}${scale}, get ${row.got}${scale}${miss}`;
+  const gap = row.gap === undefined ? '' : `, off by ${formatGapPercent(row.gap)}`;
+  return `${row.label}: asked ${row.asked}${scale}, get ${row.got}${scale}${gap}`;
 }
 
 export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: string }) {
   const { colour } = useTheme();
   const { capHeight } = useTypeMetrics('cardTitle');
 
+  const showGap = rows.some((row) => row.gap !== undefined);
+  const headings = showGap ? 'Asked, get, and off by.' : 'Asked, and get.';
+
   return (
     <Card paddingVertical={space.blocks}>
       <View
         accessible
-        accessibilityLabel={unit ? `Measured in ${unit}. Asked, and get.` : 'Asked, and get.'}
+        accessibilityLabel={unit ? `Measured in ${unit}. ${headings}` : headings}
         style={{ flexDirection: 'row', alignItems: 'flex-end' }}
       >
-        <Caption tone="secondary" style={{ flex: 1.4 }}>
+        <Caption tone="secondary" style={LABEL_COLUMN}>
           {unit ?? ''}
         </Caption>
         <Caption tone="secondary" style={COLUMN}>
@@ -98,19 +111,24 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
         <Caption tone="secondary" style={COLUMN}>
           Get
         </Caption>
+        {showGap ? (
+          <Caption tone="secondary" style={COLUMN}>
+            Off by
+          </Caption>
+        ) : null}
       </View>
 
       {rows.map((row, i) => (
         <View key={row.label}>
           <View style={{ marginVertical: space.snug }}>{i > 0 ? <Divider /> : null}</View>
-          {/* One element, not three: read separately, "Magnesium" / "2.4" / "2"
-              is three fragments with nothing to tie them together. */}
+          {/* One element, not four: read separately, "Magnesium" / "2.4" / "2" /
+              "+7%" is four fragments with nothing to tie them together. */}
           <View
             accessible
             accessibilityLabel={rowLabel(row, unit)}
             style={{ flexDirection: 'row', alignItems: 'baseline' }}
           >
-            <CardTitle style={{ flex: 1.4 }} numberOfLines={1}>
+            <CardTitle style={LABEL_COLUMN} numberOfLines={1}>
               {row.label}
             </CardTitle>
             <Caption tone="secondary" style={COLUMN}>
@@ -128,6 +146,11 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
                 {row.got}
               </CardTitle>
             </View>
+            {showGap ? (
+              <Caption tone="secondary" style={COLUMN}>
+                {row.gap === undefined ? '' : formatGapPercent(row.gap)}
+              </Caption>
+            ) : null}
           </View>
         </View>
       ))}

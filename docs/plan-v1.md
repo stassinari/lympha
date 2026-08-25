@@ -214,3 +214,15 @@ Icon, splash, EAS build config, TestFlight + Play internal track.
    tabular, no feature needed.
 3. **Non-zero starting water** — parked in the schema, out of v1, but it's the most likely
    thing to change the engine's shape later. Engine signatures should not assume zero TDS input.
+4. **Volume entry is awkward to correct.** Reported from the first Android build, by two
+   people independently. The field starts a fresh number on the first keystroke but appends
+   afterwards, so changing 1500 to 500 means backspacing rather than just typing. Needs a
+   decision on when an entry is "finished" and typing should start over.
+5. **The headline rounding percentage cannot be reproduced from the detail screen.** The
+   figure is computed from full-precision ppm and the table displays one decimal, so at
+   Rao's / 1500 ml the app says 7% while the printed numbers give 6%. For an app whose whole
+   claim is that its arithmetic is checkable, this is the wrong number to be unable to check.
+   Nothing on the screen says which row the headline came from either.
+6. **Settings button placement** — deferred; being reworked with Claude Design.
+7. **Bottles section** in settings — an improvement is intended, not yet specified.
+8. **Icon and splash** — still Expo defaults; deliberately skipped to get a build out.

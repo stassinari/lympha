@@ -19,7 +19,29 @@ export type RoundingSummary = { status: RoundingStatus; text: string } | null;
 const EXACT = 0.005;
 
 /**
- * The gap worth reporting, signed. Negative means the water is weaker than asked.
+ * Which of the figures on the detail screen the headline is quoting.
+ *
+ * The headline is one percentage over a screen showing six, and until it said
+ * which one it meant, it could not be checked: a reader picked the row they
+ * assumed it came from, got a different answer, and had no way to tell whether
+ * the app or their arithmetic was wrong. Naming the source is half of making the
+ * number verifiable — `formatPpm`'s second decimal is the other half.
+ */
+export type HeadlineSource =
+  /** The error in the finished water, where the vendor publishes enough to know it. */
+  | { kind: 'profile'; measure: 'hardness' | 'alkalinity'; label: string }
+  /** The worst single bottle, where it does not. */
+  | { kind: 'bottle'; componentId: string; label: string };
+
+export type Headline = {
+  gap: number;
+  /** Null only when there is nothing to report — no profile and no bottles. */
+  source: HeadlineSource | null;
+};
+
+/**
+ * The gap worth reporting, signed, and where it came from. Negative means the
+ * water is weaker than asked.
  *
  * Where the vendor publishes ion data this is the error in the *water* — which is
  * what the user actually cares about, and is usually far smaller than the error on
@@ -29,21 +51,30 @@ const EXACT = 0.005;
  * Without ion data there is no honest statement about the water, so it falls back
  * to the worst single bottle.
  */
-export function headlineGap(dose: Dose): number {
+export function headline(dose: Dose): Headline {
   const profile = dose.profile;
   if (profile) {
     const { hardnessError: h, alkalinityError: a } = profile;
-    return Math.abs(h) >= Math.abs(a) ? h : a;
+    return Math.abs(h) >= Math.abs(a)
+      ? { gap: h, source: { kind: 'profile', measure: 'hardness', label: 'Hardness' } }
+      : { gap: a, source: { kind: 'profile', measure: 'alkalinity', label: 'Alkalinity' } };
   }
 
-  let worst = 0;
+  let worst: Headline = { gap: 0, source: null };
   for (const line of dose.lines) {
     if (line.exact <= 0) continue;
     const signed = line.error / line.exact;
-    if (Math.abs(signed) > Math.abs(worst)) worst = signed;
+    if (Math.abs(signed) > Math.abs(worst.gap) || worst.source === null) {
+      worst = {
+        gap: signed,
+        source: { kind: 'bottle', componentId: line.component.id, label: line.component.name },
+      };
+    }
   }
   return worst;
 }
+
+export const headlineGap = (dose: Dose): number => headline(dose).gap;
 
 export function roundingSummary(dose: Dose, flagAbove = 0.1): RoundingSummary {
   if (!dose.showsRounding) return null;

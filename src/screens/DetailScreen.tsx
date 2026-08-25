@@ -16,7 +16,8 @@ import { BarRow, Body, DoseValue, Pill, Screen, SectionHeader, space, useTheme }
 import { ComparisonTable, ScreenHeader } from '@/components';
 import type { ComparisonRow } from '@/components';
 import { formatDoseAmount, formatIdealAmount, formatPpm, formatUnit } from '@/format/units';
-import { headlineGap } from '@/format/rounding';
+import { headline } from '@/format/rounding';
+import type { HeadlineSource } from '@/format/rounding';
 import { useBrand, useCleanVolume, useDose, useStore } from '@/state';
 
 export type DetailScreenProps = { onClose: () => void };
@@ -29,7 +30,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
 
-  const gap = headlineGap(dose);
+  const { gap, source } = headline(dose);
   const percent = Math.round(Math.abs(gap) * 100);
   const direction = gap < 0 ? 'under' : 'over';
 
@@ -39,6 +40,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
     got: formatDoseAmount(line.delivered, line.dispenser.step),
     off: line.zeroed || line.relativeError > flagAbove,
     direction: line.delivered < line.exact ? 'under' : 'over',
+    gap: line.exact > 0 ? line.error / line.exact : undefined,
   }));
 
   const profile = dose.profile;
@@ -50,6 +52,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           got: formatPpm(profile.delivered.hardness),
           off: Math.abs(profile.hardnessError) > flagAbove,
           direction: profile.hardnessError < 0 ? 'under' : 'over',
+          gap: profile.hardnessError,
         },
         {
           label: 'Alkalinity',
@@ -57,6 +60,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           got: formatPpm(profile.delivered.alkalinity),
           off: Math.abs(profile.alkalinityError) > flagAbove,
           direction: profile.alkalinityError < 0 ? 'under' : 'over',
+          gap: profile.alkalinityError,
         },
       ]
     : [];
@@ -84,7 +88,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
             </Body>
           </View>
           <Body tone="onCard" style={{ marginTop: 6 }}>
-            {explain(dose, direction)}
+            {explain(dose, direction, source)}
           </Body>
         </BarRow>
 
@@ -133,7 +137,19 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   );
 }
 
-function explain(dose: ReturnType<typeof useDose>, direction: string): string {
+/**
+ * Names the figure the headline is quoting, then says why it is out.
+ *
+ * The attribution is the fix for a real report: with six numbers below and one
+ * percentage above, a reader picked the row they assumed it came from, got a
+ * different answer, and had no way to know which of them was wrong. It was the
+ * alkalinity row, and nothing on the screen said so.
+ */
+function explain(
+  dose: ReturnType<typeof useDose>,
+  direction: string,
+  source: HeadlineSource | null,
+): string {
   const zeroed = dose.zeroed;
   if (zeroed.length === 1) {
     return `${zeroed[0]!.component.name} rounds away to nothing at this volume, so it is missing from the water entirely.`;
@@ -142,5 +158,6 @@ function explain(dose: ReturnType<typeof useDose>, direction: string): string {
     return `${zeroed.length} bottles round away to nothing at this volume, so they are missing from the water entirely.`;
   }
   const unit = dose.lines[0]?.dispenser.unit ?? 'drop';
-  return `A ${formatUnit(unit, 1)} cannot be halved, so the closest you can actually make is a little ${direction} what the recipe asks for.`;
+  const attribution = source ? `${source.label} is the widest gap. ` : '';
+  return `${attribution}A ${formatUnit(unit, 1)} cannot be halved, so the closest you can actually make is a little ${direction} what the recipe asks for.`;
 }

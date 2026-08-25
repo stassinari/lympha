@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { componentMap, getRecipe } from '@/data';
 import { computeDose } from '@/engine';
-import { roundingSummary } from './rounding';
+import { headline, roundingSummary } from './rounding';
+import { formatGapPercent, formatPpm } from './units';
 
 const summary = (recipeId: string, volumeMl: number, flagAbove?: number) =>
   roundingSummary(computeDose(getRecipe(recipeId)!, volumeMl, componentMap), flagAbove);
@@ -64,5 +65,44 @@ describe('roundingSummary', () => {
     const tight = summary('lotus-simple-and-sweet', 1000, 0.01);
     expect(tight?.status).toBe('warning');
     expect(tight?.text).toMatch(/^Rounds hard/);
+  });
+});
+
+describe('headline', () => {
+  /**
+   * Reported from the first Android build, and the reason this test exists.
+   *
+   * Rao's at 1500 ml: the app said 7% over target, the detail screen printed
+   * hardness 72.3 → 75 and alkalinity 20.1 → 21.4, and a reader doing the
+   * division got 6%. Both were "right" — the app computed from 21.4286, the
+   * reader from what was on the screen. For an app whose entire claim is that its
+   * arithmetic is checkable, the rounding figure is the worst one to be unable to
+   * check, so the printed figures now have to reproduce it.
+   */
+  it('can be reproduced from the figures the detail screen prints', () => {
+    const dose = computeDose(getRecipe('lotus-raos-recipe')!, 1500, componentMap);
+    const { gap, source } = headline(dose);
+
+    expect(source).toEqual({ kind: 'profile', measure: 'alkalinity', label: 'Alkalinity' });
+    expect(Math.round(Math.abs(gap) * 100)).toBe(7);
+
+    const profile = dose.profile!;
+    const asPrinted = (delivered: number, target: number) => {
+      const t = Number(formatPpm(target));
+      return (Number(formatPpm(delivered)) - t) / t;
+    };
+
+    expect(
+      formatGapPercent(asPrinted(profile.delivered.alkalinity, profile.target.alkalinity)),
+    ).toBe(formatGapPercent(gap));
+    expect(formatGapPercent(asPrinted(profile.delivered.hardness, profile.target.hardness))).toBe(
+      formatGapPercent(profile.hardnessError),
+    );
+  });
+
+  it('falls back to the worst bottle where the vendor publishes no ion data', () => {
+    const dose = computeDose(getRecipe('apax-lab-standard-cupping')!, 500, componentMap);
+    const { source } = headline(dose);
+    expect(source?.kind).toBe('bottle');
   });
 });

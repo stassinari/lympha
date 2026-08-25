@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatDoseAmount, formatIdealAmount, formatPpm, formatUnit } from './units';
+import {
+  formatDoseAmount,
+  formatGapPercent,
+  formatIdealAmount,
+  formatPpm,
+  formatUnit,
+} from './units';
 
 describe('formatUnit', () => {
   it('pluralises the units you count', () => {
@@ -44,8 +50,36 @@ describe('formatIdealAmount', () => {
 describe('formatPpm', () => {
   it('spends a decimal only where there is one to spend', () => {
     expect(formatPpm(90)).toBe('90');
-    expect(formatPpm(88.393)).toBe('88.4');
+    expect(formatPpm(88.393)).toBe('88.39');
     expect(formatPpm(72.3)).toBe('72.3');
     expect(formatPpm(0)).toBe('0');
+  });
+
+  /**
+   * The reason for the second decimal: at one, the printed figures gave 6.5%
+   * against a headline of 7%, and the arithmetic the screen invites you to do
+   * disagreed with the screen.
+   */
+  it('prints enough precision to reproduce the headline', () => {
+    const target = 20.1;
+    const delivered = (8 * (1 / ((1000 / 4500) * 0.56) / 2)) / 1.5;
+    const printed = Number(formatPpm(delivered));
+    expect(Math.round(((printed - target) / target) * 100)).toBe(
+      Math.round(((delivered - target) / target) * 100),
+    );
+  });
+});
+
+describe('formatGapPercent', () => {
+  it('signs the direction and rounds to whole percent', () => {
+    expect(formatGapPercent(0.0661)).toBe('+7%');
+    expect(formatGapPercent(0.10685)).toBe('+11%');
+    expect(formatGapPercent(-0.0373)).toBe('-4%');
+  });
+
+  it('drops the sign where there is nothing to sign', () => {
+    expect(formatGapPercent(0.00134)).toBe('0%');
+    expect(formatGapPercent(-0.00446)).toBe('0%');
+    expect(formatGapPercent(0)).toBe('0%');
   });
 });
