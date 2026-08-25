@@ -23,6 +23,15 @@
       "predictiveBackGestureEnabled": true,
       "package": "dev.saverio.lympha"
     },
-    "plugins": ["expo-font", "expo-splash-screen"]
+    "plugins": [
+      "expo-font",
+      "expo-splash-screen"
+    ],
+    "owner": "saveriodev",
+    "extra": {
+      "eas": {
+        "projectId": "c6812b0a-d1c9-4254-87f3-1f85f69ab0e2"
+      }
+    }
   }
 }
