@@ -14,9 +14,19 @@ into version control and what stays a scratch note. Stage nothing, commit nothin
 don't create branches or tags unprompted. Leave the working tree and say what changed.
 
 **Say what you're about to do before doing anything that takes over the machine.** Booting
-simulators, launching emulators, installing apps, starting long-running servers — these
-put windows on screen and are jarring without warning. One or two sentences of heads-up
-first: what will launch, what will appear, how to stop it.
+simulators, launching emulators, installing apps — these put windows on screen and are
+jarring without warning. One or two sentences of heads-up first: what will launch, what
+will appear, how to stop it.
+
+**Never start or stop Metro.** Saverio runs `npm start` himself. An agent-owned Metro holds
+port 8081, so his own `npm start` silently moves to 8082 and the simulators keep talking to
+the wrong bundler — a confusing failure that looks like stale code. If a dev server is
+needed, ask him to start it and wait.
+
+Driving a server he already has running is fine: `curl localhost:8081/reload`, screenshots,
+`adb`/`simctl`. Reading his Metro output is not — it goes to his terminal, not a log an
+agent can tail, so ask him to paste anything needed. A missing per-platform "Bundled" line
+is the tell for a stale bundle; a cache clear (`npm start -- -c`) is his call too.
 
 **Build the app; explain as you go.** Saverio is a seasoned web developer and new to React
 Native. He does not want to be blocked writing code or answering questions — but he does
