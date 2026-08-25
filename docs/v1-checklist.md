@@ -51,9 +51,11 @@ start is effectively instant.
       edited into `lotus.ts`. Everything else in the app has a flush, unbordered
       bar; this should match.
 - [ ] **Settings button placement** — deferred; being reworked with Claude Design.
-- [ ] **KONFLUX has no published label colour.** It post-dates the design handoff
-      and currently takes the documented fallback of neutral slate. Needs a real
-      value.
+- [x] **KONFLUX has no published label colour.** Done. A real value was agreed
+      with the designer — `#BE4C7C` light / `#DA6FA6` dark — replacing the
+      neutral-slate fallback. LYLAC was revised in the same pass (`#B098D8` /
+      `#CBB6EA`) so the two sit together. Both clear the white card by a wider
+      margin than Sodium's bordered bar, so neither needs an `edgeOnLight`.
 
 ---
 

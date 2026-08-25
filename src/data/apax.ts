@@ -47,16 +47,20 @@ export const dropsForGrams = (grams: number, litres = 1) =>
   Math.round(grams * litres * DROPS_PER_GRAM);
 
 /**
- * Label colours. The design handoff samples three bottles; KONFLUX post-dates it
- * and has no published value here, so it takes the handoff's documented fallback
- * of neutral slate. Replace when the real label colour is known — nothing else
- * needs to change.
+ * Label colours. The design handoff sampled only the three bottles that existed
+ * when it was written; KONFLUX post-dates it. These four are a later revision
+ * agreed with the designer, which supersedes the handoff table for Apax — KONFLUX
+ * gets a real value in place of the neutral-slate fallback, and LYLAC was warmed
+ * slightly to sit beside it. TONIK and JAMM are unchanged from the handoff.
+ *
+ * All four clear the white card by more than Sodium's bordered bar does, so none
+ * of them needs an `edgeOnLight`.
  */
 const COLOURS: Record<string, { light: string; dark: string }> = {
   tonik: { light: '#6FB87F', dark: '#93CFA0' },
   jamm: { light: '#E86A58', dark: '#FA8B7C' },
-  lylac: { light: '#B9A3D6', dark: '#D6C7E8' },
-  konflux: { light: '#7E8A8C', dark: '#9DAAAC' },
+  lylac: { light: '#B098D8', dark: '#CBB6EA' },
+  konflux: { light: '#BE4C7C', dark: '#DA6FA6' },
 };
 
 /** Bar colours may be too light to use as text — Apax's mint fails AA on white —

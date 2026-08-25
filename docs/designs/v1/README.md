@@ -229,8 +229,15 @@ matches the sticker in their hand rather than reading a word. Rules:
 |---|---|---|
 | TONIK | `#6FB87F` | `#93CFA0` |
 | JAMM | `#E86A58` | `#FA8B7C` |
-| LYLAC | `#B9A3D6` | `#D6C7E8` |
+| LYLAC | ~~`#B9A3D6`~~ `#B098D8` | ~~`#D6C7E8`~~ `#CBB6EA` |
+| KONFLUX | `#BE4C7C` | `#DA6FA6` |
 | Brand accent (text-safe) | `#2F7A45` | `#93CFA0` |
+
+**LYLAC and KONFLUX are a later revision**, agreed with the designer after this
+handoff was written. KONFLUX did not exist when the bottles were sampled and had
+been taking the neutral-slate fallback; LYLAC was warmed to sit beside its new
+neighbour. The struck values are what the handoff originally specified, kept so
+the change is traceable. `src/data/apax.ts` carries the live values.
 
 **Accent vs bar colour are separate tokens.** A bar colour may be too light to
 use as text (Apax mint fails AA on white), so each brand carries a distinct

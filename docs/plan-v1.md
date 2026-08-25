@@ -203,8 +203,9 @@ Icon, splash, EAS build config, TestFlight + Play internal track.
 1. ~~Apax recipe numbers~~ — delivered as `docs/apax-lab-brief.md` and
    `docs/apax-lab-recipes.json`, and shipped in Slice 2. Three consequences worth carrying
    forward:
-   - **KONFLUX has no published label colour.** It post-dates the design handoff, so it
-     takes the handoff's documented fallback of neutral slate. Needs a real value.
+   - ~~**KONFLUX has no published label colour.**~~ Resolved: a real value was agreed
+     with the designer (`#BE4C7C` / `#DA6FA6`), replacing the neutral-slate fallback.
+     LYLAC was revised in the same pass. Both supersede the handoff's Apax table.
    - **Three brands, not two**, and two of them are the same vendor. The brand chip row and
      the "Bottles" settings section were designed for two.
    - **Fifteen recipes in one range**, grouped process / roast / brew-method / varietal /
