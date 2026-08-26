@@ -139,3 +139,5 @@ export const SectionHeader = variantComponent('sectionHeader', 'SectionHeader', 
 export const UnitLabel = variantComponent('unitLabel', 'UnitLabel');
 export const VolumeUnit = variantComponent('volumeUnit', 'VolumeUnit');
 export const CardLabel = variantComponent('cardLabel', 'CardLabel');
+/** The app's name in the dose screen header. The one role not set in Nunito. */
+export const Wordmark = variantComponent('wordmark', 'Wordmark');

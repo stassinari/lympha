@@ -10,15 +10,16 @@
  * bottom-right acts on this brew.** Every overlay screen already puts its action
  * top-right, so the dose screen was the odd one out rather than the precedent.
  *
- * The wordmark is here to give the glyph something to be opposite. It is
- * deliberately quiet — the smallest label role in secondary tone — because the
- * screen's subject is the recipe card immediately beneath it, and an app that
- * announces its own name louder than the thing you opened it for has its priorities
- * backwards.
+ * The wordmark is set in Figtree, and is the only thing in the app that is. A
+ * second family is a cost — another face to load, another set of metrics to keep —
+ * and it is worth paying exactly here: the mark is a picture of the app's name
+ * rather than a piece of its content, and setting it apart is what stops the header
+ * reading as the top of the page. It stays in the secondary tone, so it is present
+ * without competing with the recipe card immediately beneath it.
  */
 
+import { SettingsIcon, Touchable, Wordmark, space } from '@/design';
 import { View } from 'react-native';
-import { CardLabel, SettingsIcon, Touchable, space } from '@/design';
 
 const GLYPH = 18;
 
@@ -47,9 +48,9 @@ export function AppHeader({ onOpenSettings }: AppHeaderProps) {
     >
       {/* Decorative: a screen reader already announces the app by name on launch,
           so reading it again at the top of the only screen is noise. */}
-      <CardLabel tone="secondary" accessibilityElementsHidden importantForAccessibility="no">
+      <Wordmark tone="primary" accessibilityElementsHidden importantForAccessibility="no">
         Lympha
-      </CardLabel>
+      </Wordmark>
       <Touchable
         borderless
         onPress={onOpenSettings}

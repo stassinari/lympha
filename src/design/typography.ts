@@ -9,10 +9,13 @@
  * not a preference. The display roles sit as close to that floor as Nunito
  * allows; the difference from the handoff's `line-height: 0.88` is taken out of
  * container padding instead, using `inkInsets`.
+ *
+ * Every role is Nunito except `wordmark`, and a role's font is what decides which
+ * font's floor its line height is measured against — the two are 0.11em apart.
  */
 
-import { FONT_FAMILY, minLineHeightRatio, trackingInset, trackingPx } from './metrics';
-import type { InkExtent, NunitoWeight } from './metrics';
+import type { FontMetrics, FontWeight, InkExtent } from './metrics';
+import { FIGTREE, NUNITO, faceFor, minLineHeightRatio, trackingInset, trackingPx } from './metrics';
 
 export type TypeRole =
   | 'hero'
@@ -26,10 +29,20 @@ export type TypeRole =
   | 'sectionHeader'
   | 'unitLabel'
   | 'volumeUnit'
-  | 'cardLabel';
+  | 'cardLabel'
+  | 'wordmark';
 
 type RoleSpec = {
-  weight: NunitoWeight;
+  /**
+   * The family, where it is not the app's own.
+   *
+   * Defaulted rather than required because exactly one role departs from Nunito,
+   * and a field repeated on twelve roles to say "as usual" earns nothing. The
+   * font is not cosmetic here: it selects which metrics the line-height floor is
+   * checked against, and the two fonts' floors differ by 0.11em.
+   */
+  font?: FontMetrics;
+  weight: FontWeight;
   size: number;
   /** Multiple of font size. Must clear `minLineHeightRatio` for the weight. */
   lineHeightRatio: number;
@@ -123,6 +136,35 @@ const ROLES: Record<TypeRole, RoleSpec> = {
     extent: 'text',
     maxScale: GEOMETRIC_MAX_SCALE,
   },
+  /**
+   * The app's name, in the dose screen's header, and the only thing set in Figtree.
+   *
+   * A wordmark is a picture of a name rather than a piece of text, which is the one
+   * place a second family pays for itself: it marks the app's own chrome as not
+   * being part of the content. Everything else on every screen stays Nunito.
+   *
+   * Figtree at 600 has a floor of 0.977 — its content box is 0.164em tighter than
+   * Nunito's — so 1.15 here is generous rather than near the limit and the mark has
+   * room to sit without shearing. Note the guard in `resolve` only means anything
+   * because the role names its font: measured against Nunito's 1.067 floor for the
+   * same weight this ratio would also have passed, while checking a font the mark is
+   * not set in.
+   *
+   * Capped, and more tightly than the display roles: the header is pinned outside
+   * the scroll view, so an uncapped wordmark grows the one strip of the screen that
+   * cannot scroll and pushes the doses off it. The mark is decoration — it is
+   * hidden from screen readers — so it is the right thing to hold still.
+   */
+  wordmark: {
+    font: FIGTREE,
+    weight: '600',
+    size: 20,
+    lineHeightRatio: 1.15,
+    // Slightly tight, as a set name rather than a read word.
+    trackingEm: -0.01,
+    extent: 'text',
+    maxScale: 1.2,
+  },
   /** Sits beside the volume, which is far larger, so it is scaled up to match. */
   volumeUnit: {
     weight: '700',
@@ -143,8 +185,10 @@ export type ResolvedType = {
    *  so a line box measures the same on both platforms. */
   includeFontPadding: false;
   textTransform?: 'uppercase';
+  /** The family the role resolved to, so layout reads the right metrics for it. */
+  font: FontMetrics;
   /** Kept so layout can compensate for the asymmetry — see `inkInsets`. */
-  weight: NunitoWeight;
+  weight: FontWeight;
   extent: InkExtent;
   /** Undefined where the role may scale without limit. */
   maxScale?: number;
@@ -161,20 +205,24 @@ export type ResolvedType = {
 };
 
 function resolve(spec: RoleSpec): ResolvedType {
-  const floor = minLineHeightRatio(spec.weight, spec.extent);
+  const font = spec.font ?? NUNITO;
+  const floor = minLineHeightRatio(spec.weight, spec.extent, font);
   if (spec.lineHeightRatio < floor) {
     throw new Error(
-      `lineHeightRatio ${spec.lineHeightRatio} is below Nunito's floor of ${floor.toFixed(3)} ` +
-        `for weight ${spec.weight}/${spec.extent}; glyphs would be clipped.`,
+      `lineHeightRatio ${spec.lineHeightRatio} is below ${font.name}'s floor of ` +
+        `${floor.toFixed(3)} for weight ${spec.weight}/${spec.extent}; glyphs would be clipped.`,
     );
   }
   return {
-    fontFamily: FONT_FAMILY[spec.weight],
+    // Throws if the weight is not a loaded face, so a role can never name type the
+    // app has not shipped — Android would silently fake it.
+    fontFamily: faceFor(font, spec.weight).family,
     fontSize: spec.size,
     lineHeight: Math.round(spec.size * spec.lineHeightRatio),
     letterSpacing: trackingPx(spec.trackingEm, spec.size),
     includeFontPadding: false,
     ...(spec.uppercase ? { textTransform: 'uppercase' as const } : {}),
+    font,
     weight: spec.weight,
     extent: spec.extent,
     maxScale: spec.maxScale,
@@ -193,15 +241,16 @@ export const typeSpecs = ROLES;
 /**
  * Just the React Native style properties for a role.
  *
- * `ResolvedType` also carries `weight`, `extent`, `maxScale` and `trackingInset`,
- * which are metric metadata for layout rather than style props. Spreading the whole
- * record into a `style` would pass them to the renderer, where they are meaningless
- * at best.
+ * `ResolvedType` also carries `font`, `weight`, `extent`, `maxScale` and
+ * `trackingInset`, which are metric metadata for layout rather than style props.
+ * Spreading the whole record into a `style` would pass them to the renderer, where
+ * they are meaningless at best.
  */
 export function styleForRole(
   role: TypeRole,
-): Omit<ResolvedType, 'weight' | 'extent' | 'maxScale' | 'trackingInset'> {
+): Omit<ResolvedType, 'font' | 'weight' | 'extent' | 'maxScale' | 'trackingInset'> {
   const {
+    font: _font,
     weight: _weight,
     extent: _extent,
     maxScale: _maxScale,

@@ -8,6 +8,7 @@
 
 import { Platform, useWindowDimensions } from 'react-native';
 import {
+  NUNITO,
   ascentPxFor,
   capBlockBoxFor,
   capBoxInsetFor,
@@ -16,45 +17,49 @@ import {
   descentPxFor,
   inkInsetsFor,
 } from './metrics';
-import type { InkExtent, NunitoWeight, TextPlatform } from './metrics';
+import type { FontMetrics, InkExtent, FontWeight, TextPlatform } from './metrics';
 import { typeScale } from './typography';
 import type { TypeRole } from './typography';
 
 export const TEXT_PLATFORM: TextPlatform = Platform.OS === 'android' ? 'android' : 'ios';
 
-export const descentPx = (fontSize: number, lineHeight: number) =>
-  descentPxFor(TEXT_PLATFORM, fontSize, lineHeight);
+export const descentPx = (fontSize: number, lineHeight: number, font: FontMetrics = NUNITO) =>
+  descentPxFor(TEXT_PLATFORM, fontSize, lineHeight, font);
 
-export const ascentPx = (fontSize: number, lineHeight: number) =>
-  ascentPxFor(TEXT_PLATFORM, fontSize, lineHeight);
+export const ascentPx = (fontSize: number, lineHeight: number, font: FontMetrics = NUNITO) =>
+  ascentPxFor(TEXT_PLATFORM, fontSize, lineHeight, font);
 
 export const inkInsets = (
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent = 'text',
-) => inkInsetsFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
+  font: FontMetrics = NUNITO,
+) => inkInsetsFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent, font);
 
 export const capBoxPadding = (
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
-) => capBoxPaddingFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
+  font: FontMetrics = NUNITO,
+) => capBoxPaddingFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent, font);
 
 export const capBoxInset = (
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
-) => capBoxInsetFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
+  font: FontMetrics = NUNITO,
+) => capBoxInsetFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent, font);
 
 export const capBlockBox = (
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
-) => capBlockBoxFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
+  font: FontMetrics = NUNITO,
+) => capBlockBoxFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent, font);
 
 /**
  * The effective text-size multiplier for a role, with the role's own ceiling
@@ -102,17 +107,21 @@ export function useTypeMetrics(role: TypeRole) {
   const fontSize = spec.fontSize * factor;
   const lineHeight = spec.lineHeight * factor;
 
+  // The role's own font, not the app's default one: a box squared about Nunito's
+  // cap block is not squared about Figtree's, and its descent is 0.1em shallower.
+  const font = spec.font;
+
   return {
     factor,
     fontSize,
     lineHeight,
     /** Distance from the baseline to the top of the digits or capitals. */
-    capHeight: capTop(spec.weight, spec.extent) * fontSize,
-    capBoxPadding: capBoxPadding(fontSize, lineHeight, spec.weight, spec.extent),
-    capBoxInset: capBoxInset(fontSize, lineHeight, spec.weight, spec.extent),
-    inkInsets: inkInsets(fontSize, lineHeight, spec.weight, spec.extent),
+    capHeight: capTop(spec.weight, spec.extent, font) * fontSize,
+    capBoxPadding: capBoxPadding(fontSize, lineHeight, spec.weight, spec.extent, font),
+    capBoxInset: capBoxInset(fontSize, lineHeight, spec.weight, spec.extent, font),
+    inkInsets: inkInsets(fontSize, lineHeight, spec.weight, spec.extent, font),
     /** Where the marks sit inside the line box, for anything drawn around them. */
-    capBlockBox: capBlockBox(fontSize, lineHeight, spec.weight, spec.extent),
+    capBlockBox: capBlockBox(fontSize, lineHeight, spec.weight, spec.extent, font),
     trackingInset: spec.trackingInset * factor,
   };
 }

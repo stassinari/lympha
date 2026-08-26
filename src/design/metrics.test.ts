@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ALL_FAMILIES,
   CAP_HEIGHT,
   CONTENT_BOX,
   DESCENT,
-  FONT_FAMILY,
   ascentPxFor,
   capBlockBoxFor,
   capBoxInsetFor,
@@ -17,20 +17,20 @@ import {
   trackingInset,
   trackingPx,
 } from './metrics';
-import type { NunitoWeight, TextPlatform } from './metrics';
+import type { FontWeight, TextPlatform } from './metrics';
 import { typeScale, typeSpecs } from './typography';
 import type { TypeRole } from './typography';
 
 /** The existing expectations were all written against iOS; bind them explicitly
  *  now that the module models both platforms. */
-const inkInsets = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text' = 'text') =>
+const inkInsets = (fs: number, lh: number, w: FontWeight, e: 'digits' | 'text' = 'text') =>
   inkInsetsFor('ios', fs, lh, w, e);
-const capBoxPadding = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text') =>
+const capBoxPadding = (fs: number, lh: number, w: FontWeight, e: 'digits' | 'text') =>
   capBoxPaddingFor('ios', fs, lh, w, e);
-const capBoxInset = (fs: number, lh: number, w: NunitoWeight, e: 'digits' | 'text') =>
+const capBoxInset = (fs: number, lh: number, w: FontWeight, e: 'digits' | 'text') =>
   capBoxInsetFor('ios', fs, lh, w, e);
 
-const WEIGHTS: NunitoWeight[] = ['400', '600', '700', '800', '900'];
+const WEIGHTS: FontWeight[] = ['400', '600', '700', '800', '900'];
 
 describe('Nunito metrics', () => {
   it('has the content box the TTFs report', () => {
@@ -107,7 +107,7 @@ describe('the type scale', () => {
   });
 
   it.each(roles)('%s names a font family that is actually loaded', (role) => {
-    expect(Object.values(FONT_FAMILY)).toContain(typeScale[role].fontFamily);
+    expect(ALL_FAMILIES).toContain(typeScale[role].fontFamily);
   });
 
   it('converts the handoff’s em tracking into absolute px', () => {

@@ -1,17 +1,40 @@
 /**
- * Derives Nunito's vertical metrics from the shipped TTFs.
+ * Derives a font's vertical metrics from the shipped TTFs.
  *
  * Why this exists: React Native clips glyphs to the lineHeight box, and the
  * shortfall is taken off the top. So there is a hard floor below which capitals
  * and digits shear. That floor is a property of the font, not a matter of taste,
  * and this script computes it rather than leaving it to be eyeballed.
  *
- * Run: node scripts/font-metrics.mjs
- * The output is transcribed into src/design/metrics.ts.
+ * Run: node scripts/font-metrics.mjs [family] [...weights]
+ *   node scripts/font-metrics.mjs                     → Nunito, every loaded weight
+ *   node scripts/font-metrics.mjs figtree 600SemiBold  → one face of another family
+ *
+ * Every family in the app needs its own numbers: two fonts at the same nominal
+ * size have different ascenders, descenders and cap heights, so a line height that
+ * is safe in one shears glyphs in the other. The output is transcribed into
+ * src/design/metrics.ts.
  */
 import fs from 'node:fs';
 
-const WEIGHTS = ['400Regular', '600SemiBold', '700Bold', '800ExtraBold', '900Black'];
+const FAMILIES = {
+  nunito: {
+    name: 'Nunito',
+    weights: ['400Regular', '600SemiBold', '700Bold', '800ExtraBold', '900Black'],
+  },
+  // Only the weight the app ships. Any other face in the package can still be
+  // measured by naming it: `node scripts/font-metrics.mjs figtree 700Bold`.
+  figtree: { name: 'Figtree', weights: ['600SemiBold'] },
+};
+
+const [familyArg, ...weightArgs] = process.argv.slice(2);
+const family = FAMILIES[(familyArg ?? 'nunito').toLowerCase()];
+if (!family) {
+  console.error(`Unknown family. Known: ${Object.keys(FAMILIES).join(', ')}`);
+  process.exit(1);
+}
+const WEIGHTS = weightArgs.length > 0 ? weightArgs : family.weights;
+const PACKAGE = family.name.toLowerCase();
 
 function readTables(b) {
   const n = b.readUInt16BE(4);
@@ -70,7 +93,9 @@ function glyphBounds(b, t, gid, indexToLocFormat, numGlyphs) {
 
 const rows = [];
 for (const w of WEIGHTS) {
-  const b = fs.readFileSync(`node_modules/@expo-google-fonts/nunito/${w}/Nunito_${w}.ttf`);
+  const b = fs.readFileSync(
+    `node_modules/@expo-google-fonts/${PACKAGE}/${w}/${family.name}_${w}.ttf`,
+  );
   const t = readTables(b);
   const upm = b.readUInt16BE(t.head.off + 18);
   const indexToLocFormat = b.readInt16BE(t.head.off + 50);
@@ -78,6 +103,12 @@ for (const w of WEIGHTS) {
   const ascender = b.readInt16BE(t.hhea.off + 4);
   const descender = b.readInt16BE(t.hhea.off + 6);
   const lineGap = b.readInt16BE(t.hhea.off + 8);
+  // OS/2 publishes cap and x-height directly, and they are not derivable from the
+  // outlines: 'H' happens to equal the cap height in most fonts but is not defined
+  // to. Present from OS/2 version 2 on.
+  const os2Version = b.readUInt16BE(t['OS/2'].off);
+  const xHeight = os2Version >= 2 ? b.readInt16BE(t['OS/2'].off + 86) : null;
+  const capHeight = os2Version >= 2 ? b.readInt16BE(t['OS/2'].off + 88) : null;
   const lookup = cmapLookup(b, t);
 
   // Widest ink extents over the characters this app actually renders large:
@@ -111,6 +142,8 @@ for (const w of WEIGHTS) {
     ascender,
     descender,
     lineGap,
+    xHeight,
+    capHeight,
     contentBox,
     inkTop,
     inkBottom,
@@ -121,6 +154,7 @@ for (const w of WEIGHTS) {
 }
 
 const f = (n) => n.toFixed(4);
+console.log(`\n${family.name}`);
 console.log(
   'weight        upm  asc  desc  contentBox  inkTop  inkBottom  digitTop  floor(digits)  floor(all)',
 );
@@ -130,6 +164,17 @@ for (const r of rows) {
       `${r.inkTop}     ${r.inkBottom}      ${r.digitTop}       ${f(r.floorDigits)}         ${f(r.floorAll)}`,
   );
 }
+console.log('\nem, for transcription into metrics.ts:');
+for (const r of rows) {
+  console.log(
+    `${r.w.padEnd(13)} ascent ${(r.ascender / r.upm).toFixed(3)}  descent ${(-r.descender / r.upm).toFixed(3)}  ` +
+      `contentBox ${(r.contentBox / r.upm).toFixed(3)}  cap ${r.capHeight === null ? '   ?  ' : (r.capHeight / r.upm).toFixed(3)}  ` +
+      `x ${r.xHeight === null ? '  ?  ' : (r.xHeight / r.upm).toFixed(3)}  ` +
+      `inkTop ${(r.inkTop / r.upm).toFixed(3)}  digitTop ${(r.digitTop / r.upm).toFixed(3)}  ` +
+      `inkBottom ${(r.inkBottom / r.upm).toFixed(3)}`,
+  );
+}
+
 const worst = Math.max(...rows.map((r) => r.floorAll));
 console.log(`\nWorst-case lineHeight floor across weights: ${f(worst)} em`);
 console.log(

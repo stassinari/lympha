@@ -1,10 +1,14 @@
 /**
- * Nunito's vertical metrics, and the line-height rules they impose.
+ * Font vertical metrics, and the line-height rules they impose.
  *
- * All values are em (the font's unitsPerEm is 1000). They are transcribed from
+ * All values are em (both fonts' unitsPerEm is 1000). They are transcribed from
  * `scripts/font-metrics.mjs`, which reads them out of the shipped TTFs — run
- * `npm run font-metrics` to reproduce. They are checked in rather than computed
- * at build time so nothing at runtime depends on parsing a font file.
+ * `npm run font-metrics [family]` to reproduce. They are checked in rather than
+ * computed at build time so nothing at runtime depends on parsing a font file.
+ *
+ * Every function here takes the font as a trailing argument, defaulting to Nunito
+ * because that is what all but one role is set in. Nothing about these numbers
+ * transfers between families — see `FontMetrics`.
  *
  * ---
  *
@@ -28,7 +32,7 @@
  * the difference out of the container's padding.
  */
 
-export type NunitoWeight = '400' | '600' | '700' | '800' | '900';
+export type FontWeight = '400' | '600' | '700' | '800' | '900';
 
 /**
  * The two platforms position a line of text differently inside an explicit
@@ -44,62 +48,132 @@ export type NunitoWeight = '400' | '600' | '700' | '800' | '900';
  */
 export type TextPlatform = 'ios' | 'android';
 
-export const FONT_FAMILY: Record<NunitoWeight, string> = {
-  '400': 'Nunito_400Regular',
-  '600': 'Nunito_600SemiBold',
-  '700': 'Nunito_700Bold',
-  '800': 'Nunito_800ExtraBold',
-  '900': 'Nunito_900Black',
+/** One loaded face: its RN family name and its own ink extents. */
+export type FontFace = {
+  family: string;
+  /** Tallest ink above the baseline. Heavier weights are taller: the outlines grow
+   *  outward, so the safe line height grows with the weight. */
+  inkTop: number;
+  /** Tallest ink above the baseline for digits only. Lower than `inkTop`, so
+   *  numerals tolerate a tighter line than prose. */
+  digitTop: number;
+  /** Lowest ink below the baseline (negative). Descenders never reach the full font
+   *  descent, which is why there is slack under a line of text. */
+  inkBottom: number;
 };
 
-/** The font's own descent, in em. What sits below the baseline on iOS at any
- *  line height, and the starting point for Android's even split. */
-export const DESCENT = 0.353;
-
-export const ASCENT = 1.011;
-export const CONTENT_BOX = ASCENT + DESCENT; // 1.364em, the box at lineHeight: normal
-export const CAP_HEIGHT = 0.705;
-export const X_HEIGHT = 0.484;
-
-/** Tallest ink above the baseline, per weight. Heavier weights are taller: the
- *  outlines grow outward, so the safe line height grows with the weight. */
-const INK_TOP: Record<NunitoWeight, number> = {
-  '400': 0.714,
-  '600': 0.714,
-  '700': 0.721,
-  '800': 0.732,
-  '900': 0.743,
+/**
+ * Everything about a family that layout has to know, in em.
+ *
+ * There is one of these per family in the app, because **none of it transfers**.
+ * Two fonts at the same nominal size have different ascenders, descenders and cap
+ * heights, so a line height that is safe in one shears glyphs in the other and a
+ * box squared about one font's cap block is not squared about the other's. Nunito
+ * and Figtree differ by more than they look: a 1.200em content box against
+ * 1.364em, and 0.250em of descent against 0.353em.
+ *
+ * All values come from `scripts/font-metrics.mjs`, which reads them out of the
+ * shipped TTFs — run `npm run font-metrics [family]` to reproduce. They are checked
+ * in rather than computed at build time so nothing at runtime depends on parsing a
+ * font file.
+ */
+export type FontMetrics = {
+  name: string;
+  ascent: number;
+  descent: number;
+  /** The box at `lineHeight: normal` — ascender + descender + lineGap. */
+  contentBox: number;
+  capHeight: number;
+  xHeight: number;
+  /** Only the weights the app actually loads. Asking for another throws. */
+  faces: Partial<Record<FontWeight, FontFace>>;
 };
 
-/** Tallest ink above the baseline for digits only. Nearly weight-invariant,
- *  and lower than INK_TOP, so numerals tolerate a tighter line than prose. */
-const DIGIT_TOP: Record<NunitoWeight, number> = {
-  '400': 0.714,
-  '600': 0.714,
-  '700': 0.715,
-  '800': 0.716,
-  '900': 0.716,
+const NUNITO_FACES = {
+  '400': { family: 'Nunito_400Regular', inkTop: 0.714, digitTop: 0.714, inkBottom: -0.195 },
+  '600': { family: 'Nunito_600SemiBold', inkTop: 0.714, digitTop: 0.714, inkBottom: -0.198 },
+  '700': { family: 'Nunito_700Bold', inkTop: 0.721, digitTop: 0.715, inkBottom: -0.203 },
+  '800': { family: 'Nunito_800ExtraBold', inkTop: 0.732, digitTop: 0.716, inkBottom: -0.207 },
+  '900': { family: 'Nunito_900Black', inkTop: 0.743, digitTop: 0.716, inkBottom: -0.212 },
+} satisfies Record<FontWeight, FontFace>;
+
+/** The app's text face, for every role but the wordmark. */
+export const NUNITO: FontMetrics = {
+  name: 'Nunito',
+  ascent: 1.011,
+  descent: 0.353,
+  contentBox: 1.364,
+  capHeight: 0.705,
+  xHeight: 0.484,
+  faces: NUNITO_FACES,
 };
 
-/** Lowest ink below the baseline (negative). Descenders never reach the full
- *  font descent, which is why there is slack under a line of text. */
-const INK_BOTTOM: Record<NunitoWeight, number> = {
-  '400': -0.195,
-  '600': -0.198,
-  '700': -0.203,
-  '800': -0.207,
-  '900': -0.212,
+/**
+ * The wordmark face, and nothing else — see the `wordmark` role.
+ *
+ * One weight, because the wordmark is one word at one size and the app has no other
+ * use for the family. Anything else asked of it throws rather than falling back:
+ * `faceFor` exists to make that loud.
+ *
+ * Note how little it has in common with Nunito: a shorter ascent and a much
+ * shallower descent, which together make its content box 0.164em tighter, so its
+ * line-height floor is 0.977 where Nunito's worst is 1.096. Its cap height happens
+ * to land within half a percent of Nunito's, so the two read at a similar size at
+ * the same `fontSize` — a coincidence of these two fonts, not a rule.
+ */
+export const FIGTREE: FontMetrics = {
+  name: 'Figtree',
+  ascent: 0.95,
+  descent: 0.25,
+  contentBox: 1.2,
+  capHeight: 0.7,
+  xHeight: 0.5,
+  faces: {
+    '600': { family: 'Figtree_600SemiBold', inkTop: 0.727, digitTop: 0.712, inkBottom: -0.215 },
+  },
 };
+
+/**
+ * A font's face for a weight, or a loud failure.
+ *
+ * Silently falling back would be the worst outcome: the app would render a weight
+ * it does not have — which Android fakes by synthesising a bold — and lay it out
+ * against metrics belonging to a different one.
+ */
+export function faceFor(font: FontMetrics, weight: FontWeight): FontFace {
+  const face = font.faces[weight];
+  if (!face) {
+    throw new Error(
+      `${font.name} has no ${weight} face loaded. Available: ${Object.keys(font.faces).join(', ')}.`,
+    );
+  }
+  return face;
+}
+
+/** Nunito's own values, kept as named constants because most of the app is set in
+ *  it and the layout maths reads better without a lookup. */
+export const DESCENT = NUNITO.descent;
+export const ASCENT = NUNITO.ascent;
+export const CONTENT_BOX = NUNITO.contentBox;
+export const CAP_HEIGHT = NUNITO.capHeight;
+export const X_HEIGHT = NUNITO.xHeight;
+
+/** Every face the app can render, across all families. */
+export const ALL_FAMILIES: string[] = [NUNITO, FIGTREE].flatMap((f) =>
+  Object.values(f.faces).map((face) => face.family),
+);
 
 /** Which glyphs a piece of text actually contains. Numerals can be set tighter
  *  than prose because they have no ascenders and no descenders. */
 export type InkExtent = 'digits' | 'text';
 
-const inkTop = (weight: NunitoWeight, extent: InkExtent) =>
-  extent === 'digits' ? DIGIT_TOP[weight] : INK_TOP[weight];
+const inkTop = (font: FontMetrics, weight: FontWeight, extent: InkExtent) => {
+  const face = faceFor(font, weight);
+  return extent === 'digits' ? face.digitTop : face.inkTop;
+};
 
-const inkBottom = (weight: NunitoWeight, extent: InkExtent) =>
-  extent === 'digits' ? 0 : INK_BOTTOM[weight];
+const inkBottom = (font: FontMetrics, weight: FontWeight, extent: InkExtent) =>
+  extent === 'digits' ? 0 : faceFor(font, weight).inkBottom;
 
 /**
  * The smallest legal `lineHeight`, as a multiple of font size, before glyphs
@@ -108,8 +182,11 @@ const inkBottom = (weight: NunitoWeight, extent: InkExtent) =>
  * Ranges from 1.067 (Regular prose) to 1.096 (Black prose); digits sit at ~1.07
  * for every weight.
  */
-export const minLineHeightRatio = (weight: NunitoWeight, extent: InkExtent = 'text') =>
-  DESCENT + inkTop(weight, extent);
+export const minLineHeightRatio = (
+  weight: FontWeight,
+  extent: InkExtent = 'text',
+  font: FontMetrics = NUNITO,
+) => font.descent + inkTop(font, weight, extent);
 
 /**
  * Empty space, in px, between the edges of a text box and the visible ink.
@@ -123,12 +200,16 @@ export function inkInsetsFor(
   platform: TextPlatform,
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent = 'text',
+  font: FontMetrics = NUNITO,
 ): { top: number; bottom: number } {
   return {
-    top: ascentPxFor(platform, fontSize, lineHeight) - inkTop(weight, extent) * fontSize,
-    bottom: descentPxFor(platform, fontSize, lineHeight) + inkBottom(weight, extent) * fontSize,
+    top:
+      ascentPxFor(platform, fontSize, lineHeight, font) - inkTop(font, weight, extent) * fontSize,
+    bottom:
+      descentPxFor(platform, fontSize, lineHeight, font) +
+      inkBottom(font, weight, extent) * fontSize,
   };
 }
 
@@ -173,11 +254,12 @@ export function capBlockBoxFor(
   platform: TextPlatform,
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
+  font: FontMetrics = NUNITO,
 ): { top: number; height: number } {
-  const height = capTop(weight, extent) * fontSize;
-  return { top: ascentPxFor(platform, fontSize, lineHeight) - height, height };
+  const height = capTop(weight, extent, font) * fontSize;
+  return { top: ascentPxFor(platform, fontSize, lineHeight, font) - height, height };
 }
 
 /**
@@ -186,17 +268,26 @@ export function capBlockBoxFor(
  * The one function that knows the platforms disagree. Everything above it is
  * font data; everything below it is layout, and gets this right for free.
  */
-export function descentPxFor(platform: TextPlatform, fontSize: number, lineHeight: number): number {
-  const natural = DESCENT * fontSize;
+export function descentPxFor(
+  platform: TextPlatform,
+  fontSize: number,
+  lineHeight: number,
+  font: FontMetrics = NUNITO,
+): number {
+  const natural = font.descent * fontSize;
   if (platform === 'ios') return natural;
   // Android moves half the difference between the natural box and the requested
   // line height onto each side of the baseline.
-  return natural - (CONTENT_BOX * fontSize - lineHeight) / 2;
+  return natural - (font.contentBox * fontSize - lineHeight) / 2;
 }
 
 /** Space above the baseline. The rest of the box, by definition. */
-export const ascentPxFor = (platform: TextPlatform, fontSize: number, lineHeight: number) =>
-  lineHeight - descentPxFor(platform, fontSize, lineHeight);
+export const ascentPxFor = (
+  platform: TextPlatform,
+  fontSize: number,
+  lineHeight: number,
+  font: FontMetrics = NUNITO,
+) => lineHeight - descentPxFor(platform, fontSize, lineHeight, font);
 
 /**
  * Distance from the baseline to the top of the *cap block* — capital height for
@@ -206,8 +297,8 @@ export const ascentPxFor = (platform: TextPlatform, fontSize: number, lineHeight
  * containing a "g" does not read as sitting lower on the line than one without.
  * Optical alignment is judged on the cap block, so that is what these helpers use.
  */
-export function capTop(weight: NunitoWeight, extent: InkExtent): number {
-  return extent === 'digits' ? DIGIT_TOP[weight] : CAP_HEIGHT;
+export function capTop(weight: FontWeight, extent: InkExtent, font: FontMetrics = NUNITO): number {
+  return extent === 'digits' ? faceFor(font, weight).digitTop : font.capHeight;
 }
 
 /**
@@ -226,11 +317,12 @@ export function capBoxPaddingFor(
   platform: TextPlatform,
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
+  font: FontMetrics = NUNITO,
 ): { paddingTop: number; paddingBottom: number } {
-  const below = descentPxFor(platform, fontSize, lineHeight);
-  const above = lineHeight - below - capTop(weight, extent) * fontSize;
+  const below = descentPxFor(platform, fontSize, lineHeight, font);
+  const above = lineHeight - below - capTop(weight, extent, font) * fontSize;
   return {
     paddingTop: Math.max(0, below - above),
     paddingBottom: Math.max(0, above - below),
@@ -249,11 +341,12 @@ export function capBoxInsetFor(
   platform: TextPlatform,
   fontSize: number,
   lineHeight: number,
-  weight: NunitoWeight,
+  weight: FontWeight,
   extent: InkExtent,
+  font: FontMetrics = NUNITO,
 ): number {
-  const below = descentPxFor(platform, fontSize, lineHeight);
-  const above = lineHeight - below - capTop(weight, extent) * fontSize;
+  const below = descentPxFor(platform, fontSize, lineHeight, font);
+  const above = lineHeight - below - capTop(weight, extent, font) * fontSize;
   return Math.max(above, below);
 }
 
