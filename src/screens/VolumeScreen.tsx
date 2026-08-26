@@ -16,7 +16,6 @@ import { Dimensions, Keyboard, Platform, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppText,
-  Caption,
   Pill,
   Screen,
   Touchable,
@@ -273,9 +272,6 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
           />
         ))}
       </View>
-      <Caption tone="secondary" style={{ marginTop: space.snug }}>
-        millilitres
-      </Caption>
 
       <View style={{ flex: 1 }} />
 

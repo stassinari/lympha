@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { Platform, ScrollView, Switch, View } from 'react-native';
 import {
   BarCluster,
-  Caption,
   Overlay,
   Pill,
   Screen,
@@ -188,9 +187,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             control={<BarCluster colours={componentsForBrand(b.id).map((c) => c.colour)} />}
           />
         ))}
-        <Caption tone="secondary" style={{ paddingHorizontal: 8, marginTop: 4 }}>
-          Adding your own concentrates is not in this version.
-        </Caption>
       </ScrollView>
 
       <Overlay

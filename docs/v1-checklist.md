@@ -40,9 +40,9 @@ Verified on device 2026-08-25: haptics land and read as pleasant rather than noi
 
 ## Copy
 
+- [x] **Drop "millilitres" beneath the volume presets.** Done. The `ml` beside the value and the `"250 millilitres"` accessibility label on each preset both stay — the caption was the only redundant copy, and a screen reader still hears the unit.
+- [x] **Drop "Adding your own concentrates is not in this version."** Done. The Bottles list now ends on the last brand row.
 - [ ] **A full copywriting round.** Every string, read as a set rather than one at a time.
-- [ ] **Drop "millilitres" beneath the volume presets.** The screen is titled Water, the value is followed by `ml`, and the presets are plainly volumes. The caption says nothing the screen has not already said.
-- [ ] **Drop "Adding your own concentrates is not in this version."** from the bottom of Settings. It answers a question nobody asked and dates the build.
 
 ---
 
