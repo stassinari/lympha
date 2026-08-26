@@ -17,7 +17,8 @@
  * what was hit.
  */
 
-import { Body, Dot, Touchable, resolveAccent, useTheme } from '@/design';
+import { View } from 'react-native';
+import { Body, Icon, Touchable, resolveAccent, useTheme } from '@/design';
 import type { RoundingSummary } from '@/format/rounding';
 
 /**
@@ -32,6 +33,40 @@ import type { RoundingSummary } from '@/format/rounding';
 const TAP_BAND = 11;
 const GAP_ABOVE = 14;
 
+/**
+ * The status mark: a filled circle either way, amber or teal.
+ *
+ * Both states used to be coloured dots, which carry their whole meaning in hue —
+ * so they said nothing in greyscale, nothing to a red-green reader, and nothing
+ * on a phone in sunlight. `info` and `checkCircle` are shape as well as hue, and
+ * they share a silhouette, so the row swaps between them without reflowing or
+ * changing weight.
+ *
+ * `info` deliberately, not a warning glyph: the copy here is gentle on purpose,
+ * and a triangle would shout over a line that means to murmur. Filled, because a
+ * state is not an action — the one place in the app where `fill` is right.
+ *
+ * The amber is the text-weight token rather than the dot's. Same colour in dark,
+ * where they resolve identically; in light, a 16pt mark on the page background
+ * needs the contrast that a 9pt dot did not.
+ */
+const MARK = 16;
+
+/**
+ * The clear state sits a step back from the caution state.
+ *
+ * Problems should have more presence than non-problems, and left alone these two
+ * would have the same: the teal and the amber are within a tenth of each other
+ * against the dark background, and a filled disc carries more ink than the
+ * outline it replaces. Alpha rather than a paler teal, so the mute holds on both
+ * schemes without a second value to keep in step.
+ *
+ * The mark only. The sentence beside it stays at the secondary tone in both
+ * states — it clears AA on the page background by a tenth of a point, and
+ * `palette.ts` is explicit that those values do not get lightened.
+ */
+const CLEAR_MARK_OPACITY = 0.8;
+
 export type RoundingLineProps = {
   summary: RoundingSummary;
   brandAccent: { light: string; dark: string };
@@ -39,7 +74,7 @@ export type RoundingLineProps = {
 };
 
 export function RoundingLine({ summary, brandAccent, onDetails }: RoundingLineProps) {
-  const { scheme } = useTheme();
+  const { colour, scheme } = useTheme();
   if (!summary) return null;
 
   const accent = resolveAccent(brandAccent, scheme);
@@ -65,7 +100,15 @@ export function RoundingLine({ summary, brandAccent, onDetails }: RoundingLinePr
         marginBottom: -TAP_BAND,
       }}
     >
-      <Dot status={summary.status} />
+      <View style={{ width: MARK, alignItems: 'center' }}>
+        {summary.status === 'warning' ? (
+          <Icon name="info" size={MARK} weight="fill" colour={colour.textWarning} />
+        ) : (
+          <View style={{ opacity: CLEAR_MARK_OPACITY }}>
+            <Icon name="checkCircle" size={MARK} weight="fill" colour={colour.ok} />
+          </View>
+        )}
+      </View>
       <Body tone="secondary" style={{ flex: 1 }}>
         {summary.text}
       </Body>

@@ -7,7 +7,19 @@
  */
 
 import { View } from 'react-native';
-import { Caption, Card, CardTitle, Chevron, space } from '@/design';
+import { Caption, Card, CardTitle, Icon, space, useTheme } from '@/design';
+
+/**
+ * The chevron is the tell that a row pushes a screen, and it is drawn from
+ * `onPress` alone so it can never disagree with what the row does.
+ *
+ * Water and the single-dispenser brands show a value and no chevron, which looks
+ * like an inconsistency next to Apax and is not one: those rows have nothing to
+ * choose — millilitres is the only unit for water, and Lotus ships a dropper and
+ * no scale — so they are statements rather than pickers, and they are not tap
+ * targets at all. A chevron on them would promise a screen that does not exist.
+ */
+const CHEVRON = 20;
 
 export type SettingsRowProps = {
   label: string;
@@ -29,6 +41,8 @@ export function SettingsRow({
   onPress,
   value,
 }: SettingsRowProps) {
+  const { colour } = useTheme();
+
   return (
     <Card
       paddingVertical={14}
@@ -46,7 +60,7 @@ export function SettingsRow({
           ) : null}
         </View>
         {value ? <Caption tone="secondary">{value}</Caption> : null}
-        {onPress ? <Chevron direction="right" /> : null}
+        {onPress ? <Icon name="chevronRight" size={CHEVRON} colour={colour.textSecondary} /> : null}
         {!wide && control ? control : null}
       </View>
       {wide && control ? <View style={{ marginTop: space.blocks }}>{control}</View> : null}

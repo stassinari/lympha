@@ -25,6 +25,19 @@ export const CLUSTER_SIZE = {
 
 export type ClusterSize = keyof typeof CLUSTER_SIZE;
 
+/**
+ * The width `count` bars occupy at a given size, for a caller reserving a fixed
+ * column for a cluster whose length varies.
+ *
+ * Derived rather than written down at the call site, so the handoff's bar widths
+ * stay the single place those numbers live — a change to `CLUSTER_SIZE` must not
+ * leave a reserved column quietly the wrong size.
+ */
+export const clusterWidth = (size: ClusterSize, count: number) => {
+  const { width, gap } = CLUSTER_SIZE[size];
+  return count <= 0 ? 0 : count * width + (count - 1) * gap;
+};
+
 export type BarClusterProps = {
   colours: (SchemeColour | undefined)[];
   size?: ClusterSize;

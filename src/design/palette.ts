@@ -16,10 +16,14 @@ export type ColourTokens = {
   textOnCard: string;
   textWarning: string;
   divider: string;
+  /**
+   * Rounding is within tolerance. Per scheme, unlike `warning`, because it is a
+   * two-value hue: see the note on the light table below.
+   */
+  ok: string;
 };
 
 export type SemanticTokens = {
-  ok: string;
   warning: string;
 };
 
@@ -29,6 +33,20 @@ export type SemanticTokens = {
  */
 export const NEUTRAL_SLATE = { light: '#7E8A8C', dark: '#9DAAAC' } as const;
 
+/**
+ * `ok` is the potassium bar teal, deliberately.
+ *
+ * It was a generic success green, which made it the only colour in the app
+ * outside the identity palette — terracotta, rose, cream, teal, amber. Reusing
+ * the teal keeps that list closed, and the teal is not otherwise spoken for as a
+ * state.
+ *
+ * The two values are restated here rather than imported from `data/lotus`, which
+ * is where the same pair sits as Lotus's published label colour. They are the
+ * same colour on purpose and should be changed together — but a semantic token
+ * must not move because a vendor revised a sticker, so the theme does not depend
+ * on the data layer to know what "fine" looks like.
+ */
 export const light: ColourTokens = {
   background: '#FBF8F4',
   card: '#FFFFFF',
@@ -39,6 +57,7 @@ export const light: ColourTokens = {
   textOnCard: '#7D6D66',
   textWarning: '#96632F',
   divider: '#EDE4DC',
+  ok: '#4E9E98',
 };
 
 export const dark: ColourTokens = {
@@ -51,12 +70,11 @@ export const dark: ColourTokens = {
   textOnCard: '#B6A79F',
   textWarning: '#D99A4E',
   divider: '#2C2523',
+  ok: '#5AB3AC',
 };
 
-/** Shared across both schemes: these read acceptably on either background. */
+/** Shared across both schemes: this reads acceptably on either background. */
 export const semantic: SemanticTokens = {
-  /** Rounding is within tolerance. */
-  ok: '#78A566',
   /** Rounding is over the flag threshold, or a bottle would round to zero. */
   warning: '#D99A4E',
 };

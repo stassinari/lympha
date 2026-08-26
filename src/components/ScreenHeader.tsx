@@ -11,16 +11,27 @@
  * It is also where the header's accessibility lives: the title carries the
  * heading role — which is what makes rotor and reading-control navigation land
  * somewhere useful — and the dismiss control is given a target that clears the
- * platform minimum despite being drawn as a 12px glyph.
+ * platform minimum despite being drawn as a 20px glyph.
  */
 
 import { Platform, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import { Body, Chevron, ScreenTitle, Touchable, resolveAccent, space, useTheme } from '@/design';
+import { Body, Icon, ScreenTitle, Touchable, resolveAccent, space, useTheme } from '@/design';
 import { useBrand } from '@/state';
 
 /**
- * Expands a 12px chevron to a 48px target without moving it.
+ * Android's back affordance: the trailing chevron turned through half a turn.
+ *
+ * The set ships one caret and it points right. Phosphor's caret is symmetric
+ * about its point, so a half turn is the drawing the library would call
+ * `CaretLeft` — which keeps the app's icon count at six rather than adding a
+ * seventh name for a shape it already has. Same 20pt as the settings rows, so
+ * every caret in the app is one size.
+ */
+const BACK = 20;
+
+/**
+ * Expands the chevron to a 48px target without moving it.
  *
  * The alternative — padding the button out to 48 square, or giving the bar a
  * minimum height — would push the glyph inboard of the screen's content edge or
@@ -29,7 +40,7 @@ import { useBrand } from '@/state';
  * touch area without layout, so the target clears both platforms' minimums while
  * the bar keeps the height the design drew.
  */
-const HIT_SLOP = 18;
+const HIT_SLOP = 14;
 
 export type ScreenHeaderProps = {
   title: string;
@@ -67,7 +78,7 @@ export function ScreenHeader({
     >
       {Platform.OS === 'android' ? (
         <Touchable borderless onPress={onClose} hitSlop={HIT_SLOP} accessibilityLabel="Back">
-          <Chevron direction="left" size={12} colour={colour.text} />
+          <Icon name="chevronRight" size={BACK} rotate={180} colour={colour.text} />
         </Touchable>
       ) : null}
       <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>

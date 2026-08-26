@@ -8,7 +8,7 @@
  */
 
 import { View } from 'react-native';
-import { BarCluster, Caption, Card, CardTitle, Chevron, space } from '@/design';
+import { BarCluster, Caption, Card, CardTitle, Icon, space, useTheme } from '@/design';
 import type { SchemeColour } from '@/design';
 
 export type RecipeHeaderProps = {
@@ -19,6 +19,8 @@ export type RecipeHeaderProps = {
 };
 
 export function RecipeHeader({ recipeName, brandName, bottleColours, onPress }: RecipeHeaderProps) {
+  const { colour } = useTheme();
+
   return (
     <Card
       onPress={onPress}
@@ -35,7 +37,7 @@ export function RecipeHeader({ recipeName, brandName, bottleColours, onPress }: 
             {brandName}
           </Caption>
         </View>
-        <Chevron direction="down" />
+        <Icon name="chevronDown" colour={colour.textSecondary} />
       </View>
     </Card>
   );

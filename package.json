@@ -11,9 +11,11 @@
     "expo-haptics": "~57.0.1",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
+    "phosphor-react-native": "^3.0.6",
     "react": "19.2.3",
     "react-native": "0.86.2",
     "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "15.15.4",
     "zustand": "^5.0.15"
   },
   "devDependencies": {

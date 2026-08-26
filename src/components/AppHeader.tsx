@@ -18,25 +18,37 @@
  * without competing with the recipe card immediately beneath it.
  */
 
-import { SettingsIcon, Touchable, Wordmark, space } from '@/design';
+import { Icon, Touchable, Wordmark, space, useTheme } from '@/design';
 import { View } from 'react-native';
 
-const GLYPH = 18;
+/**
+ * A gear, not sliders.
+ *
+ * The sliders this replaces promised "adjust values", and the screen behind it is
+ * preferences — appearance, units, defaults. The gear is the honest signal, and
+ * its rounder silhouette sits better with the type than two straight tracks did.
+ *
+ * It stays in the secondary tone, like the wordmark opposite it: the pair is
+ * chrome, and neither half should out-shout the recipe card beneath them.
+ */
+const GLYPH = 24;
 
 /**
  * Expands the glyph to a 44pt target without moving it or the row.
  *
- * `SettingsIcon` draws two tracks 18pt wide and about 14.5pt tall, so the target
- * needs ~15pt on every side. Padding the button out instead would either push the
- * glyph inboard of the screen's content edge — losing the alignment with the cards
- * below — or make the row three times the height the design calls slim.
- * `hitSlop` is the property for exactly this: touch area without layout.
+ * The glyph is 24pt square, so the target needs 10pt on every side. Padding the
+ * button out instead would either push the glyph inboard of the screen's content
+ * edge — losing the alignment with the cards below — or make the row three times
+ * the height the design calls slim. `hitSlop` is the property for exactly this:
+ * touch area without layout.
  */
-const HIT_SLOP = 15;
+const HIT_SLOP = 10;
 
 export type AppHeaderProps = { onOpenSettings: () => void };
 
 export function AppHeader({ onOpenSettings }: AppHeaderProps) {
+  const { colour } = useTheme();
+
   return (
     <View
       style={{
@@ -57,7 +69,7 @@ export function AppHeader({ onOpenSettings }: AppHeaderProps) {
         hitSlop={HIT_SLOP}
         accessibilityLabel="Settings"
       >
-        <SettingsIcon size={GLYPH} />
+        <Icon name="settings" size={GLYPH} colour={colour.textSecondary} />
       </Touchable>
     </View>
   );
