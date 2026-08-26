@@ -11,7 +11,7 @@
  * container padding instead, using `inkInsets`.
  */
 
-import { FONT_FAMILY, minLineHeightRatio, trackingPx } from './metrics';
+import { FONT_FAMILY, minLineHeightRatio, trackingInset, trackingPx } from './metrics';
 import type { InkExtent, NunitoWeight } from './metrics';
 
 export type TypeRole =
@@ -148,6 +148,16 @@ export type ResolvedType = {
   extent: InkExtent;
   /** Undefined where the role may scale without limit. */
   maxScale?: number;
+  /**
+   * Right padding, at the nominal size, that gives back RN's trailing
+   * letter-spacing so the last glyph is not clipped — see `trackingInset`.
+   *
+   * Metric metadata rather than a style prop, because padding does not scale with
+   * the reader's text size and `letterSpacing` does: baked into the static style
+   * it would be right at 1× and short by the same proportion at every size above
+   * it. `AppText` applies it scaled.
+   */
+  trackingInset: number;
 };
 
 function resolve(spec: RoleSpec): ResolvedType {
@@ -168,6 +178,7 @@ function resolve(spec: RoleSpec): ResolvedType {
     weight: spec.weight,
     extent: spec.extent,
     maxScale: spec.maxScale,
+    trackingInset: trackingInset(trackingPx(spec.trackingEm, spec.size)),
   };
 }
 
@@ -182,11 +193,20 @@ export const typeSpecs = ROLES;
 /**
  * Just the React Native style properties for a role.
  *
- * `ResolvedType` also carries `weight`, `extent` and `maxScale`, which are metric
- * metadata for layout rather than style props. Spreading the whole record into a
- * `style` would pass them to the renderer, where they are meaningless at best.
+ * `ResolvedType` also carries `weight`, `extent`, `maxScale` and `trackingInset`,
+ * which are metric metadata for layout rather than style props. Spreading the whole
+ * record into a `style` would pass them to the renderer, where they are meaningless
+ * at best.
  */
-export function styleForRole(role: TypeRole): Omit<ResolvedType, 'weight' | 'extent' | 'maxScale'> {
-  const { weight: _weight, extent: _extent, maxScale: _maxScale, ...style } = typeScale[role];
+export function styleForRole(
+  role: TypeRole,
+): Omit<ResolvedType, 'weight' | 'extent' | 'maxScale' | 'trackingInset'> {
+  const {
+    weight: _weight,
+    extent: _extent,
+    maxScale: _maxScale,
+    trackingInset: _trackingInset,
+    ...style
+  } = typeScale[role];
   return style;
 }

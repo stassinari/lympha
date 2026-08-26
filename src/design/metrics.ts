@@ -136,6 +136,51 @@ export function inkInsetsFor(
 export const trackingPx = (em: number, fontSize: number) => em * fontSize;
 
 /**
+ * The width a negatively-tracked text box under-measures its own ink by.
+ *
+ * React Native applies `letterSpacing` after *every* character, including the
+ * last, where CSS puts it only *between* them. With negative tracking the box
+ * therefore comes out one whole tracking unit narrower than the glyphs inside it,
+ * and the final glyph is clipped at the frame — losing ~2.9px of the last digit
+ * at `hero`, which is what the volume screen's cutoff was.
+ *
+ * Giving that trailing unit back as right padding restores the advance width the
+ * text should have had. This is not a fudge factor: it is exactly the one gap RN
+ * adds that should not be there, and it is zero for every role tracked at or
+ * above zero. Positive tracking leaves the box a trailing gap *too wide*, which
+ * clips nothing and is left alone.
+ */
+export const trackingInset = (letterSpacing: number) => Math.max(0, -letterSpacing);
+
+/**
+ * Where the cap block sits inside a line box — the rect the digits or capitals
+ * actually occupy, as opposed to the box RN reserves around them.
+ *
+ * For anything drawn *around* text rather than beside it. A `Text`'s own
+ * background is no use for this: it fills the line box, and on iOS the line box
+ * is nowhere near centred on its marks. At `hero`, 72/78 Black digits, iOS leaves
+ * 1.03px above the digits and 25.42px below — because it pins the space under the
+ * baseline to the font's descent and digits have no descenders to fill it. Android
+ * splits the slack and comes out at 11.14/15.31, near enough to look deliberate.
+ * That difference is why a selection band drawn as a text background reads as
+ * correct on one platform and badly low on the other, and no choice of line height
+ * fixes it — the descent is the font's, not the layout's.
+ *
+ * Measured from the top of the line box, so it composes directly with a text's
+ * own frame.
+ */
+export function capBlockBoxFor(
+  platform: TextPlatform,
+  fontSize: number,
+  lineHeight: number,
+  weight: NunitoWeight,
+  extent: InkExtent,
+): { top: number; height: number } {
+  const height = capTop(weight, extent) * fontSize;
+  return { top: ascentPxFor(platform, fontSize, lineHeight) - height, height };
+}
+
+/**
  * Space below the baseline, in px, for a given line height.
  *
  * The one function that knows the platforms disagree. Everything above it is

@@ -12,8 +12,15 @@
  */
 
 import { ScrollView, View } from 'react-native';
-import { Screen, SettingsIcon, Touchable, space, useReflowedText } from '@/design';
-import { DoseProgress, DoseRow, RecipeHeader, RoundingLine, VolumeCard } from '@/components';
+import { Screen, space, useReflowedText } from '@/design';
+import {
+  AppHeader,
+  DoseProgress,
+  DoseRow,
+  RecipeHeader,
+  RoundingLine,
+  VolumeCard,
+} from '@/components';
 import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
 
 export type DoseScreenProps = {
@@ -51,34 +58,28 @@ export function DoseScreen({
    */
   const reflowed = useReflowedText();
 
-  /* The rounding line and the way out of the screen share the bottom edge, as the
-     handoff has them: the settings affordance sits bottom-right, which is also
-     the direction its screen rises from. */
+  /* The footer is now only about this brew: status dot, what the rounding costs,
+     and the way through to the breakdown. Settings has moved to the header, so
+     the line gets the full width and is a single tap target — see `RoundingLine`. */
   const bottomBar = (
     <View
       style={{
-        flexDirection: 'row',
-        alignItems: 'center',
         // Supplied by the scroll container when it lives inside one.
         paddingHorizontal: reflowed ? 0 : space.screenH,
       }}
     >
-      <View style={{ flex: 1 }}>
-        <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
-      </View>
-      <Touchable
-        onPress={onOpenSettings}
-        hitSlop={16}
-        accessibilityLabel="Settings"
-        style={{ paddingLeft: space.blocks, paddingVertical: space.blocks }}
-      >
-        <SettingsIcon />
-      </Touchable>
+      <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
     </View>
   );
 
   return (
     <Screen horizontalPadding={0}>
+      {/* Outside the scroller: app chrome does not scroll away, and settings should
+          be reachable whatever the list is doing. */}
+      <View style={{ paddingHorizontal: space.screenH }}>
+        <AppHeader onOpenSettings={onOpenSettings} />
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

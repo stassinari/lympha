@@ -52,9 +52,6 @@ export const dropsForGrams = (grams: number, litres = 1) =>
  * agreed with the designer, which supersedes the handoff table for Apax — KONFLUX
  * gets a real value in place of the neutral-slate fallback, and LYLAC was warmed
  * slightly to sit beside it. TONIK and JAMM are unchanged from the handoff.
- *
- * All four clear the white card by more than Sodium's bordered bar does, so none
- * of them needs an `edgeOnLight`.
  */
 const COLOURS: Record<string, { light: string; dark: string }> = {
   tonik: { light: '#6FB87F', dark: '#93CFA0' },

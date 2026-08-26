@@ -44,10 +44,57 @@ const PRESETS = [250, 350, 500, 1000];
 const CARET_BLINK_MS = 550;
 const MAX_DIGITS = 5;
 
+/**
+ * The selection band behind an untouched value.
+ *
+ * Two people on the first Android build read the screen as "delete this, then type"
+ * and neither was describing a bug: the behaviour was already replace-on-first-key,
+ * but a caret parked after the last digit is the universal cue for *insert here*, so
+ * the screen was telling them the opposite of what it does.
+ *
+ * A selection says it instead — it is the one cue that means "type and this goes
+ * away", and it needs no words.
+ *
+ * ---
+ *
+ * Why it is a drawn view and not the Text's own background
+ *
+ * A `Text` background fills the *line box*, and a line box is never centred on its
+ * marks. At `hero` — 72px Black digits in a 78px box — iOS leaves 1.03px above the
+ * digits and 25.42px below, because it pins the space under the baseline to the
+ * font's descent and digits have no descenders to fill it. Android splits the slack
+ * and lands at 11.14/15.31, which is why the first attempt looked deliberate there
+ * and badly low on iOS. No choice of line height fixes it: the descent belongs to
+ * the font.
+ *
+ * So the band is positioned from `capBlockBox` — the rect the digits actually
+ * occupy — and is symmetric about them on both platforms by construction. It is
+ * absolute, so it contributes nothing to layout: the value cannot be wrapped in a
+ * View to carry a background, because the row is baseline-aligned and a View has no
+ * text baseline (the trap `Caret` and `AnimatedAppText` both document).
+ *
+ * Its width is the one thing metrics cannot supply — it depends on how many digits
+ * are on screen — so it is measured. The band therefore lands a frame after the
+ * digits, which is invisible behind a screen that takes ~390ms to arrive.
+ */
+const SELECTION_ALPHA = '42';
+
+/**
+ * Breathing room around the digits, as a fraction of font size rather than in px,
+ * so the band stays proportional when the reader turns their text size up.
+ */
+const SELECTION_PAD_X = 0.07;
+const SELECTION_PAD_Y = 0.1;
+const SELECTION_RADIUS = 0.06;
+
 const clampVolume = (ml: number) => Math.min(VOLUME_MAX_ML, Math.max(VOLUME_MIN_ML, ml));
 
 /**
  * A caret bar that blinks in hard steps rather than fading, as a text cursor does.
+ *
+ * Only shown once the value is genuinely being edited. Before that the selection
+ * band is the cue, and a caret alongside it would be two contradictory claims about
+ * what the next keystroke does.
  *
  * It is exactly as tall as the digits it sits beside — baseline to the top of the
  * numerals — and it is placed by baseline alignment rather than by centring. A
@@ -102,10 +149,35 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
    *  first keystroke starts a fresh number rather than appending to the old one. */
   const [entry, setEntry] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<number | null>(null);
+  /** The band's width is the one part metrics cannot supply, because it depends on
+   *  how many digits are on screen. See the note on the selection band above. */
+  const [valueWidth, setValueWidth] = useState(0);
   const inputRef = useRef<TextInput>(null);
 
   const pendingMl = entry === null ? volumeMl : clampVolume(Number(entry) || 0);
   const display = entry === null ? String(volumeMl) : entry === '' ? '0' : entry;
+
+  /** Nothing typed yet, so the whole value is still standing in for itself and the
+   *  next keystroke replaces it. Exactly the state a text selection describes. */
+  const selected = entry === null;
+
+  /**
+   * The band, in the row's own coordinates.
+   *
+   * `capBlockBox.top` is measured from the top of the value's line box, and the
+   * value is the tallest thing in a baseline-aligned row, so its line box top *is*
+   * the row's top and the two systems compose without an offset.
+   */
+  const padX = hero.fontSize * SELECTION_PAD_X;
+  const padY = hero.fontSize * SELECTION_PAD_Y;
+  const band = {
+    left: -padX,
+    width: valueWidth + padX * 2,
+    top: hero.capBlockBox.top - padY,
+    height: hero.capBlockBox.height + padY * 2,
+    borderRadius: hero.fontSize * SELECTION_RADIUS,
+    backgroundColor: `${accent}${SELECTION_ALPHA}`,
+  };
 
   // Live preview while typing, so the nudge reacts as the number becomes real.
   // Below the minimum there is nothing meaningful to evaluate — "3" on the way to
@@ -164,12 +236,20 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
       <Touchable
         onPress={() => inputRef.current?.focus()}
         accessibilityLabel={`${pendingMl} millilitres`}
-        accessibilityHint="Edit the volume"
+        // The selection is a visual cue, so it is said out loud too — otherwise the
+        // one group of users who cannot see it is also the group most likely to
+        // assume they have to clear the field first.
+        accessibilityHint={selected ? 'Selected. Type to replace the volume' : 'Edit the volume'}
         style={{ flexDirection: 'row', alignItems: 'baseline' }}
       >
-        <AppText variant="hero">{display}</AppText>
+        {/* First child, so it paints behind the digits. Absolute, so it is not part
+            of the baseline row and cannot move anything. */}
+        {selected && valueWidth > 0 ? <View style={{ position: 'absolute', ...band }} /> : null}
+        <AppText variant="hero" onLayout={(e) => setValueWidth(e.nativeEvent.layout.width)}>
+          {display}
+        </AppText>
         {/* Immediately after the digits, where the next one will appear. */}
-        <Caret colour={accent} height={hero.capHeight} />
+        {selected ? null : <Caret colour={accent} height={hero.capHeight} />}
         {/* Anchored right, so the unit holds still as the number gains digits. */}
         <View style={{ flex: 1 }} />
         <VolumeUnit tone="secondary">ml</VolumeUnit>

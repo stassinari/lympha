@@ -158,7 +158,11 @@ top of the dose screen).
 **Purpose.** Appearance, units, brewing defaults, bottles. Deliberately short —
 anything longer is a sign the main screen is under-decided.
 
-**Entry animation: rises from the bottom** (the entry point sits bottom-right).
+**Entry animation: drops from the top** (the entry point sits top-right).
+
+~~Rises from the bottom~~ — superseded. Settings moved out of the dose screen's
+footer and into a header row, so it now arrives from the direction of the control
+that opens it, as every other screen does.
 
 Sections, each with a 13.5px/800 secondary uppercase header:
 
@@ -219,7 +223,7 @@ matches the sticker in their hand rather than reading a word. Rules:
 |---|---|---|
 | Magnesium | `#B8404F` | `#E4707E` |
 | Calcium | `#EBB093` | `#EBB093` |
-| Sodium | `#F0DADC` (+ `#DFC0C3` inner edge on white) | `#EBD3D5` |
+| Sodium | `#F0DADC` | `#EBD3D5` |
 | Potassium | `#4E9E98` | `#5AB3AC` |
 | Brand accent (text-safe) | `#B8404F` | `#E4707E` |
 
@@ -239,6 +243,12 @@ been taking the neutral-slate fallback; LYLAC was warmed to sit beside its new
 neighbour. The struck values are what the handoff originally specified, kept so
 the change is traceable. `src/data/apax.ts` carries the live values.
 
+**No bar carries a border, however pale.** Sodium's `#DFC0C3` inner edge is
+withdrawn: it was there to hold a 3:1 edge against a white card, which is a rule
+for text and this is not text. The bar echoes the sticker, the row's name and
+number carry the meaning, and every bar is flush and unbordered at the colour the
+vendor publishes.
+
 **Accent vs bar colour are separate tokens.** A bar colour may be too light to
 use as text (Apax mint fails AA on white), so each brand carries a distinct
 text-safe accent for links and active states.
@@ -255,7 +265,7 @@ This is the governing motion rule:
 |---|---|---|---|
 | Brand + recipe | Header, top of screen | Top | `translateY(-100%)` → `0` |
 | Volume | Edit button, mid-screen right | Right | `translateX(100%)` → `0` |
-| Settings | Bottom of screen | Bottom | `translateY(100%)` → `0` |
+| Settings | Top-right of dose screen | Top | `translateY(-100%)` → `0` |
 
 Timing: 380–400ms, `cubic-bezier(.22, 1, .36, 1)`.
 

@@ -39,13 +39,28 @@ import type { DoseLine } from '@/engine';
  * text children composites badly — measured on a Pixel 8 it leaves a pale band,
  * exactly the height of the numeral's cap block, across an otherwise grey row.
  *
- * The same recession is expressed in colour instead: the card drops to the page
- * background so it stops reading as a raised surface, its shadow goes with it,
- * the text steps down to the secondary tone, and only the colour bar actually
- * fades — a leaf view with nothing behind it, where alpha is unambiguous. No
- * offscreen layers, and no platform divergence.
+ * So the recession is built from three separate things instead, none of which is a
+ * group alpha over a shadow:
+ *
+ *   - **The surface drops to the chip tone**, and the shadow goes with it. Not the
+ *     page background, which was the first attempt and the bug this fixes: at 1.06
+ *     against the card it was indistinguishable from the page, so a finished row
+ *     read as *deleted* rather than as done-and-still-there. The chip tone is the
+ *     app's existing sunken surface — darker than the card in light, lighter in
+ *     dark, 1.20 against it either way — so the row visibly stops being raised
+ *     without ceasing to be a row.
+ *   - **The content dims to 62%.** Alpha on the content wrapper alone is safe where
+ *     alpha on the row was not: the layer holds text over an opaque parent, with no
+ *     elevation inside it to composite against.
+ *   - **The bar fades**, a leaf view with nothing behind it, where alpha is
+ *     unambiguous.
+ *
+ * Geometry does not change at all — same height, same padding, same 12px bar at full
+ * width, no inset and no scale. A list that reflows as you tick it loses the shape
+ * you were reading.
  */
 const DONE_BAR_OPACITY = 0.42;
+const DONE_CONTENT_OPACITY = 0.62;
 const DONE_SHIFT = 6;
 const DONE_MS = 280;
 
@@ -97,31 +112,48 @@ function UnitColumn({ unit, count }: { unit: DoseUnit; count: number }) {
 }
 
 /**
- * A row that has been poured slides a little out of the way, as the handoff has
- * it. Transform only, so it runs on the native driver and never touches layout.
+ * A row that has been poured dims, and slides a little out of the way as the handoff
+ * has it. Transform and opacity only, so both run on the native driver and neither
+ * touches layout.
  *
- * Suppressed under Reduce Motion, where it is pure decoration: the strike-through
- * and the row's recession into the page already say the same thing, and neither
- * of them moves.
+ * One progress value drives both, so they cannot drift apart. The *slide* is
+ * suppressed under Reduce Motion, where it is pure decoration — the strike-through,
+ * the dim and the row's drop to the sunken tone all say the same thing without
+ * moving. The dim is not suppressed: it is a state, not a motion, and at zero
+ * duration it simply arrives without a transition, as the whole row already did.
  */
-function useDoneNudge(done: boolean, reduced: boolean) {
-  const [offset] = useState(() => new Animated.Value(done && !reduced ? DONE_SHIFT : 0));
+function useDoneRecession(done: boolean, reduced: boolean) {
+  const [progress] = useState(() => new Animated.Value(done ? 1 : 0));
   useEffect(() => {
-    const animation = Animated.timing(offset, {
-      toValue: done && !reduced ? DONE_SHIFT : 0,
+    const animation = Animated.timing(progress, {
+      toValue: done ? 1 : 0,
       duration: reduced ? 0 : DONE_MS,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     });
     animation.start();
     return () => animation.stop();
-  }, [done, offset, reduced]);
-  return { transform: [{ translateX: offset }] };
+  }, [done, progress, reduced]);
+
+  return {
+    opacity: progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, DONE_CONTENT_OPACITY],
+    }),
+    transform: [
+      {
+        translateX: progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, reduced ? 0 : DONE_SHIFT],
+        }),
+      },
+    ],
+  };
 }
 
 export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const { colour, scheme } = useTheme();
-  const { bar, edge } = resolveBarColour(line.component.colour, scheme);
+  const { bar } = resolveBarColour(line.component.colour, scheme);
   const reduced = useReduceMotion();
 
   /**
@@ -142,9 +174,8 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const amount = formatDoseAmount(line.delivered, line.dispenser.step);
   const unit = formatUnit(line.dispenser.unit, line.delivered);
   const alternative = line.alternative;
-  const tone = done ? 'secondary' : 'primary';
   const pulse = usePulse(amount);
-  const nudge = useDoneNudge(done, reduced);
+  const recession = useDoneRecession(done, reduced);
 
   const mark = () => {
     // A short tap you can feel. The brief's user is not looking at the screen
@@ -156,9 +187,8 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   return (
     <BarRow
       barColour={bar}
-      barEdgeColour={edge}
       barOpacity={done ? DONE_BAR_OPACITY : 1}
-      surfaceColour={done ? colour.background : undefined}
+      surfaceColour={done ? colour.control : undefined}
       elevated={!done}
       onPress={onPress ? mark : undefined}
       paddingVertical={0}
@@ -172,20 +202,23 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
       accessibilityHint={done ? 'Mark as not added' : 'Mark as added'}
       accessibilityState={{ checked: done }}
     >
-      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, nudge]}>
+      <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, recession]}>
         <View style={[{ flex: 1 }, title.capBoxPadding]}>
-          <RowTitle tone={tone} style={done ? { textDecorationLine: 'line-through' } : undefined}>
+          <RowTitle style={done ? { textDecorationLine: 'line-through' } : undefined}>
             {line.component.name}
           </RowTitle>
           {alternative ? (
-            <Caption tone="secondary">
+            /* The dim is carried by the wrapper, so a done row must not also step
+               its text down a tone: secondary at 62% lands near 2.2:1, and this is
+               the one line in the row small enough for that to matter. */
+            <Caption tone={done ? 'primary' : 'secondary'}>
               {formatDoseAmount(alternative.delivered, alternative.dispenser.step)}{' '}
               {formatUnit(alternative.dispenser.unit, alternative.delivered)}
             </Caption>
           ) : null}
         </View>
         <View style={[{ flexDirection: 'row', alignItems: 'baseline' }, value.capBoxPadding]}>
-          <AnimatedAppText variant="doseValue" tone={tone} style={pulse}>
+          <AnimatedAppText variant="doseValue" style={pulse}>
             {amount}
           </AnimatedAppText>
           <UnitColumn unit={line.dispenser.unit} count={line.delivered} />

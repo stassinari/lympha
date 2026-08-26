@@ -9,6 +9,7 @@
 import { Platform, useWindowDimensions } from 'react-native';
 import {
   ascentPxFor,
+  capBlockBoxFor,
   capBoxInsetFor,
   capBoxPaddingFor,
   capTop,
@@ -48,6 +49,36 @@ export const capBoxInset = (
   extent: InkExtent,
 ) => capBoxInsetFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
 
+export const capBlockBox = (
+  fontSize: number,
+  lineHeight: number,
+  weight: NunitoWeight,
+  extent: InkExtent,
+) => capBlockBoxFor(TEXT_PLATFORM, fontSize, lineHeight, weight, extent);
+
+/**
+ * The effective text-size multiplier for a role, with the role's own ceiling
+ * applied. The one number everything else here scales by.
+ */
+export function useTypeScaleFactor(role: TypeRole): number {
+  const { fontScale } = useWindowDimensions();
+  const { maxScale } = typeScale[role];
+  return maxScale === undefined ? fontScale : Math.min(fontScale, maxScale);
+}
+
+/**
+ * The right inset a role needs at the reader's text size so its last glyph is not
+ * clipped — see `trackingInset` for what RN is doing wrong and why this is a
+ * restoration rather than a fudge.
+ *
+ * Scaled here rather than baked into the role's style, because RN scales
+ * `letterSpacing` with `fontSize` but does not scale padding: a static value would
+ * be exactly right at 1× and short by the same proportion at every size above it.
+ */
+export function useTrackingInset(role: TypeRole): number {
+  return typeScale[role].trackingInset * useTypeScaleFactor(role);
+}
+
 /**
  * A role's metrics at the reader's chosen text size.
  *
@@ -65,9 +96,8 @@ export const capBoxInset = (
  * stops moving at exactly the point its type does.
  */
 export function useTypeMetrics(role: TypeRole) {
-  const { fontScale } = useWindowDimensions();
   const spec = typeScale[role];
-  const factor = spec.maxScale === undefined ? fontScale : Math.min(fontScale, spec.maxScale);
+  const factor = useTypeScaleFactor(role);
 
   const fontSize = spec.fontSize * factor;
   const lineHeight = spec.lineHeight * factor;
@@ -81,6 +111,9 @@ export function useTypeMetrics(role: TypeRole) {
     capBoxPadding: capBoxPadding(fontSize, lineHeight, spec.weight, spec.extent),
     capBoxInset: capBoxInset(fontSize, lineHeight, spec.weight, spec.extent),
     inkInsets: inkInsets(fontSize, lineHeight, spec.weight, spec.extent),
+    /** Where the marks sit inside the line box, for anything drawn around them. */
+    capBlockBox: capBlockBox(fontSize, lineHeight, spec.weight, spec.extent),
+    trackingInset: spec.trackingInset * factor,
   };
 }
 

@@ -26,6 +26,18 @@ export type TouchableProps = Omit<PressableProps, 'style'> & {
    * transparent header.
    */
   borderless?: boolean;
+  /**
+   * Dim on press on Android too, instead of the ripple.
+   *
+   * For a control that is a *region* rather than an object: the dose screen's
+   * footer is a full-width tap target with no card, border or resting background
+   * of its own. Material's ripple belongs to a surface — bounded, it draws a
+   * rectangle where the design says there is nothing, and borderless it spills
+   * the width of the screen. Neither reads as feedback, so this one takes the dim
+   * on both platforms. Deliberately narrow: anything with a surface keeps the
+   * ripple.
+   */
+  pressDim?: boolean;
   children?: React.ReactNode;
 };
 
@@ -37,6 +49,7 @@ export function Touchable({
   style,
   radius,
   borderless,
+  pressDim,
   disabled,
   // Defaulted here rather than on the element, because a caller that forwards an
   // optional role passes `undefined` explicitly — and a later spread of
@@ -52,15 +65,16 @@ export function Touchable({
       accessibilityRole={accessibilityRole}
       disabled={disabled}
       android_ripple={
-        Platform.OS === 'android'
+        Platform.OS === 'android' && !pressDim
           ? { color: `${colour.text}${RIPPLE_ALPHA}`, foreground: false, borderless: !!borderless }
           : undefined
       }
       style={({ pressed }) => [
         radius !== undefined ? { borderRadius: radius, overflow: 'hidden' } : null,
         style,
-        // Android gets the ripple instead; dimming as well would double up.
-        pressed && Platform.OS !== 'android' ? { opacity: PRESSED_OPACITY } : null,
+        // Android gets the ripple instead; dimming as well would double up. Unless
+        // it has been given no ripple to get — see `pressDim`.
+        pressed && (pressDim || Platform.OS !== 'android') ? { opacity: PRESSED_OPACITY } : null,
         disabled ? { opacity: 0.4 } : null,
       ]}
       {...rest}

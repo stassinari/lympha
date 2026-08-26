@@ -22,12 +22,16 @@ import { VolumeScreen } from './VolumeScreen';
 
 export type OverlayName = 'volume' | 'recipe' | 'settings' | 'detail';
 
-/** Each screen enters from its trigger: the header is at the top, Edit is
- *  mid-screen on the right, settings and Details sit along the bottom edge. */
+/** Each screen enters from its trigger: the recipe card and the settings glyph are
+ *  both at the top, Edit is mid-screen on the right, and Details is the footer.
+ *
+ *  Settings moved from the footer to the header, so it now arrives from above with
+ *  it. The direction is not decoration — it is what tells you which thing you
+ *  touched, so it has to follow the control rather than stay where it was. */
 const DIRECTION: Record<OverlayName, OverlayDirection> = {
   recipe: 'top',
   volume: 'right',
-  settings: 'bottom',
+  settings: 'top',
   detail: 'bottom',
 };
 

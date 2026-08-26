@@ -15,6 +15,7 @@ import type { StyleProp, TextProps as RNTextProps, TextStyle } from 'react-nativ
 import { styleForRole, typeScale } from './typography';
 import type { TypeRole } from './typography';
 import { useTheme } from './theme';
+import { useTrackingInset } from './textMetrics';
 
 export type Tone = 'primary' | 'secondary' | 'onCard' | 'warning' | 'ok';
 
@@ -32,9 +33,23 @@ export type TextProps = Omit<RNTextProps, 'style'> & {
  */
 const maxScaleFor = (variant: TypeRole) => typeScale[variant].maxScale;
 
-/** The resolved style for a role and tone, shared by the plain and animated texts. */
+/**
+ * The resolved style for a role and tone, shared by the plain and animated texts.
+ *
+ * The right inset is applied here rather than at any call site, because the bug it
+ * fixes is a property of the *role*, not of one screen: React Native puts a
+ * letter-spacing gap after the final character, so every negatively-tracked role
+ * measures narrower than its own ink and clips its last glyph. It was only ever
+ * noticed at `hero`, where it is 2.9px of a 72px digit, but `volume`, `doseValue`,
+ * `screenTitle`, `rowTitle` and `cardTitle` all had it to a smaller degree.
+ *
+ * Padding, not a negative margin: the frame has to grow for the ink to survive.
+ * Nothing in the app right-aligns text within its own box, so widening the box
+ * moves no glyph.
+ */
 function useTextStyle(variant: TypeRole, tone: Tone) {
   const { colour } = useTheme();
+  const inset = useTrackingInset(variant);
   const colours: Record<Tone, string> = {
     primary: colour.text,
     secondary: colour.textSecondary,
@@ -42,7 +57,11 @@ function useTextStyle(variant: TypeRole, tone: Tone) {
     warning: colour.textWarning,
     ok: colour.ok,
   };
-  return [styleForRole(variant), { color: colours[tone] }];
+  return [
+    styleForRole(variant),
+    { color: colours[tone] },
+    inset > 0 ? { paddingRight: inset } : null,
+  ];
 }
 
 export function AppText({

@@ -104,7 +104,10 @@ export const lotusComponents: Component[] = [
       asCaCO3: { alkalinity: ALKALINITY_PER_DROP_PER_LITRE },
       mgPerL: { Na: 1.847, HCO3: 4.903 },
     },
-    colour: { light: '#F0DADC', dark: '#EBD3D5', edgeOnLight: '#DFC0C3' },
+    // The palest label in the app, and shipped exactly as published. It reads as a
+    // whisper against a white card, which is correct: the bar is decoration, and
+    // "Sodium" plus its number is what tells you what to pour.
+    colour: { light: '#F0DADC', dark: '#EBD3D5' },
   },
   {
     id: 'lotus-potassium',

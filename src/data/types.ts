@@ -80,8 +80,6 @@ export type Ions = {
 export type BottleColour = {
   light: string;
   dark: string;
-  /** A very pale label needs an inner edge to stay visible on a white card. */
-  edgeOnLight?: string;
 };
 
 /** A component made up at home rather than bought ready to dose. Recursion

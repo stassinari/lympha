@@ -1,84 +1,55 @@
 # Before v1 rolls out
 
-Everything that stands between the current TestFlight build and something worth
-handing to people who did not help build it. Grouped by kind, not by priority —
-priority is Saverio's call.
+Everything that stands between the current TestFlight build and something worth handing to people who did not help build it. Grouped by kind, not by priority — priority is Saverio's call.
 
-Verified on device 2026-08-25: haptics land and read as pleasant rather than
-noisy, the screen transitions do the job of tying the screens together, and cold
-start is effectively instant.
+Verified on device 2026-08-25: haptics land and read as pleasant rather than noisy, the screen transitions do the job of tying the screens together, and cold start is effectively instant.
 
 ---
 
 ## Bugs
 
-- [ ] **The volume numeral is clipped on its right edge.** Volume edit screen,
-      visible on an iPhone and reproducible in the simulator, missed until it was
-      seen on hardware. Android unverified — the emulator is currently a Pixel 3a,
-      where it is too small to judge.
+- [x] **The volume numeral is clipped on its right edge.** Fixed, and the suspected cause was the actual one: RN applies `letterSpacing` after *every* character where CSS applies it *between* them, so a negatively-tracked box measures exactly one tracking unit narrower than its own ink — 2.88px at `hero`.
 
-      Likely cause, to be confirmed rather than assumed: the `hero` role carries
-      `trackingEm: -0.04`, which at 72px is **-2.88px of letter-spacing**. React
-      Native applies tracking after *every* character including the last, so the
-      text box measures ~3px narrower than the ink it contains and the final
-      glyph loses its right edge. If that is it, the fix belongs in the type
-      system as a tracking-derived right inset, not as a padding fudge on one
-      screen — every negatively-tracked role has the same latent problem, and the
-      display roles carry the most tracking.
-- [ ] **Volume entry is awkward to correct.** Reported independently by two people
-      on the first Android build. The field starts with a fully filled number, and
-      the caret sits to its right. This suggests the user has to first delete the
-      current characters, then type the new value. This is not actually what
-      happens. What happens is on the first keystroke the new character replaces
-      the current selection but appends afterwards. This is likely the right UX
-      pattern to use, but the visual cues are misleading.
+      Fixed in the type system, not on the screen. `trackingInset()` in `metrics.ts` gives that trailing unit back as right padding, every role carries its own value, and `AppText` applies it to all of them — so `volume`, `doseValue`, `screenTitle`, `rowTitle` and `cardTitle` are fixed too, having all been latently clipped by smaller amounts. It is scaled by the reader's text size in `useTrackingInset`, because RN scales `letterSpacing` but not padding: baked into the static style it would have been correct at 1× and short by the same proportion at every size above.
+
+      **Small visual consequence, worth a look on device:** two gaps widen to the values the design actually specifies. `ml` sits 1.9px further from the volume numeral and 0.8px further from a dose value, because those `marginLeft: 6` gaps were previously being eaten by ink overhanging its own box. Verified on neither platform yet.
+- [x] **Volume entry is awkward to correct.** Done. The behaviour was already right — first keystroke replaces — so only the cue changed. An untouched value now renders inside a padded selection band with **no caret**. The caret appears and starts blinking on the first keystroke, once there is genuinely an insertion point. VoiceOver/TalkBack get the same information in words: the hint reads "Selected. Type to replace the volume".
+
+      Note the field is the offscreen `TextInput` that summons the keypad, and it holds no text while the committed volume is on screen — so there is no UIKit selection to call `selectAll` on and none would be visible if there were. The band is drawn, which is the only place it can come from in this architecture.
+
+      The first attempt used the `Text`'s own background, which looked right on Android and sat visibly low on iOS. A text background fills the *line box*, and a line box is never centred on its marks: at 72/78 Black digits iOS leaves **1.03px above and 25.42px below**, because it pins the space under the baseline to the font's descent and digits have no descenders to fill it. Android splits the slack and lands at 11.14/15.31, near enough to look deliberate. No line height fixes it — the descent belongs to the font.
+
+      So the band is now positioned from `capBlockBox()`, the rect the digits actually occupy, and is symmetric about them on both platforms by construction. It is absolutely positioned, so it contributes nothing to layout — the value cannot be wrapped in a `View` to carry a background, because the row is baseline-aligned and a `View` has no text baseline. Padding is proportional to font size (7% horizontal, 10% vertical) so it holds up at large text sizes. Its width is measured with `onLayout`, the one part metrics cannot supply, so the band lands a frame after the digits — invisible behind a screen that takes ~390ms to arrive.
 
 ---
 
 ## Design
 
-- [ ] **A completed dose row fades away rather than receding.** Its surface drops
-      to the page background, which is so close to the card colour that the row
-      reads as disappearing instead of as done-and-still-there. The list is meant
-      to keep its shape so you can see what you already poured. Needs a distinct
-      treatment — the recession is right, the value chosen for it is not.
-- [ ] **Remove the border on Sodium's colour bar.** Sodium is the one component
-      with `edgeOnLight` set (`#DFC0C3` inside `#F0DADC`), added because the
-      published label colour is too pale to hold an edge against a white card.
-      Saverio does not want the border. The accessible replacement is to darken
-      the bar itself rather than outline it — but the bar colour is vendor data,
-      so darkening is a *display* transform and must be recorded as one, not
-      edited into `lotus.ts`. Everything else in the app has a flush, unbordered
-      bar; this should match.
-- [ ] **Settings button placement** — deferred; being reworked with Claude Design.
-- [x] **KONFLUX has no published label colour.** Done. A real value was agreed
-      with the designer — `#BE4C7C` light / `#DA6FA6` dark — replacing the
-      neutral-slate fallback. LYLAC was revised in the same pass (`#B098D8` /
-      `#CBB6EA`) so the two sit together. Both clear the white card by a wider
-      margin than Sodium's bordered bar, so neither needs an `edgeOnLight`.
+- [x] **A completed dose row fades away rather than receding.** Done. The surface now drops to the sunken chip tone (`colour.control`) instead of the page background: 1.20 against the card either scheme, against 1.06 before, so the row reads as *lowered* rather than deleted. Content dims to 62% on the content wrapper alone — never a group alpha over the card and its shadow, which is what composited badly on Android. Strike-through, the 6px slide and the geometry are all unchanged, so the list keeps its shape.
+
+      One number to check on device: primary text at 62% over the chip tone is 4.36:1 in light mode. The row title is 20px/800 so its threshold is 3:1 and it is fine; the *alternative-dose caption* is 13.5px, where AA wants 4.5:1. Raising the dim to 64% gives 4.62:1 and is a one-token change if that caption matters more than the exact value.
+- [x] **Remove the border on Sodium's colour bar.** Done, and the darkening transform is **not** the replacement — it was dropped. The bar is a decorative echo of the label, not information: the row's name and number carry the meaning, so the 3:1 rule does not apply to it. `edgeOnLight` is therefore gone from the model entirely — `BottleColour`, `SchemeColour`, `resolveBarColour`, `BarRow` — rather than left in place unused. Sodium ships at its published `#F0DADC`, flush and unbordered like every other bar, and no display transform replaces it.
+- [x] **Settings button placement.** Done. Settings has left the footer for a slim header row on the dose screen — quiet `Lympha` wordmark left, sliders glyph right, 44pt target via `hitSlop` so the row stays slim and the glyph stays on the cards' content edge. The footer keeps status dot, rounding line and **Details** only.
+
+      This gives the app a rule it was missing: **top-right is app chrome, bottom-right acts on this brew.** Every overlay screen already put its action top-right, so the dose screen was the exception rather than the precedent. Consequence handled: the Settings overlay now enters from the **top** rather than the bottom, because entry direction is what tells you which control you touched, so it has to follow the control.
+
+      Separately, the footer is now a full-width tap target for Details — ~47pt band from padding plus an equal negative margin, so **nothing moves**. No card, border, chevron or resting background; "Details" stays the only coloured element and a brief dim confirms the press. That dim is on both platforms: this control has no surface, and a Material ripple either draws a rectangle where the design says there is nothing or spills the width of the screen (`Touchable`'s new `pressDim`, deliberately narrow — anything with a surface keeps the ripple).
+- [x] **KONFLUX has no published label colour.** Done. A real value was agreed with the designer — `#BE4C7C` light / `#DA6FA6` dark — replacing the neutral-slate fallback. LYLAC was revised in the same pass (`#B098D8` / `#CBB6EA`) so the two sit together. Both clear the white card by a wider margin than Sodium's bordered bar, so neither needs an `edgeOnLight`.
 
 ---
 
 ## Copy
 
-- [ ] **A full copywriting round.** Every string, read as a set rather than one at
-      a time.
-- [ ] **Drop "millilitres" beneath the volume presets.** The screen is titled
-      Water, the value is followed by `ml`, and the presets are plainly volumes.
-      The caption says nothing the screen has not already said.
-- [ ] **Drop "Adding your own concentrates is not in this version."** from the
-      bottom of Settings. It answers a question nobody asked and dates the build.
+- [ ] **A full copywriting round.** Every string, read as a set rather than one at a time.
+- [ ] **Drop "millilitres" beneath the volume presets.** The screen is titled Water, the value is followed by `ml`, and the presets are plainly volumes. The caption says nothing the screen has not already said.
+- [ ] **Drop "Adding your own concentrates is not in this version."** from the bottom of Settings. It answers a question nobody asked and dates the build.
 
 ---
 
 ## Release
 
 - [ ] **App icon.** Still Expo's default blue "A" on both platforms.
-- [ ] **Splash: deliberately leave it alone.** Cold start is effectively instant,
-      and Saverio's judgement on device is that a designed splash would be *more*
-      jarring than none. Recorded as a decision so it is not mistaken for an
-      oversight later. The native splash is still held until fonts and stored
-      state are ready, which is what keeps the app from flashing a wrong volume.
+- [ ] **Splash: deliberately leave it alone.** Cold start is effectively instant, and Saverio's judgement on device is that a designed splash would be *more* jarring than none. Recorded as a decision so it is not mistaken for an oversight later. The native splash is still held until fonts and stored state are ready, which is what keeps the app from flashing a wrong volume.
 
 ---
 

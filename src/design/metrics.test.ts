@@ -5,6 +5,7 @@ import {
   DESCENT,
   FONT_FAMILY,
   ascentPxFor,
+  capBlockBoxFor,
   capBoxInsetFor,
   capBoxPaddingFor,
   capTop,
@@ -13,6 +14,7 @@ import {
   minLineHeightRatio,
   opticalGap,
   opticalPadding,
+  trackingInset,
   trackingPx,
 } from './metrics';
 import type { NunitoWeight, TextPlatform } from './metrics';
@@ -363,5 +365,98 @@ describe('the same layout lands on both platforms', () => {
       const above = t.lineHeight - below - capTop(t.weight, 'digits') * t.fontSize;
       expect(above + pad.paddingTop).toBeCloseTo(below + pad.paddingBottom, 9);
     }
+  });
+});
+
+describe('trackingInset', () => {
+  it('gives back exactly the trailing gap RN adds after the last character', () => {
+    // RN applies letterSpacing after every character; CSS applies it between them.
+    // The box is therefore one whole tracking unit short of its own ink.
+    expect(trackingInset(trackingPx(-0.04, 72))).toBeCloseTo(2.88, 9);
+  });
+
+  it('is zero for a role that is not tracked negatively', () => {
+    // A positive-tracked box is a hair too wide, which clips nothing.
+    expect(trackingInset(trackingPx(0.06, 13.5))).toBe(0);
+    expect(trackingInset(0)).toBe(0);
+  });
+
+  it('covers every negatively-tracked role in the scale, not just the hero', () => {
+    const tracked = (Object.keys(typeScale) as TypeRole[]).filter(
+      (role) => typeScale[role].letterSpacing < 0,
+    );
+    // The bug was only ever *seen* at hero, where it is 2.9px of a 72px digit. It
+    // was latent everywhere else the handoff tightened the tracking.
+    expect(tracked.length).toBeGreaterThan(1);
+    for (const role of tracked) {
+      expect(typeScale[role].trackingInset).toBeCloseTo(-typeScale[role].letterSpacing, 9);
+    }
+  });
+
+  it('leaves an untracked role with no inset at all', () => {
+    for (const role of Object.keys(typeScale) as TypeRole[]) {
+      if (typeScale[role].letterSpacing >= 0) expect(typeScale[role].trackingInset).toBe(0);
+    }
+  });
+});
+
+describe('capBlockBox', () => {
+  const hero = typeScale.hero;
+
+  it('reports the digit block, not the line box', () => {
+    const box = capBlockBoxFor('ios', hero.fontSize, hero.lineHeight, hero.weight, hero.extent);
+    expect(box.height).toBeCloseTo(capTop('900', 'digits') * 72, 9);
+    // Shorter than the box RN reserves around it, which is the whole point.
+    expect(box.height).toBeLessThan(hero.lineHeight);
+  });
+
+  it('is why a text background cannot be used as a selection band', () => {
+    // The measured asymmetry behind the iOS bug: a background filling the line box
+    // sits ~24px lower on its digits than the same background does on Android.
+    const above = (platform: TextPlatform) =>
+      capBlockBoxFor(platform, hero.fontSize, hero.lineHeight, hero.weight, hero.extent).top;
+    const below = (platform: TextPlatform) =>
+      hero.lineHeight -
+      capBlockBoxFor(platform, hero.fontSize, hero.lineHeight, hero.weight, hero.extent).top -
+      capBlockBoxFor(platform, hero.fontSize, hero.lineHeight, hero.weight, hero.extent).height;
+
+    expect(above('ios')).toBeCloseTo(1.03, 1);
+    expect(below('ios')).toBeCloseTo(25.42, 1);
+    expect(above('android')).toBeCloseTo(11.14, 1);
+    expect(below('android')).toBeCloseTo(15.31, 1);
+
+    // iOS is off-centre by most of the font's descent; Android by a few pixels.
+    expect(Math.abs(below('ios') - above('ios'))).toBeGreaterThan(20);
+    expect(Math.abs(below('android') - above('android'))).toBeLessThan(5);
+  });
+
+  it('centres a padded band on the digits on both platforms', () => {
+    // What the volume screen actually draws. Symmetric by construction, so the band
+    // needs no per-platform correction — which is the property that was missing.
+    const PAD = 7.2;
+    for (const platform of ['ios', 'android'] as TextPlatform[]) {
+      const box = capBlockBoxFor(
+        platform,
+        hero.fontSize,
+        hero.lineHeight,
+        hero.weight,
+        hero.extent,
+      );
+      const band = { top: box.top - PAD, height: box.height + PAD * 2 };
+      expect(box.top - band.top).toBeCloseTo(band.top + band.height - (box.top + box.height), 9);
+    }
+  });
+
+  it('grows with the reader’s text size', () => {
+    const at = (factor: number) =>
+      capBlockBoxFor(
+        'ios',
+        hero.fontSize * factor,
+        hero.lineHeight * factor,
+        hero.weight,
+        hero.extent,
+      );
+    expect(at(1.3).height).toBeCloseTo(at(1).height * 1.3, 9);
+    expect(at(1.3).top).toBeCloseTo(at(1).top * 1.3, 9);
   });
 });

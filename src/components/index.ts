@@ -1,3 +1,4 @@
+export * from './AppHeader';
 export * from './ComparisonTable';
 export * from './DoseProgress';
 export * from './DoseRow';

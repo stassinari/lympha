@@ -10,6 +10,14 @@
  *      problem whatever colour a future brand ships.
  *   3. Light and dark use different values of the same hue, but the same geometry.
  *   4. A bottle with no sampleable colour degrades to neutral slate.
+ *
+ * Rule 1 is what settles the question a pale label used to raise. Lotus Sodium is
+ * `#F0DADC`, which is 1.33 against a white card, and it used to carry an
+ * `edgeOnLight` outline so it could hold a 3:1 edge. That was applying a text rule
+ * to something that is not text: the bar is a decorative echo of the sticker, and
+ * the row's name and number carry the meaning whatever the bar does. Nothing is
+ * lost when it is faint, so nothing needs to be added to stop it being faint —
+ * every bar is now flush and unbordered, at exactly the colour the vendor publishes.
  */
 
 import { NEUTRAL_SLATE } from './palette';
@@ -18,23 +26,17 @@ import type { ResolvedScheme } from './theme';
 export type SchemeColour = {
   light: string;
   dark: string;
-  /** A very pale label needs an inner edge to stay visible against a white card. */
-  edgeOnLight?: string;
 };
 
 export type ResolvedBarColour = {
   bar: string;
-  /** Only ever set in light mode, and only for labels too pale to hold an edge. */
-  edge?: string;
 };
 
 export function resolveBarColour(
   colour: SchemeColour | undefined,
   scheme: ResolvedScheme,
 ): ResolvedBarColour {
-  if (!colour) return { bar: NEUTRAL_SLATE[scheme] };
-  const bar = colour[scheme];
-  return scheme === 'light' && colour.edgeOnLight ? { bar, edge: colour.edgeOnLight } : { bar };
+  return { bar: colour ? colour[scheme] : NEUTRAL_SLATE[scheme] };
 }
 
 /** Brand accent, for links and active states. Always a separate token from the

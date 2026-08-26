@@ -7,7 +7,9 @@
  * kind of object, which is how the app stays calm about rounding at 6am.
  *
  * The bar is exactly 12px, full height, and touches the card edge. An inset bar
- * was tested during design and reads too quietly.
+ * was tested during design and reads too quietly. Every bar is flush and
+ * unbordered, however pale the label — see `resolveBarColour` for why a pale one
+ * needs no help.
  */
 
 import { View } from 'react-native';
@@ -19,10 +21,8 @@ export type BarRowProps = {
   children: React.ReactNode;
   /** Already resolved for the active scheme — see `resolveBarColour`. */
   barColour: string;
-  /** Inner edge for a label too pale to hold its own against a white card. */
-  barEdgeColour?: string;
   onPress?: () => void;
-  /** Overrides the card surface — used to let a completed row recede into the page. */
+  /** Overrides the card surface — used to drop a completed row to the sunken tone. */
   surfaceColour?: string;
   /** Opacity applied to the colour bar alone. Safe because the bar is a leaf with
    *  nothing behind it; group opacity over a whole row is not (see `DoseRow`). */
@@ -42,7 +42,6 @@ export type BarRowProps = {
 export function BarRow({
   children,
   barColour,
-  barEdgeColour,
   onPress,
   surfaceColour,
   barOpacity = 1,
@@ -60,20 +59,7 @@ export function BarRow({
 
   const body = (
     <>
-      <View style={{ width: COLOUR_BAR_WIDTH, backgroundColor: barColour, opacity: barOpacity }}>
-        {barEdgeColour ? (
-          <View
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              backgroundColor: barEdgeColour,
-            }}
-          />
-        ) : null}
-      </View>
+      <View style={{ width: COLOUR_BAR_WIDTH, backgroundColor: barColour, opacity: barOpacity }} />
       <View style={[{ flex: 1, paddingVertical, paddingHorizontal }, contentStyle]}>
         {children}
       </View>
