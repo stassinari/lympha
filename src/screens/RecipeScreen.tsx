@@ -10,14 +10,14 @@
  * rows is not something to read at 6am.
  */
 
-import { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
-import { BarCluster, Caption, Chip, Screen, SectionHeader, space } from '@/design';
 import { RecipeRow, ScreenHeader } from '@/components';
 import { brands, componentMap, componentsForBrand, groupedRecipesForBrand } from '@/data';
+import { BarCluster, Caption, Chip, Screen, SectionHeader, space } from '@/design';
 import { computeDose } from '@/engine';
 import { groupLabel, recipeSubtitle } from '@/format/recipeList';
 import { unitPreferenceFor, useBrand, useRecipe, useStore } from '@/state';
+import { useMemo } from 'react';
+import { ScrollView, View } from 'react-native';
 
 /** A brand's palette, so it is recognised before the name is read. Static data,
  *  so it needs no hook. */
@@ -134,13 +134,6 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
           </View>
         ))}
       </ScrollView>
-
-      <Caption
-        tone="secondary"
-        style={{ paddingVertical: space.snug, paddingHorizontal: space.screenH + 8 }}
-      >
-        Switching brand keeps your volume.
-      </Caption>
     </Screen>
   );
 }

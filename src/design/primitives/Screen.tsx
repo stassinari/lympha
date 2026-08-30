@@ -5,6 +5,12 @@
  * measurements of one device each; the real inset is whatever the notch, Dynamic
  * Island or status bar leaves, so it is read from the platform and the handoff's
  * figures become the minimum rather than the value.
+ *
+ * Nothing is added above that inset here. Every screen's first child is a header
+ * band of a fixed height — see `HEADER_BAND` — and top spacing is measured inside
+ * it, against the header's cap height. A screen-level top padding on top of that
+ * would be a second, invisible offset that each screen could get wrong, which is
+ * exactly how the content start line drifted apart in the first place.
  */
 
 import { View } from 'react-native';
@@ -15,8 +21,6 @@ import { space, useTheme } from '../theme';
 export type ScreenProps = {
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  /** Extra breathing room above the first block, on top of the safe area. */
-  topPadding?: number;
   /** Screens that scroll handle their own bottom inset. */
   applyBottomInset?: boolean;
   /**
@@ -33,7 +37,6 @@ export type ScreenProps = {
 export function Screen({
   children,
   style,
-  topPadding = space.snug,
   applyBottomInset = true,
   horizontalPadding = space.screenH,
 }: ScreenProps) {
@@ -46,7 +49,7 @@ export function Screen({
         {
           flex: 1,
           backgroundColor: colour.background,
-          paddingTop: insets.top + topPadding,
+          paddingTop: insets.top,
           paddingBottom: applyBottomInset ? insets.bottom : 0,
           paddingLeft: Math.max(insets.left, horizontalPadding),
           paddingRight: Math.max(insets.right, horizontalPadding),

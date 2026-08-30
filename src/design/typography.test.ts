@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { FIGTREE, NUNITO, faceFor, minLineHeightRatio } from './metrics';
-import type { FontWeight } from './metrics';
+import { FIGTREE, NUNITO, capBoxPaddingFor, capTop, faceFor, minLineHeightRatio } from './metrics';
+import type { FontWeight, TextPlatform } from './metrics';
+import { HEADER_BAND } from './layout';
 import { styleForRole, typeScale, typeSpecs } from './typography';
 import type { TypeRole } from './typography';
 
@@ -152,5 +153,81 @@ describe('the two fonts’ line-height floors', () => {
     // The coincidence worth knowing about: near-identical cap heights, so the two
     // read at a similar size at the same fontSize despite all the above.
     expect(Math.abs(NUNITO.capHeight - FIGTREE.capHeight)).toBeLessThan(0.01);
+  });
+});
+
+/**
+ * The header band, which is the only thing keeping the content start line the same
+ * on Home as on every overlay screen.
+ *
+ * Home is headed by a 16pt Figtree wordmark and the overlays by a 24pt Nunito
+ * title. Nothing stops those two drifting apart except the band being fixed and
+ * both headers being cap-squared inside it — so this asserts the geometry rather
+ * than trusting two components to keep agreeing. Both platforms, because the whole
+ * reason `capBoxPadding` exists is that they disagree about where a line box sits
+ * on its marks.
+ */
+describe('the header band', () => {
+  const PLATFORMS: TextPlatform[] = ['ios', 'android'];
+
+  /** Where the header's capitals start, measured from the top of the band. */
+  const capTopInBand = (role: TypeRole, platform: TextPlatform) => {
+    const { fontSize, lineHeight, weight, extent, font } = typeScale[role];
+    const pad = capBoxPaddingFor(platform, fontSize, lineHeight, weight, extent, font);
+    const box = lineHeight + pad.paddingTop + pad.paddingBottom;
+    const cap = capTop(weight, extent, font) * fontSize;
+    // The box is symmetric about its caps once squared, so centring it in the band
+    // is (band - box) / 2 of band slack plus (box - cap) / 2 of the box's own.
+    return (HEADER_BAND - box) / 2 + (box - cap) / 2;
+  };
+
+  it('holds both headers, so a fixed height never shears one', () => {
+    for (const role of ['wordmark', 'screenTitle'] as const) {
+      for (const platform of PLATFORMS) {
+        const { fontSize, lineHeight, weight, extent, font } = typeScale[role];
+        const pad = capBoxPaddingFor(platform, fontSize, lineHeight, weight, extent, font);
+        expect(lineHeight + pad.paddingTop + pad.paddingBottom).toBeLessThan(HEADER_BAND);
+      }
+    }
+  });
+
+  it('puts each header at the same height on both platforms', () => {
+    for (const role of ['wordmark', 'screenTitle'] as const) {
+      expect(capTopInBand(role, 'ios')).toBeCloseTo(capTopInBand(role, 'android'), 6);
+    }
+  });
+
+  it('gives the wordmark the air above its caps that stops it reading as a label', () => {
+    // Not the line box: Figtree leaves slack above its caps, so measuring to the
+    // box would put the visible mark lower than intended. Cap-block centring is
+    // symmetric about the baseline, so this is also the air below it — which is
+    // the half that was too tight at the old 56pt band.
+    expect(capTopInBand('wordmark', 'ios')).toBeCloseTo(26.4, 1);
+  });
+
+  /**
+   * Headroom for the brand mark that will eventually sit left of the wordmark.
+   * It does not exist yet, so nothing here draws one — this only records that the
+   * band was sized with room for it, so adding it is additive to `AppHeader` and
+   * reaches neither `HEADER_BAND` nor the content start line.
+   */
+  it('has room for a ~24pt brand mark beside the wordmark', () => {
+    expect(HEADER_BAND - 24).toBeGreaterThanOrEqual(2 * 16);
+  });
+
+  /**
+   * The whole point of the band. The two headers are 8pt of font size apart, and
+   * before the band that difference landed on the content: the recipe card on
+   * Home and the `APPEARANCE` label on Settings sat about 13pt apart and the page
+   * jumped as you navigated.
+   *
+   * What survives is half the difference in their cap heights, which moves the
+   * headers' own ink and nothing below them. It stays small enough that the two
+   * bars read as one strip.
+   */
+  it('absorbs the difference in header size, so content starts at one y', () => {
+    const gap = capTopInBand('wordmark', 'ios') - capTopInBand('screenTitle', 'ios');
+    expect(gap).toBeGreaterThan(0);
+    expect(gap).toBeLessThan(4);
   });
 });

@@ -12,11 +12,26 @@
  * heading role — which is what makes rotor and reading-control navigation land
  * somewhere useful — and the dismiss control is given a target that clears the
  * platform minimum despite being drawn as a 20px glyph.
+ *
+ * The bar is a fixed band rather than a row that measures its own title — see
+ * `HEADER_BAND`. Home's header is a 16pt wordmark and these are 24pt titles, and
+ * a self-measuring row put the content on those two screens about 13pt apart, so
+ * the page jumped as you navigated between them.
  */
 
 import { Platform, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
-import { Body, Icon, ScreenTitle, Touchable, resolveAccent, space, useTheme } from '@/design';
+import {
+  Body,
+  HEADER_BAND,
+  Icon,
+  ScreenTitle,
+  Touchable,
+  resolveAccent,
+  space,
+  useTheme,
+  useTypeMetrics,
+} from '@/design';
 import { useBrand } from '@/state';
 
 /**
@@ -33,12 +48,11 @@ const BACK = 20;
 /**
  * Expands the chevron to a 48px target without moving it.
  *
- * The alternative — padding the button out to 48 square, or giving the bar a
- * minimum height — would push the glyph inboard of the screen's content edge or
- * the title down the screen, and the header would no longer line up with the
- * cards beneath it. `hitSlop` is the property that exists for precisely this:
- * touch area without layout, so the target clears both platforms' minimums while
- * the bar keeps the height the design drew.
+ * The band is tall enough to hold a 48pt target, but padding the button out to
+ * fill it would push the glyph inboard of the screen's content edge and lose its
+ * alignment with the cards below. `hitSlop` is the property that exists for
+ * precisely this: touch area without layout, so the target clears both
+ * platforms' minimums while the glyph stays on the content edge.
  */
 const HIT_SLOP = 14;
 
@@ -63,14 +77,25 @@ export function ScreenHeader({
   const { colour, scheme } = useTheme();
   const brand = useBrand();
   const tint = accent ?? resolveAccent(brand.accent, scheme);
+  /**
+   * Squares the title's box about its capitals, so plain centring in the band
+   * puts the marks where the eye says the middle is.
+   *
+   * React Native pins the space below the baseline to the font's descent and
+   * stacks the whole line-height slack above it, so a centred line box sits
+   * visibly low — and Nunito Black at 24pt has enough descent to show it. Read at
+   * the reader's text size rather than the nominal one, so the centring survives
+   * dynamic type.
+   */
+  const titleType = useTypeMetrics('screenTitle');
 
   return (
     <View
       style={[
         {
+          minHeight: HEADER_BAND,
           flexDirection: 'row',
           alignItems: 'center',
-          marginBottom: space.blocks,
           paddingHorizontal: inset,
         },
         style,
@@ -81,7 +106,12 @@ export function ScreenHeader({
           <Icon name="chevronRight" size={BACK} rotate={180} colour={colour.text} />
         </Touchable>
       ) : null}
-      <ScreenTitle style={{ flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 }}>
+      <ScreenTitle
+        style={[
+          { flex: 1, marginLeft: Platform.OS === 'android' ? 10 : 0 },
+          titleType.capBoxPadding,
+        ]}
+      >
         {title}
       </ScreenTitle>
       {Platform.OS === 'ios' ? (

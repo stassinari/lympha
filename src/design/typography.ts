@@ -143,6 +143,11 @@ const ROLES: Record<TypeRole, RoleSpec> = {
    * place a second family pays for itself: it marks the app's own chrome as not
    * being part of the content. Everything else on every screen stays Nunito.
    *
+   * Mixed case, never uppercase, and smaller than `screenTitle` on purpose: it is
+   * not the page's heading, so it must not read as one. The header band absorbs
+   * the difference in size between the two — see `HEADER_BAND` — so neither ever
+   * moves the content beneath it.
+   *
    * Figtree at 600 has a floor of 0.977 — its content box is 0.164em tighter than
    * Nunito's — so 1.15 here is generous rather than near the limit and the mark has
    * room to sit without shearing. Note the guard in `resolve` only means anything
@@ -158,10 +163,19 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   wordmark: {
     font: FIGTREE,
     weight: '600',
-    size: 20,
+    // Two thirds of `screenTitle`, not a shade under it. At 20 the mark was 4pt
+    // off the page titles, which reads as a near-miss — as though it were trying
+    // to be one and failing — rather than as a different kind of thing. 16 is far
+    // enough away that the question does not come up, and the band is what stops
+    // the smaller mark shortening the header: see `HEADER_BAND`.
+    size: 16,
     lineHeightRatio: 1.15,
-    // Slightly tight, as a set name rather than a read word.
-    trackingEm: -0.01,
+    // Opened up, not tightened. A wordmark is looked at rather than read, and a
+    // little air between the letters is what separates a set name from a word in
+    // a sentence. Positive tracking needs no `trackingInset`: RN's trailing
+    // letter-space leaves the box too wide rather than too narrow, which clips
+    // nothing.
+    trackingEm: 0.015,
     extent: 'text',
     maxScale: 1.2,
   },
