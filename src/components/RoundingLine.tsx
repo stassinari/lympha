@@ -8,13 +8,11 @@
  * The whole line is the way through to the breakdown, not just the word
  * "Details". A 15px word is a ~40×22pt target at the far bottom corner of the
  * screen, which is the hardest place on a phone to hit one-handed, and the line
- * beside it is already about exactly the thing the breakdown explains — so the
- * text was a label for a target that should have been the row.
+ * beside it is about exactly the thing the breakdown explains.
  *
- * It gains no card, border, chevron or resting background in exchange. The line
- * looks the same as it did; "Details" stays the only coloured thing on it and
- * carries the affordance on its own, and a press dims the row briefly to confirm
- * what was hit.
+ * It has no card, border, chevron or resting background. "Details" is the only
+ * coloured thing on it and carries the affordance on its own, and a press dims
+ * the row briefly to confirm what was hit.
  */
 
 import { View } from 'react-native';
@@ -27,8 +25,8 @@ import type { RoundingSummary } from '@/format/rounding';
  * The band has to clear 44pt: the line's own `body` box is 22.5pt, and the 14pt
  * gap above the text is already inside the target, so 11pt below takes it to
  * ~47pt. The equal negative margin gives that height back to the layout, so the
- * line sits exactly where it did — the overhang falls into the bottom inset,
- * which is empty, rather than up over the last dose row.
+ * line keeps its position — the overhang falls into the bottom inset, which is
+ * empty, rather than up over the last dose row.
  */
 const TAP_BAND = 11;
 const GAP_ABOVE = 14;
@@ -36,19 +34,18 @@ const GAP_ABOVE = 14;
 /**
  * The status mark: a filled circle either way, amber or leaf green.
  *
- * Both states used to be coloured dots, which carry their whole meaning in hue —
- * so they said nothing in greyscale, nothing to a red-green reader, and nothing
- * on a phone in sunlight. `info` and `checkCircle` are shape as well as hue, and
- * they share a silhouette, so the row swaps between them without reflowing or
- * changing weight.
+ * A coloured dot carries its whole meaning in hue, so it says nothing in
+ * greyscale, nothing to a red-green reader, and nothing on a phone in sunlight.
+ * `info` and `checkCircle` are shape as well as hue, and they share a silhouette,
+ * so the row swaps between them without reflowing or changing weight.
  *
  * `info` deliberately, not a warning glyph: the copy here is gentle on purpose,
  * and a triangle would shout over a line that means to murmur. Filled, because a
  * state is not an action — the one place in the app where `fill` is right.
  *
- * The amber is the text-weight token rather than the dot's. Same colour in dark,
- * where they resolve identically; in light, a 16pt mark on the page background
- * needs the contrast that a 9pt dot did not.
+ * The amber is the text-weight token (`textWarning`) rather than `warning`. The
+ * two resolve identically in dark; in light, a 16pt mark on the page background
+ * needs the text token's contrast.
  */
 const MARK = 16;
 
@@ -57,8 +54,8 @@ const MARK = 16;
  *
  * Problems should have more presence than non-problems, and left alone these two
  * would not: at full strength the green is the *brighter* of the two against the
- * dark background (8.6:1 to the amber's 7.7), and a filled disc carries more ink
- * than the outline it replaces. Alpha rather than a paler green, so the mute
+ * dark background (8.6:1 to the amber's 7.7), and a filled disc carries a lot of
+ * ink. Alpha rather than a paler green, so the mute
  * holds on both schemes without a second value to keep in step.
  *
  * `palette.test.ts` restates this value to check the mark's contrast as drawn,
@@ -85,7 +82,7 @@ export function RoundingLine({ summary, brandAccent, onDetails }: RoundingLinePr
   return (
     <Touchable
       onPress={onDetails}
-      // The row is one control now, so it reads as one: the status it reports is
+      // The row is one control, so it reads as one: the status it reports is
       // the label, and what tapping does is the hint. Without this the reader
       // announces the summary and the word "Details" as two separate strings and
       // leaves it to the listener to work out that the first one is a button.

@@ -1,12 +1,12 @@
 /**
  * Enter or pick the water volume.
  *
- * The highest-frequency interaction in the app, and the one the brief says
- * deserves the most attention.
+ * The highest-frequency interaction in the app, and the one that deserves the
+ * most attention.
  *
- * The keypad is the **system** numeric keyboard, not a bespoke grid. A custom
- * grid was built during design and rejected: it added maintenance and lost
- * haptics, key repeat and accessibility for nothing. Getting the system keyboard
+ * The keypad is the **system** numeric keyboard, not a bespoke grid: a custom
+ * grid adds maintenance and loses haptics, key repeat and accessibility for
+ * nothing. Getting the system keyboard
  * without a visible text field means an offscreen `TextInput` holding focus while
  * the value is drawn at display size — see `HiddenInput` below.
  */
@@ -46,13 +46,10 @@ const MAX_DIGITS = 5;
 /**
  * The selection band behind an untouched value.
  *
- * Two people on the first Android build read the screen as "delete this, then type"
- * and neither was describing a bug: the behaviour was already replace-on-first-key,
- * but a caret parked after the last digit is the universal cue for *insert here*, so
- * the screen was telling them the opposite of what it does.
- *
- * A selection says it instead — it is the one cue that means "type and this goes
- * away", and it needs no words.
+ * The first keystroke replaces the value, but a caret parked after the last digit
+ * is the universal cue for *insert here*, so it reads as "delete this, then type" —
+ * the opposite of what the screen does. A selection is the one cue that means
+ * "type and this goes away", and it needs no words.
  *
  * ---
  *
@@ -62,8 +59,8 @@ const MAX_DIGITS = 5;
  * marks. At `hero` — 72px Black digits in a 78px box — iOS leaves 1.03px above the
  * digits and 25.42px below, because it pins the space under the baseline to the
  * font's descent and digits have no descenders to fill it. Android splits the slack
- * and lands at 11.14/15.31, which is why the first attempt looked deliberate there
- * and badly low on iOS. No choice of line height fixes it: the descent belongs to
+ * and lands at 11.14/15.31, so a text background looks deliberate there and badly
+ * low on iOS. No choice of line height fixes it: the descent belongs to
  * the font.
  *
  * So the band is positioned from `capBlockBox` — the rect the digits actually
@@ -100,8 +97,8 @@ const clampVolume = (ml: number) => Math.min(VOLUME_MAX_ML, Math.max(VOLUME_MIN_
  * plain View has no text baseline, so Yoga aligns its *bottom* edge to the row's
  * baseline; a bar of cap height therefore spans precisely the same band as the
  * digits. That works out identically on both platforms without knowing anything
- * about how either distributes line-height slack, which centring did not — hence
- * the caret sitting low on iOS and correct on Android.
+ * about how either distributes line-height slack, which centring does not: a
+ * centred caret sits low on iOS.
  *
  * The height is read at the reader's text size rather than the nominal one, or a
  * reader on large text gets a caret two thirds the height of their digits.
@@ -196,8 +193,8 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
 
   /**
    * The nudge is the suggestion, so turning suggestions off removes the card
-   * rather than leaving it to report that no volume divides evenly — which was
-   * both alarming and untrue, since nothing had been looked for.
+   * rather than leaving it to report that no volume divides evenly — which would
+   * be both alarming and untrue, since nothing has been looked for.
    *
    * Honesty is not lost: the dose screen still reports the gap on every brew.
    */
@@ -300,9 +297,9 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
  * How much of the window the system keypad covers, so the nudge can sit above it.
  *
  * Measured from the keyboard's top edge rather than from its reported height.
- * Under Android's edge-to-edge the window no longer resizes and the keypad is
+ * Under Android's edge-to-edge the window does not resize and the keypad is
  * drawn over the navigation bar, so `height` under-reports by exactly the
- * navigation bar — 268 against a real 292 on a Pixel 8. The distance from the
+ * navigation bar. The distance from the
  * window's bottom to `screenY` is unambiguous on both platforms.
  */
 function useKeyboardOverlap(): number {

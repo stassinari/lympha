@@ -39,9 +39,8 @@ const maxScaleFor = (variant: TypeRole) => typeScale[variant].maxScale;
  * The right inset is applied here rather than at any call site, because the bug it
  * fixes is a property of the *role*, not of one screen: React Native puts a
  * letter-spacing gap after the final character, so every negatively-tracked role
- * measures narrower than its own ink and clips its last glyph. It was only ever
- * noticed at `hero`, where it is 2.9px of a 72px digit, but `volume`, `doseValue`,
- * `screenTitle`, `rowTitle` and `cardTitle` all had it to a smaller degree.
+ * measures narrower than its own ink and clips its last glyph — 2.9px of a 72px
+ * `hero` digit, less at the smaller tracked roles.
  *
  * Padding, not a negative margin: the frame has to grow for the ink to survive.
  * Nothing in the app right-aligns text within its own box, so widening the box

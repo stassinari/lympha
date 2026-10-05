@@ -55,9 +55,8 @@ describe('unitPreferenceFor', () => {
   });
 
   it('round-trips with the key the store writes, for every brand', () => {
-    // The bug this guards: the screen read `units[brandId]` while the store wrote
-    // `units[unitGroupOf(brandId)]`. Every option but the default looked
-    // unselected, though the change had in fact been made.
+    // The store writes `units[unitGroupOf(brandId)]`. Reading any other key makes
+    // every option but the default look unselected, though the change was made.
     for (const brand of brands) {
       const written = { ...DEFAULTS, units: { [unitGroupOf(brand.id)]: 'drop' as const } };
       expect(unitPreferenceFor(written, brand.id), brand.id).toBe('drop');
@@ -110,9 +109,8 @@ describe('repair', () => {
   });
 
   it('drops a recipe id the data no longer has', () => {
-    // This has already happened once: Apax's card values were replaced by the
-    // calculator's, and `apax-washed` became `apax-lab-washed`. Without this the
-    // app would reopen on a recipe that does not exist.
+    // Recipe ids change with the data, as `apax-washed` → `apax-lab-washed` does
+    // here. Without this the app would reopen on a recipe that does not exist.
     const repaired = repair(state({ recipeIds: { lotus: 'apax-washed' } }));
     expect(repaired.recipeIds).toEqual({});
     expect(recipeIdFor(repaired, 'lotus')).toBeDefined();
@@ -140,8 +138,8 @@ describe('repair', () => {
   });
 
   it('drops a unit stored under a brand rather than a unit group', () => {
-    // An earlier build keyed these per brand. Those entries are not keys any more,
-    // and are discarded rather than half-applied to one Apax range.
+    // Keys are unit groups. A brand id is not one, so its entry is discarded
+    // rather than half-applied to one Apax range.
     expect(repair(state({ units: { 'apax-lab': 'g' } })).units).toEqual({});
   });
 

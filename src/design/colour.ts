@@ -1,7 +1,7 @@
 /**
  * Resolving a bottle's label colour for the active scheme.
  *
- * The rules the whole identity system rests on, from the handoff:
+ * The rules the identity system rests on (`docs/designs/v1`):
  *
  *   1. Colour never carries meaning alone. A name and a number are always
  *      present too, for colour-blind users and for very pale labels.
@@ -11,13 +11,11 @@
  *   3. Light and dark use different values of the same hue, but the same geometry.
  *   4. A bottle with no sampleable colour degrades to neutral slate.
  *
- * Rule 1 is what settles the question a pale label used to raise. Lotus Sodium is
- * `#F0DADC`, which is 1.33 against a white card, and it used to carry an
- * `edgeOnLight` outline so it could hold a 3:1 edge. That was applying a text rule
- * to something that is not text: the bar is a decorative echo of the sticker, and
- * the row's name and number carry the meaning whatever the bar does. Nothing is
- * lost when it is faint, so nothing needs to be added to stop it being faint —
- * every bar is now flush and unbordered, at exactly the colour the vendor publishes.
+ * Rule 1 is why a pale bar needs no outline. Lotus Sodium is `#F0DADC`, 1.33:1
+ * against a white card, but a 3:1 contrast rule is for meaning-bearing marks: the
+ * bar is a decorative echo of the sticker, and the row's name and number carry the
+ * meaning. Every bar is flush and unbordered, at exactly the colour the vendor
+ * publishes.
  */
 
 import { NEUTRAL_SLATE } from './palette';

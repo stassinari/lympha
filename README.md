@@ -9,13 +9,14 @@ silently reports.
 
 ## Docs
 
-| Document                                             | What it is                                                                                                 |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| [`docs/water-schema-v0.md`](docs/water-schema-v0.md) | Data model and verified vendor numbers. **Source of truth for anything numeric.**                          |
-| [`docs/design-brief.md`](docs/design-brief.md)       | The brief given to Claude Design.                                                                          |
-| [`docs/designs/v1/`](docs/designs/v1/)               | Design handoff. **Source of truth for pixels, not for data** — it was written without sight of the schema. |
-| [`docs/plan-v1.md`](docs/plan-v1.md)                 | Implementation plan, including where the designs and the schema disagree.                                  |
-| [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**         |
+| Document                                             | What it is                                                                                               |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [`docs/roadmap.md`](docs/roadmap.md)                 | What is left before v1, and what comes after. The only to-do list.                                       |
+| [`docs/decisions.md`](docs/decisions.md)             | Every product, design and engineering decision, with its reason. Check here before re-arguing one.       |
+| [`docs/water-schema-v0.md`](docs/water-schema-v0.md) | Data model and verified Lotus numbers. **Source of truth for anything numeric.**                         |
+| [`docs/apax-lab-brief.md`](docs/apax-lab-brief.md)   | Sources, units and anomalies behind `src/data/sources/apax-lab.json`, the only copy of the Apax numbers. |
+| [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**       |
+| [`docs/designs/v1/`](docs/designs/v1/)               | The original design handoff: a picture of the intent, not a spec. Its numbers are wrong.                 |
 
 ## Running it
 

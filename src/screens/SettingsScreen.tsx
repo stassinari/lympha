@@ -1,9 +1,8 @@
 /**
  * Appearance, units, brewing defaults, bottles.
  *
- * Deliberately short. The handoff is explicit that anything longer is a sign the
- * main screen is under-decided, and nothing here is something you would visit
- * before coffee.
+ * Deliberately short: anything longer is a sign the main screen is under-decided,
+ * and nothing here is something you would visit before coffee.
  */
 
 import { useState } from 'react';

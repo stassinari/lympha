@@ -12,12 +12,10 @@
  * distance, nearer first — a smaller honest volume is often the better answer,
  * and the design is explicit that the search must not prefer "brew more".
  *
- * How far it will look is **proportional to what was asked for**, rather than the
- * handoff's flat 900 ml. That figure is sensible from a litre and absurd from a
- * cup: it produced "Use 800 ml" for someone who asked for 350, which is not the
- * "slightly different volume" the brief describes — it is a different drink. A
- * quarter either way keeps the suggestion recognisable as the same brew, and
- * where nothing qualifies the honest answer is no suggestion at all.
+ * The search range is a quarter of the requested volume, not the handoff's flat
+ * 900 ml. A flat range is sensible from a litre and absurd from a cup: 800 ml
+ * offered to someone asking for 350 is a different drink, not a nudge. Where
+ * nothing qualifies within range, the answer is no suggestion at all.
  */
 
 import type { Component, Recipe } from '@/data/types';

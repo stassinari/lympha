@@ -33,8 +33,8 @@ export type Dose = {
    *
    * False when the active dispenser can deliver partial units — a scale reading
    * to 0.01 g rounds too, but saying so would be noise dressed up as honesty.
-   * The design brief phrases this as "suppressed in grams mode"; the real rule is
-   * the dispenser, so it stays correct for a brand that ships something else.
+   * Keyed on the dispenser rather than on grams, so it stays correct for a brand
+   * that ships something else.
    */
   showsRounding: boolean;
   /** Worst relative error across the bottles. Zero when rounding is suppressed. */

@@ -1,10 +1,11 @@
-# Water recipe data model — v0 draft
+# Water recipe data model
 
-Working document. Purpose: find the shape that survives Apax, Lotus, Barista Hustle
-and a powder without a code change per brand.
+A data model that fits Apax, Lotus, Barista Hustle and a powder without per-brand code,
+and the verified Lotus numbers.
 
-Status: Apax and Lotus are fully specified from primary sources. Barista Hustle and
-Third Wave Water are shapes only, numbers unverified.
+Lotus is specified from primary sources. Apax numbers are in
+[`apax-lab-brief.md`](apax-lab-brief.md) and `src/data/sources/apax-lab.json`. Barista
+Hustle and Third Wave Water are shapes only; their numbers are unverified.
 
 ---
 
@@ -12,7 +13,7 @@ Third Wave Water are shapes only, numbers unverified.
 
 Vendors specify recipes in two incompatible ways:
 
-- **Dose-first** (Apax): "2.7 g/L Tonik". The dose *is* the recipe; ppm is a side effect.
+- **Dose-first** (Apax): "2.0 g/L TONIK". The dose *is* the recipe; ppm is a side effect.
 - **Target-first** (Lotus): "50 ppm Mg". The target is the recipe; drops are computed.
 
 A schema that picks one breaks on the other. The fix is to separate three things
@@ -96,13 +97,14 @@ component, not a broken record.
 {
   "id": "apax-washed",
   "brand": "apax-lab",
-  "name": "Washed processed",
+  "name": "Washed",
   "reference_volume_ml": 1000,
   "stated_as": "dose",
   "additions": [
-    { "component": "apax-tonik", "amount": 2.7 },
-    { "component": "apax-jamm",  "amount": 0.3 },
-    { "component": "apax-lylac", "amount": 1.0 }
+    { "component": "apax-tonik",   "amount": 2.0 },
+    { "component": "apax-jamm",    "amount": 0.5 },
+    { "component": "apax-lylac",   "amount": 0.5 },
+    { "component": "apax-konflux", "amount": 1.0 }
   ],
   "scaling": "linear"
 }
@@ -114,9 +116,8 @@ field and no class of mismatch bug.
 `stated_as` is `dose` or `target` — it documents which way the vendor thinks, which
 matters when the numbers need re-checking.
 
-**No per-recipe constraints.** An earlier draft had a `sum_of_additions` rule to
-encode Apax's 3–4 g/L envelope. Cut: for recipes we author, that's a build-time test,
-not shipped data. The underlying fact — *Apax concentrates are intended at 3–4 g/L
+**No per-recipe constraints.** Apax's 3–4 g/L envelope is a build-time test on
+authored recipes, not shipped data. The underlying fact — *Apax concentrates are intended at 3–4 g/L
 combined* — is a property of the **brand**, and only becomes load-bearing once users
 build custom recipes. Add it to Brand then, as `intended_dose_range`.
 
@@ -126,9 +127,9 @@ build custom recipes. Add it to Brand then, as `intended_dose_range`.
 
 ### 1. Apax — dose-first, capped total
 
-Recipes are ratios inside a fixed 4.0 g/L envelope; all seven published rows sum to
-exactly 4.0. One dispenser, `equivalent: 0.0667 g` per drop, back-computed from their
-own drops/grams table (15 drops to the gram).
+Recipes are ratios inside a 4.0 g/L envelope, with two documented exceptions. One
+dispenser: 15 drops to the gram, from Apax's own table. Recipes, sources and anomalies
+are in [`apax-lab-brief.md`](apax-lab-brief.md).
 
 No ion data. Apax publishes ingredient lists but not quantities, so Apax cannot
 participate in cross-brand comparison. Known limitation, not a gap to fill.
@@ -148,7 +149,7 @@ the Mg/Ca inputs and bicarbonate only from Na/K, so:
 Which makes Lotus structurally identical to Barista Hustle: a hardness source and a
 buffer source, pre-dissolved and split four ways.
 
-**Their formula**, for the record:
+**Their formula:**
 
 ```
 drops = ppm_caco3 x (volume_ml / 4500) x dropper_factor x (2 if monovalent else 1)
@@ -226,8 +227,8 @@ A prepared component. Recursion depth 1 is enough; nobody makes a stock from a s
 }
 ```
 
-The recipe referencing it is an ordinary recipe — the two-stage-ness is entirely
-contained in the component. That's the test passing.
+The recipe referencing it is an ordinary recipe; the two stages are contained in the
+component.
 
 Note this is the same hardness+buffer system Lotus sells pre-mixed, so once the
 numbers are in, BH and Lotus should be directly comparable in CaCO₃ terms.
@@ -243,7 +244,7 @@ numbers are in, BH and Lotus should be directly comparable in CaCO₃ terms.
 }
 ```
 
-Nothing special left in the recipe. The sachet's indivisibility now lives on its
+The recipe is ordinary. The sachet's indivisibility lives on its
 dispenser (`step: 1, allow_partial: false`), same as a dropper. Scaling to 500 mL
 yields 0.13 sachets, which the runtime must refuse to print as an instruction.
 
@@ -276,15 +277,7 @@ is "brew a slightly different volume and it lands exactly".
 
 ---
 
-## Open questions
+## Open questions and deferred work
 
-1. Barista Hustle numbers — entirely unverified. Only outstanding data task.
-2. Non-zero starting water. Probably a property of the *brew*, not the recipe.
-   Parked, but it needs a home eventually.
-3. Cross-brand comparison works in ppm as CaCO₃ for Lotus and (once verified) BH.
-   Apax can't join without ion data they don't publish. Accept the asymmetry.
-
-## Not doing yet
-
-Sharing, accounts, sync, custom concentrates, brand-level dose ranges. All additive
-to the above rather than structural, which is the point of stopping here.
+Barista Hustle numbers, non-zero starting water, cross-brand comparison and everything
+deliberately not built yet are tracked in [`roadmap.md`](roadmap.md).

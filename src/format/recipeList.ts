@@ -33,9 +33,9 @@ export const groupLabel = (group: RecipeGroup | undefined): string | undefined =
  *
  * Only a bottle actually vanishing is worth a warning here. Flagging every recipe
  * that merely rounds hard sounds thorough and is useless: at 350 ml every Lotus
- * recipe rounds hard, so the list showed the same amber sentence seven times, told
- * you nothing about which to pick, and buried the one fact that does distinguish
- * them. A warning that is always on is not a warning.
+ * recipe rounds hard, so the same amber sentence would sit on all seven rows, say
+ * nothing about which to pick, and bury the one fact that does distinguish them.
+ * A warning that is always on is not a warning.
  *
  * The rounding gap is already reported twice — on the dose screen once a recipe is
  * chosen, and by the nudge when the volume is the thing at fault. A losable

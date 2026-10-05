@@ -45,17 +45,17 @@ const CLUSTER_COLUMN = clusterWidth('row', MOST_BOTTLES);
 /**
  * The selection mark, on the trailing edge.
  *
- * A 2pt outline was the weakest signal in the app — it sat directly under the
- * brand chips, whose selected state is an unmistakable dark fill, and lost the
- * comparison every time. A check says the same thing in a shape, and says it to
- * anyone who cannot resolve a hairline against a card edge. The border stays;
- * selection is one signal stated twice, not two competing ones, which is also
- * why the check is ink rather than the accent.
+ * A 2pt outline alone is too weak a signal: it sits directly under the brand
+ * chips, whose selected state is an unmistakable dark fill, and loses the
+ * comparison. A check says the same thing in a shape, and says it to anyone who
+ * cannot resolve a hairline against a card edge. The outline is kept; selection
+ * is one signal stated twice, not two competing ones, which is also why the check
+ * is ink rather than the accent.
  *
  * Its slot is reserved on every row, but that costs nothing here: it is the
  * trailing edge, and nothing in the row aligns to it. The same slot at the
- * leading edge would have indented all seven titles to make room for a mark that
- * appears on one.
+ * leading edge would indent every title to make room for a mark that appears on
+ * one.
  */
 const CHECK = 20;
 

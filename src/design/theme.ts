@@ -52,7 +52,7 @@ export const themes: Record<ResolvedScheme, Theme> = {
   dark: buildTheme('dark'),
 };
 
-/** Dark-first: the brief calls for it, and it is what an unresolved scheme gets. */
+/** Dark when the scheme is unresolved: the app is built for a dark kitchen at 6am. */
 export const ThemeContext = createContext<Theme>(themes.dark);
 
 export const useTheme = () => useContext(ThemeContext);

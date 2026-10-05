@@ -2,7 +2,7 @@
 
 Everything in this doc is about the **app icon** — the one on the home screen — and the
 native builds needed to see it. For the Phosphor glyphs used inside the UI, see
-[`v1-icon-brief.md`](v1-icon-brief.md).
+*Icons* in [`decisions.md`](decisions.md).
 
 ## Expo Go cannot show the app icon
 
@@ -13,7 +13,7 @@ that changes this. Checking an icon means a native build.
 This is also why an icon renders fine with Metro dead — icons are native resources and have
 nothing to do with the JS bundle.
 
-## The rule that will waste your afternoon
+## Prebuild runs only once
 
 **`expo run:ios` / `expo run:android` only run prebuild when the native directory is
 missing.**
@@ -104,8 +104,7 @@ Note that a layer with `"glass": true` and `"fill": "none"` has no colour of its
 appearance comes from the glass material and the substrate beneath it. Raising that layer's
 opacity will not make it more brand-coloured; give it an explicit fill instead.
 
-The fallback `icon.png` stays in `app.json` — it is still used to generate Android's legacy
-`ic_launcher`. It must be 1024×1024 and **fully opaque**: iOS applies its own mask, and
+`icon.png` in `app.json` generates Android's legacy `ic_launcher`. It must be 1024×1024 and **fully opaque**: iOS applies its own mask, and
 transparent pixels render as black artefacts.
 
 ### Android

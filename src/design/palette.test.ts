@@ -71,9 +71,8 @@ describe('clear-state mark', () => {
   });
 
   /**
-   * A state colour that is also a bottle's colour reads as that bottle, which is
-   * why `ok` stopped being Lotus's potassium teal. Brand accents count too: one
-   * colours the "Details" link right beside the check.
+   * A state colour that is also a bottle's colour reads as that bottle. Brand
+   * accents count too: one colours the "Details" link right beside the check.
    */
   it.each(schemes)('is no bottle or brand colour in %s', (scheme, tokens) => {
     const taken = [

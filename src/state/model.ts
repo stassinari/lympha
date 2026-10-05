@@ -5,9 +5,8 @@
  * Kept free of React and of storage so it can be tested in plain Node. The store
  * wiring is next door in `store.ts`.
  *
- * The brief's hardest requirement lives here: *opens to the answer*. Reopening
- * the app the next morning should need near-zero input to repeat yesterday's
- * brew, which means everything below survives a cold start.
+ * Everything here survives a cold start, so the app *opens to the answer*
+ * (`docs/decisions.md`): repeating yesterday's brew needs near-zero input.
  */
 
 import {
@@ -43,9 +42,8 @@ export type PersistedState = {
   /** Offer a nearby volume that divides evenly. */
   suggest: boolean;
   /**
-   * The volume the app opens on. `null` means whatever you last brewed, which is
-   * what the brief's "opens to the answer" asks for — but someone who always makes
-   * the same amount is better served by pinning it.
+   * The volume the app opens on. `null` means whatever you last brewed; someone
+   * who always makes the same amount is better served by pinning it.
    */
   defaultVolumeMl: number | null;
   /** Rounding gap above which the line turns amber. */
@@ -105,11 +103,9 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 /**
  * Rebuild valid state from whatever was on disk.
  *
- * Persisted ids outlive the data they point at. A build that renames a recipe —
- * as this one already has, when Apax's card values were replaced by the
- * calculator's and `apax-washed` became `apax-lab-washed` — would otherwise
- * reopen to a blank screen or a crash. Anything unrecognised is dropped rather
- * than trusted, and a dropped field falls back to its default.
+ * Persisted ids outlive the data they point at, and a renamed recipe would
+ * otherwise reopen to a blank screen or a crash. Anything unrecognised is dropped
+ * rather than trusted, and a dropped field falls back to its default.
  */
 export function repair(raw: unknown): PersistedState {
   if (!isRecord(raw)) return { ...DEFAULTS };
@@ -140,8 +136,7 @@ export function repair(raw: unknown): PersistedState {
   if (isRecord(raw.units)) {
     const known = new Set(unitGroups().map((g) => g.id));
     for (const [group, preference] of Object.entries(raw.units)) {
-      // Keys are unit groups. A build that stored them per brand — as an earlier
-      // one did — leaves entries under ids that are no longer keys, and they are
+      // Keys are unit groups. An entry under any other id, such as a brand id, is
       // dropped rather than trusted.
       if (typeof preference !== 'string' || !known.has(group)) continue;
       if (preference === 'auto' || unitsOfferedByGroup(group).has(preference as DoseUnit)) {

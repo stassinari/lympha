@@ -4,8 +4,8 @@
  * The same product needs different units at different volumes, and this is not
  * cosmetic. Apax at a litre is about sixty drops — nobody counts sixty drops
  * before coffee — while the same recipe at 200 ml is a dozen, which is easy.
- * Pull the other way and grams stop working: 200 ml of Apax JAMM is 0.06 g,
- * which most kitchen scales cannot resolve at all.
+ * Pull the other way and grams stop working: Apax's smallest dose, 0.5 g/L, is
+ * 0.1 g at 200 ml, finer than most kitchen scales resolve.
  *
  * So the unit follows the magnitude of the dose rather than a stored preference,
  * with an override available. Lotus is unaffected — its bottles have exactly one
@@ -17,8 +17,8 @@ import { toDispenserUnits } from './quantise';
 
 /**
  * Above this many drops for a single bottle, counting stops being reasonable and
- * a scale is the better instrument. A judgement call, sitting between the two
- * cases the design brief fixes: twelve drops is fine, sixty is not.
+ * a scale is the better instrument. A judgement call between the two cases in
+ * `docs/decisions.md` (Units follow magnitude): twelve drops is fine, sixty is not.
  */
 export const MAX_COMFORTABLE_DROPS = 20;
 

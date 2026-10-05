@@ -1,14 +1,11 @@
 /**
  * The dose screen's own chrome: wordmark left, settings right.
  *
- * Settings used to sit at the bottom-right of the dose screen, sharing the footer
- * with the rounding line. That put two unrelated things in one slot — the footer
- * is contextual status about *this* brew, and settings is global configuration —
- * and it made them compete with Details for the same corner.
- *
- * Splitting them gives the app a rule it did not have: **top-right is app chrome,
- * bottom-right acts on this brew.** Every overlay screen already puts its action
- * top-right, so the dose screen was the odd one out rather than the precedent.
+ * Settings lives here rather than in the footer beside the rounding line: the
+ * footer is status about *this* brew, settings is global configuration, and the
+ * two would compete with Details for one corner. The app's rule is **top-right is
+ * app chrome, bottom-right acts on this brew**, which every overlay screen follows
+ * too.
  *
  * The wordmark is set in Figtree, and is the only thing in the app that is. A
  * second family is a cost — another face to load, another set of metrics to keep —
@@ -33,9 +30,9 @@ import { View } from 'react-native';
 /**
  * A gear, not sliders.
  *
- * The sliders this replaces promised "adjust values", and the screen behind it is
- * preferences — appearance, units, defaults. The gear is the honest signal, and
- * its rounder silhouette sits better with the type than two straight tracks did.
+ * Sliders promise "adjust values", and the screen behind this is preferences —
+ * appearance, units, defaults. The gear is the honest signal, and its rounder
+ * silhouette sits better with the type than two straight tracks.
  *
  * Muted, like the wordmark opposite it: the pair is chrome, and the thing on this
  * screen worth reading first is the volume.
@@ -80,8 +77,7 @@ export function AppHeader({ onOpenSettings }: AppHeaderProps) {
       {/* The leading side is a group of its own rather than a bare child, so
           anything that joins the wordmark lands beside it rather than spread
           across the bar: three bare children under `space-between` would strand
-          the name in the middle. A `(Ly)` mark was tried here and dropped in
-          favour of the wordmark alone. */}
+          the name in the middle. */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.snug }}>
         {/* Decorative: a screen reader already announces the app by name on
             launch, so reading it again at the top of the only screen is noise. */}

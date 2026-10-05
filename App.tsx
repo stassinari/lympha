@@ -10,9 +10,8 @@ import { useHydrated, useStore } from '@/state';
 /**
  * Hold the splash until both the fonts and the stored state are ready.
  *
- * "Opens to the answer" is a non-negotiable in the brief, and rendering a frame
- * early breaks it in the most annoying way possible: the app appears showing
- * 1000 ml, then snaps to yesterday's 350 once storage comes back.
+ * The app opens to the last brew. A frame rendered before storage resolves shows
+ * the default 1000 ml, then snaps to the stored volume.
  */
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Already hidden, or unavailable. Nothing to recover from.

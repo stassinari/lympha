@@ -20,15 +20,12 @@
  *
  * **Chrome and navigation are `bold`. Status is `fill`. Nothing is `duotone`.**
  *
- * `bold` is the default here rather than something each call site repeats,
- * because the rule is about the app rather than about any one icon. Phosphor's
- * `regular` is a hairline beside display type this heavy — the gear read as
- * underdrawn against the wordmark and the 16pt footer mark was genuinely faint.
- * `bold` puts the strokes in the same weight family as the type without changing
+ * `bold` is the default because the rule belongs to the app, not to any one
+ * icon: Phosphor's `regular` is a hairline beside type this heavy. `bold` puts the strokes in the same weight family as the type without changing
  * what the icon is.
  *
  * `fill` is reserved for status, where the glyph is a state rather than an
- * action, and is currently only the rounding line. Solid shapes already mean
+ * action, and is used only by the rounding line. Solid shapes already mean
  * something specific in this app — they are the mineral bar marks — so a second
  * solid shape language would compete with the element doing the most information
  * work. Status earns the exception because a state is not an action.
@@ -40,8 +37,7 @@
  *
  * Every icon in the app is decorative: the meaning always sits on the control
  * around it, in its `accessibilityLabel` or in the text beside it. So they are
- * hidden from the accessibility tree here rather than at each call site, which is
- * what the drawn glyphs this replaces did too.
+ * hidden from the accessibility tree here rather than at each call site.
  */
 
 import { View } from 'react-native';

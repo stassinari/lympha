@@ -31,7 +31,6 @@ export type CardProps = {
  * The default surface. A whole card is often a single tap target — the recipe
  * header is one — so pressability is built in rather than wrapped around.
  *
-
  * Three layers, not two, and each is load-bearing:
  *
  *   shadow   — borderRadius + elevation, never clipped, or the shadow vanishes

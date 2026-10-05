@@ -27,7 +27,7 @@ describe('recipeSubtitle', () => {
   it('does not warn merely because a recipe rounds hard', () => {
     // Ultra Light is 19.6% short on alkalinity at a litre, and the dose screen
     // says so. Repeating it here would put the same sentence on nearly every row
-    // — at 350 ml it was on all seven — which distinguishes nothing.
+    // — at 350 ml, on all seven — which distinguishes nothing.
     expect(subtitle('lotus-ultra-light', 1000)).toEqual({
       text: 'Lotus',
       tone: 'secondary',
@@ -35,7 +35,7 @@ describe('recipeSubtitle', () => {
   });
 
   it('leaves the list calm when every recipe rounds hard', () => {
-    // The case that made the rule: no row should shout when they all would.
+    // At 350 ml every Lotus recipe rounds hard; no row should shout when they all would.
     const warned = [
       'lotus-light-and-bright',
       'lotus-simple-and-sweet',
@@ -64,7 +64,7 @@ describe('recipeSubtitle', () => {
 
   it('singles out the rows that fail at a cup', () => {
     // At 250 ml Rao's loses potassium and Ultra Light loses magnesium; Simple and
-    // Sweet survives. Three rows, two warnings — selective, which was the point.
+    // Sweet survives. Three rows, two warnings.
     expect(subtitle('lotus-simple-and-sweet', 250)?.tone).toBe('secondary');
     expect(subtitle('lotus-raos-recipe', 250)?.text).toBe('Loses Potassium at 250 ml');
     expect(subtitle('lotus-ultra-light', 250)?.text).toBe('Loses Magnesium at 250 ml');

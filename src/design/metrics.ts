@@ -43,8 +43,8 @@ export type FontWeight = '400' | '600' | '700' | '800' | '900';
  *   Android  ascent 34.67   descent  8.38
  *
  * iOS pins the descent at the font's own and takes the entire difference off the
- * ascent. Android splits the difference evenly between the two — it removed 5.71
- * above and 5.72 below. Everything else in this module derives from that.
+ * ascent. Android splits the difference evenly between the two — 5.71 above and
+ * 5.72 below. Everything else in this module derives from that.
  */
 export type TextPlatform = 'ios' | 'android';
 
@@ -222,8 +222,8 @@ export const trackingPx = (em: number, fontSize: number) => em * fontSize;
  * React Native applies `letterSpacing` after *every* character, including the
  * last, where CSS puts it only *between* them. With negative tracking the box
  * therefore comes out one whole tracking unit narrower than the glyphs inside it,
- * and the final glyph is clipped at the frame — losing ~2.9px of the last digit
- * at `hero`, which is what the volume screen's cutoff was.
+ * and the final glyph is clipped at the frame — ~2.9px of the last digit at
+ * `hero`.
  *
  * Giving that trailing unit back as right padding restores the advance width the
  * text should have had. This is not a fudge factor: it is exactly the one gap RN
@@ -367,8 +367,8 @@ export function opticalGap(
  *
  * `desired` is the gap you want to see between the card edge and the visible
  * marks; the text box already contributes `insets`, so the padding is whatever is
- * left. This is the whole reason the handoff crushed its line heights, and doing
- * it here instead means no negative margins and no per-screen fudge factors.
+ * left. This is the effect `docs/designs/v1` gets by crushing its line heights;
+ * done here it needs no negative margins and no per-screen fudge factors.
  *
  * Clamped at zero: at the tightest legal line height a display numeral's natural
  * descent slack can already exceed the gap asked for, and the honest answer is

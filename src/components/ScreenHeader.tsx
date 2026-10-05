@@ -14,9 +14,9 @@
  * platform minimum despite being drawn as a 20px glyph.
  *
  * The bar is a fixed band rather than a row that measures its own title — see
- * `HEADER_BAND`. Home's header is a 16pt wordmark and these are 24pt titles, and
- * a self-measuring row put the content on those two screens about 13pt apart, so
- * the page jumped as you navigated between them.
+ * `HEADER_BAND`. Home's header is a 16pt wordmark and these are 24pt titles, so a
+ * self-measuring row would start their content about 13pt apart and the page
+ * would jump as you navigate between them.
  */
 
 import { Platform, View } from 'react-native';

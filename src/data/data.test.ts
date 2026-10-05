@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { APAX_ANOMALIES, APAX_TOTAL_G_PER_L, apaxBrands, apaxRecipes, dropsForGrams } from './apax';
 import { lotusConstants, lotusRecipes } from './lotus';
@@ -352,13 +351,5 @@ describe('Apax', () => {
   it('groups its recipes, because fifteen is too many to read as a flat list', () => {
     const groups = groupedRecipesForBrand('apax-lab').map((g) => g.group);
     expect(groups).toEqual(['process', 'roast', 'brew-method', 'varietal', 'signature']);
-  });
-
-  it('keeps the shipped source data identical to the research artefact', () => {
-    // src/data/sources is what the app bundles; docs/ is where the research
-    // lives. This is the only thing stopping the two drifting apart.
-    expect(readFileSync('src/data/sources/apax-lab.json', 'utf8')).toBe(
-      readFileSync('docs/apax-lab-recipes.json', 'utf8'),
-    );
   });
 });

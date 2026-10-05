@@ -1,14 +1,12 @@
 /**
  * The screen the app opens on.
  *
- * The design brief's whole case is here: one person at a kitchen counter at 6am,
- * before coffee, holding a bottle in one hand and a phone in the other. They want
- * four numbers and to stop looking at the screen. So everything needed to make
- * water is visible without scrolling or tapping, and nothing on it teaches,
- * persuades or onboards.
+ * Its user is one person at a kitchen counter at 6am, before coffee, holding a
+ * bottle in one hand and a phone in the other. They want four numbers and to stop
+ * looking at the screen. So everything needed to make water is visible without
+ * scrolling or tapping, and nothing on it teaches, persuades or onboards.
  *
- * Brand, recipe and volume now come from the store and survive a cold start. The
- * navigation the header and Edit control imply arrives with the screens they open.
+ * Brand, recipe and volume come from the store and survive a cold start.
  */
 
 import { ScrollView, View } from 'react-native';
@@ -51,16 +49,16 @@ export function DoseScreen({
    * holding the screen's bottom edge.
    *
    * Pinned, it is a sibling of the list and does not shrink, so at the largest
-   * sizes it grew to eight lines and squeezed the doses off the screen entirely —
+   * sizes it grows to eight lines and squeezes the doses off the screen entirely —
    * the one thing the screen exists to show. Reflowing costs the summary its
    * permanent visibility, which is the lesser loss: at that text size the whole
    * screen is a scroll anyway.
    */
   const reflowed = useReflowedText();
 
-  /* The footer is now only about this brew: status dot, what the rounding costs,
-     and the way through to the breakdown. Settings has moved to the header, so
-     the line gets the full width and is a single tap target — see `RoundingLine`. */
+  /* The footer is only about this brew: status mark, what the rounding costs, and
+     the way through to the breakdown. Settings is in the header, so the line gets
+     the full width and is a single tap target — see `RoundingLine`. */
   const bottomBar = (
     <View
       style={{

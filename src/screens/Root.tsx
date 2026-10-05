@@ -2,8 +2,8 @@
  * The app: one screen, with overlays over it.
  *
  * There is no navigator. Every secondary screen is a full-bleed layer over a
- * persistent dose screen, and the handoff requires the screen underneath to move
- * in sympathy as one arrives. Coordinating an outgoing and an incoming screen is
+ * persistent dose screen, and the screen underneath moves in sympathy as one
+ * arrives. Coordinating an outgoing and an incoming screen is
  * awkward through a navigator and trivial with two layers reading one progress
  * value, and the app has no deep links, no history and no tabs to justify one.
  *
@@ -24,10 +24,8 @@ export type OverlayName = 'volume' | 'recipe' | 'settings' | 'detail';
 
 /** Each screen enters from its trigger: the recipe card and the settings glyph are
  *  both at the top, Edit is mid-screen on the right, and Details is the footer.
- *
- *  Settings moved from the footer to the header, so it now arrives from above with
- *  it. The direction is not decoration — it is what tells you which thing you
- *  touched, so it has to follow the control rather than stay where it was. */
+ *  The direction is not decoration — it is what tells you which thing you
+ *  touched, so it follows the control. */
 const DIRECTION: Record<OverlayName, OverlayDirection> = {
   recipe: 'top',
   volume: 'right',

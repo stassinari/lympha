@@ -1,10 +1,9 @@
 /**
  * Derives a font's vertical metrics from the shipped TTFs.
  *
- * Why this exists: React Native clips glyphs to the lineHeight box, and the
- * shortfall is taken off the top. So there is a hard floor below which capitals
- * and digits shear. That floor is a property of the font, not a matter of taste,
- * and this script computes it rather than leaving it to be eyeballed.
+ * React Native clips glyphs to the lineHeight box, taking the shortfall off the
+ * top, so each font has a hard line-height floor below which capitals and digits
+ * shear. This computes it.
  *
  * Run: node scripts/font-metrics.mjs [family] [...weights]
  *   node scripts/font-metrics.mjs                     → Nunito, every loaded weight

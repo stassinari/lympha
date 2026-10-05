@@ -36,10 +36,9 @@ const CAPPED = [...GEOMETRIC, ...CHROME];
 
 describe('dynamic type', () => {
   /**
-   * One test, not two. Exact set equality already implies that everything outside
-   * the list is uncapped, so asserting it separately bought no coverage and made a
-   * single policy change fail twice. The per-role loop is kept only because it names
-   * the offending role in the failure message.
+   * Exact set equality already implies that everything outside the list is
+   * uncapped; the per-role loop is there only to name the offending role in the
+   * failure message.
    */
   it('caps exactly the roles whose size is a layout decision', () => {
     const capped = roles.filter((role) => typeScale[role].maxScale !== undefined);
@@ -200,27 +199,24 @@ describe('the header band', () => {
   it('gives the wordmark the air above its caps that stops it reading as a label', () => {
     // Not the line box: Figtree leaves slack above its caps, so measuring to the
     // box would put the visible mark lower than intended. Cap-block centring is
-    // symmetric about the baseline, so this is also the air below it — which is
-    // the half that was too tight at the old 56pt band.
+    // symmetric about the baseline, so this is also the air below it — the half a
+    // shorter band squeezes against the content.
     expect(capTopInBand('wordmark', 'ios')).toBeCloseTo(26.4, 1);
   });
 
   /**
-   * Headroom beyond the wordmark. A `(Ly)` brand mark was tried beside it and
-   * dropped — the header is the wordmark alone — so nothing here draws one. This
-   * only records that the band still has room for a glyph that size, so anything
-   * added beside the wordmark stays additive to `AppHeader` and reaches neither
-   * `HEADER_BAND` nor the content start line.
+   * Headroom beyond the wordmark. Nothing draws a glyph beside it; this records
+   * that the band has room for one that size, so anything added beside the
+   * wordmark stays additive to `AppHeader` and reaches neither `HEADER_BAND` nor
+   * the content start line.
    */
   it('has room for a ~24pt brand mark beside the wordmark', () => {
     expect(HEADER_BAND - 24).toBeGreaterThanOrEqual(2 * 16);
   });
 
   /**
-   * The whole point of the band. The two headers are 8pt of font size apart, and
-   * before the band that difference landed on the content: the recipe card on
-   * Home and the `APPEARANCE` label on Settings sat about 13pt apart and the page
-   * jumped as you navigated.
+   * The whole point of the band. The two headers are 8pt of font size apart; if
+   * that difference reached the content, the page would jump on navigation.
    *
    * What survives is half the difference in their cap heights, which moves the
    * headers' own ink and nothing below them. It stays small enough that the two

@@ -37,7 +37,7 @@ const GRAMS_PER_DROP = 1 / DROPS_PER_GRAM;
 export const APAX_TOTAL_G_PER_L = source.validation.expected_total_g_per_litre;
 
 /**
- * Whole drops for a gram dose. Half-up, per the brief.
+ * Whole drops for a gram dose, rounded half-up as Apax does.
  *
  * Note this is *not* how the recipe is validated. A 4.0 g/L recipe containing
  * 0.5 g and 2.5 g doses rounds up twice and totals 61 or 62 drops, so a drop
@@ -47,11 +47,9 @@ export const dropsForGrams = (grams: number, litres = 1) =>
   Math.round(grams * litres * DROPS_PER_GRAM);
 
 /**
- * Label colours. The design handoff sampled only the three bottles that existed
- * when it was written; KONFLUX post-dates it. These four are a later revision
- * agreed with the designer, which supersedes the handoff table for Apax — KONFLUX
- * gets a real value in place of the neutral-slate fallback, and LYLAC was warmed
- * slightly to sit beside it. TONIK and JAMM are unchanged from the handoff.
+ * Label colours, agreed with the designer, superseding the design handoff's Apax
+ * table (which predates KONFLUX). TONIK and JAMM match the handoff; LYLAC is
+ * warmed slightly to sit beside KONFLUX. See `docs/decisions.md`.
  */
 const COLOURS: Record<string, { light: string; dark: string }> = {
   tonik: { light: '#6FB87F', dark: '#93CFA0' },

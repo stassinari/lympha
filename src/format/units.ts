@@ -45,9 +45,8 @@ export const formatIdealAmount = (value: number): string => value.toFixed(2);
  * Two rather than one, because this column is meant to be checked. At Rao's and
  * 1500 ml the delivered alkalinity is 21.4286 against a target of 20.1 — a gap of
  * 6.6%, which the headline reports as 7%. Printed to one decimal the same sum
- * gives 6.5%, so a reader doing the arithmetic on the numbers in front of them
- * got a different answer from the app and concluded, reasonably, that one of us
- * was wrong. The extra digit is what makes the headline reproducible.
+ * gives 6.5%, and a reader doing the arithmetic gets a different answer from the
+ * app. The second decimal makes the headline reproducible.
  */
 export function formatPpm(value: number): string {
   return String(Math.round(value * 100) / 100);
@@ -57,8 +56,7 @@ export function formatPpm(value: number): string {
  * A relative error, as a whole signed percentage.
  *
  * Whole, deliberately: this exists so the headline can be checked, and the
- * headline is a whole number. A decimal here would re-open the same "why doesn't
- * this add up" gap it is here to close.
+ * headline is a whole number. A decimal here would disagree with it.
  */
 export function formatGapPercent(fraction: number): string {
   const percent = Math.round(fraction * 100);

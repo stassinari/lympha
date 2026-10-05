@@ -1,10 +1,9 @@
 /**
  * The one line that tells you what you are actually about to make.
  *
- * This is the app's whole argument compressed into a sentence, so the design
- * brief is strict about it: most mornings the number is fine and should be nearly
- * invisible; occasionally it is 20% off and should be noticed. It has to read as
- * quiet confidence, not an error state.
+ * The app's whole argument compressed into a sentence. Most mornings the number
+ * is fine and should be nearly invisible; occasionally it is 20% off and should
+ * be noticed. It has to read as quiet confidence, not an error state.
  */
 
 import type { Dose } from '@/engine';
@@ -21,11 +20,11 @@ const EXACT = 0.005;
 /**
  * Which of the figures on the detail screen the headline is quoting.
  *
- * The headline is one percentage over a screen showing six, and until it said
- * which one it meant, it could not be checked: a reader picked the row they
- * assumed it came from, got a different answer, and had no way to tell whether
- * the app or their arithmetic was wrong. Naming the source is half of making the
- * number verifiable — `formatPpm`'s second decimal is the other half.
+ * The headline is one percentage over a screen showing six. Unless it names
+ * which one it quotes, a reader checks it against the wrong row, gets a different
+ * answer, and cannot tell whether the app or their arithmetic is wrong. Naming
+ * the source is half of making the number verifiable — `formatPpm`'s second
+ * decimal is the other half.
  */
 export type HeadlineSource =
   /** The error in the finished water, where the vendor publishes enough to know it. */

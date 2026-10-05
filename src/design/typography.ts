@@ -7,8 +7,8 @@
  *
  * Line heights are chosen against `minLineHeightRatio`, which is a hard floor,
  * not a preference. The display roles sit as close to that floor as Nunito
- * allows; the difference from the handoff's `line-height: 0.88` is taken out of
- * container padding instead, using `inkInsets`.
+ * allows; the tightness `docs/designs/v1` draws with `line-height: 0.88` comes
+ * from container padding, using `inkInsets`.
  *
  * Every role is Nunito except `wordmark`, and a role's font is what decides which
  * font's floor its line height is measured against — the two are 0.11em apart.
@@ -175,11 +175,10 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   wordmark: {
     font: FIGTREE,
     weight: '600',
-    // Two thirds of `screenTitle`, not a shade under it. At 20 the mark was 4pt
-    // off the page titles, which reads as a near-miss — as though it were trying
-    // to be one and failing — rather than as a different kind of thing. 16 is far
-    // enough away that the question does not come up, and the band is what stops
-    // the smaller mark shortening the header: see `HEADER_BAND`.
+    // Two thirds of `screenTitle`, not a shade under it. A mark a few points off
+    // the page titles reads as a near-miss — a title that failed — rather than a
+    // different kind of thing; at 16 the question does not come up. The band
+    // stops the smaller mark shortening the header: see `HEADER_BAND`.
     size: 16,
     lineHeightRatio: 1.15,
     // Opened up, not tightened. A wordmark is looked at rather than read, and a

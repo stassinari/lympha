@@ -6,8 +6,8 @@
  * — a warning is deliberately the same family as a dose rather than a different
  * kind of object, which is how the app stays calm about rounding at 6am.
  *
- * The bar is exactly 12px, full height, and touches the card edge. An inset bar
- * was tested during design and reads too quietly. Every bar is flush and
+ * The bar is exactly 12px, full height, and touches the card edge; an inset bar
+ * reads too quietly. Every bar is flush and
  * unbordered, however pale the label — see `resolveBarColour` for why a pale one
  * needs no help.
  */
@@ -66,8 +66,7 @@ export function BarRow({
     </>
   );
 
-  // `overflow: hidden` is what clips the bar to the radius. Verified on both
-  // platforms in the Slice 0 spike; Android needs no workaround.
+  // `overflow: hidden` is what clips the bar to the radius, on both platforms.
   const shadow = elevated ? cardShadow : null;
 
   const surface: ViewStyle = {

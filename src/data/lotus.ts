@@ -133,7 +133,7 @@ const K = 'lotus-potassium';
  * Named recipes, lifted from the `data-ppm*` attributes on the calculator page's
  * `<option>` elements. All values are ppm as CaCO₃.
  *
- * Two ingest rules were applied:
+ * Two ingest rules apply:
  *
  *   - `Custom Recipe` is excluded. It is a UI sentinel with all-zero attributes,
  *     and ingested naively it becomes a selectable option that produces plain water.

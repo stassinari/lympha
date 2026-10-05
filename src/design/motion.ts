@@ -1,10 +1,9 @@
 /**
  * Whether the platform has been asked to reduce motion.
  *
- * A vestibular accommodation, and one this app owes something to: Slice 11 put a
- * full-screen slide behind every navigation and a scale pulse on every number
- * that changes. Both are exactly the kind of movement the setting exists to
- * suppress.
+ * A vestibular accommodation. Every navigation in the app is a full-screen slide
+ * and every changing number pulses in scale — exactly the movement the setting
+ * exists to suppress.
  *
  * Suppressed does not mean removed. A transition still has to say "you have
  * arrived somewhere else", so the slide becomes a cross-fade rather than a cut —

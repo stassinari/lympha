@@ -70,14 +70,10 @@ describe('roundingSummary', () => {
 
 describe('headline', () => {
   /**
-   * Reported from the first Android build, and the reason this test exists.
-   *
-   * Rao's at 1500 ml: the app said 7% over target, the detail screen printed
-   * hardness 72.3 → 75 and alkalinity 20.1 → 21.4, and a reader doing the
-   * division got 6%. Both were "right" — the app computed from 21.4286, the
-   * reader from what was on the screen. For an app whose entire claim is that its
-   * arithmetic is checkable, the rounding figure is the worst one to be unable to
-   * check, so the printed figures now have to reproduce it.
+   * Rao's at 1500 ml headlines 7% over target from an alkalinity of 21.4286
+   * against 20.1. Printed to one decimal, 21.4 against 20.1 gives 6%. The app's
+   * whole claim is that its arithmetic is checkable, so the printed figures must
+   * reproduce the headline.
    */
   it('can be reproduced from the figures the detail screen prints', () => {
     const dose = computeDose(getRecipe('lotus-raos-recipe')!, 1500, componentMap);

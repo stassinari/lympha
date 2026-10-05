@@ -56,9 +56,9 @@ describe('formatPpm', () => {
   });
 
   /**
-   * The reason for the second decimal: at one, the printed figures gave 6.5%
+   * The reason for the second decimal: at one, the printed figures give 6.5%
    * against a headline of 7%, and the arithmetic the screen invites you to do
-   * disagreed with the screen.
+   * disagrees with the screen.
    */
   it('prints enough precision to reproduce the headline', () => {
     const target = 20.1;

@@ -5,11 +5,9 @@
  * the delivered value marked when it misses. Vendor calculators print only the
  * first column.
  *
- * The last column exists because the headline percentage could not be checked
- * without it. The screen showed six figures and one summary number, and left the
- * reader to work out which row it came from and to redo the division themselves —
- * on figures that had already been rounded for display. Printing the gap on each
- * row removes both steps.
+ * The last column is what makes the headline percentage checkable. Without it the
+ * reader has to work out which row the summary number came from and redo the
+ * division themselves, on figures already rounded for display.
  */
 
 import { View } from 'react-native';
@@ -42,9 +40,8 @@ const MARK_SIZE = 14;
  * shape rather than hue, and it says something the colour could not: which way
  * the miss went.
  *
- * An arrow rather than the caret this used to draw. A caret is the shape for
- * expand and collapse; what this means is *rounded up*, and an arrow is the
- * shape for that. Plain `ArrowUp` rather than a fatter one: this appears four
+ * An arrow, not a caret: a caret is the shape for expand and collapse, and what
+ * this means is *rounded up*. Plain `ArrowUp` rather than a fatter one: this appears four
  * times in one small table, and a chunky glyph both blurs at 14pt and overstates
  * the message — drops are integers so we nudged, not "significant increase".
  *

@@ -2,8 +2,8 @@
  * Raw colour values from the design handoff. Nothing outside this file should
  * reference a hex code; screens consume the semantic names in `theme.ts`.
  *
- * The secondary text values were verified for WCAG AA at 14px against their
- * intended backgrounds and previously failed with lighter values. Do not lighten.
+ * The secondary text values are the lightest that pass WCAG AA at 14px against
+ * their intended backgrounds. Do not lighten.
  */
 
 export type ColourTokens = {
@@ -36,11 +36,9 @@ export const NEUTRAL_SLATE = { light: '#7E8A8C', dark: '#9DAAAC' } as const;
 /**
  * `ok` is a leaf green of its own, not a bottle's colour.
  *
- * It used to be Lotus's potassium teal, to keep the palette closed. But a bottle
- * colour used as a state reads as that bottle: next to the teal bar the check
- * looked like part of the dose list, while the caution state beside it is an
- * amber that belongs to no bottle. The teal also failed contrast, at 2.34:1 in
- * light as drawn.
+ * A bottle colour used as a state reads as that bottle — beside a teal bar, a
+ * teal check looks like part of the dose list — and the caution state it pairs
+ * with is an amber that belongs to no bottle.
  *
  * Leaf sits at hue ~96°, warm enough to live with terracotta, rose, cream and
  * amber, and clear of every green a bottle or brand already uses: Lotus's
@@ -50,7 +48,6 @@ export const NEUTRAL_SLATE = { light: '#7E8A8C', dark: '#9DAAAC' } as const;
  *
  * As drawn, at the clear mark's 80% opacity, it clears 3:1 against `background`
  * in both schemes: 3.30 light, 5.89 dark. `palette.test.ts` holds it there.
- * Chosen on device 2026-10-05 over moss, sage and a hueless neutral.
  */
 export const light: ColourTokens = {
   background: '#FBF8F4',

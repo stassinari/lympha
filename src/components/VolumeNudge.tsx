@@ -7,8 +7,7 @@
  *
  * It reuses the dose row anatomy — same radius, same flush 12px bar, amber
  * instead of a bottle colour — so a warning reads as the same family of object as
- * a dose rather than as an error state. The brief is firm that this must not
- * create anxiety at 6am.
+ * a dose rather than as an error state. It must not create anxiety at 6am.
  */
 
 import { useEffect, useState } from 'react';
@@ -52,7 +51,7 @@ function body(dose: Dose, cleanVolumeMl: number | null): string {
       : `You would be ${Math.round(Math.abs(headlineGap(dose)) * 100)}% off what the recipe asks for.`;
 
   // Never invent a suggestion. Saying so plainly is the honest output, and the
-  // brief requires the card to offer only a dismiss in that case.
+  // card then offers only a dismiss.
   return cleanVolumeMl
     ? `${lost} ${cleanVolumeMl} ml lands exactly.`
     : `${lost} No nearby volume divides evenly.`;
@@ -91,9 +90,9 @@ export function VolumeNudge({ dose, cleanVolumeMl, onUseClean, onDismiss }: Volu
 /**
  * The card rises into place rather than appearing.
  *
- * The handoff animates its height, which reflows the screen; sliding it up from
- * behind the keypad reads the same and stays on the native driver, where a height
- * animation cannot go.
+ * Animating its height would reflow the screen; sliding it up from behind the
+ * keypad reads the same and stays on the native driver, where a height animation
+ * cannot go.
  */
 function useEntrance() {
   const reduced = useReduceMotion();

@@ -28,8 +28,9 @@ function lotusDrops(id: string, volumeMl: number): number[] {
 const pct = (n: number) => (n * 100).toFixed(1);
 
 /**
- * The published quantisation table from water-schema-v0, driven through the
- * whole engine this time rather than through the data layer alone.
+ * The published quantisation table from `docs/water-schema-v0.md`, driven
+ * through the whole engine. `data.test.ts` checks the same table against the
+ * data layer alone.
  */
 const PUBLISHED = [
   { id: 'lotus-light-and-bright', drops: [0, 7, 0, 6], gh: '-6.3', ka: '-3.6' },
@@ -56,8 +57,8 @@ describe('the engine reproduces the vendor’s published table at 1 L', () => {
 
 describe('honest rounding', () => {
   it('keeps the ideal alongside the achievable', () => {
-    // The worked example from the schema: 50 ppm Mg at 1 L is 6.22 drops. Lotus
-    // rounds to 6 and still reports 50 ppm. You get 48.2.
+    // Simple and Sweet's magnesium at 1 L is 3.733 drops. Four are delivered, and
+    // the 7% gap is reported rather than hidden.
     const line = dose('lotus-simple-and-sweet', 1000).lines.find(
       (l) => l.component.id === 'lotus-magnesium',
     );
@@ -204,9 +205,8 @@ describe('the clean volume search', () => {
   });
 
   it('stays within a quarter of what was asked for', () => {
-    // A flat allowance is sensible from a litre and absurd from a cup: it once
-    // answered "use 800 ml" to someone asking for 350, which is a different drink
-    // rather than a nudge.
+    // A flat allowance is sensible from a litre and absurd from a cup: 800 ml for
+    // someone asking for 350 is a different drink, not a nudge.
     for (const recipeId of ['lotus-raos-recipe', 'lotus-simple-and-sweet', 'lotus-ultra-light']) {
       for (const volumeMl of [200, 250, 350, 500, 1000, 1500, 2000]) {
         const found = findCleanVolume(recipe(recipeId), componentMap, volumeMl);

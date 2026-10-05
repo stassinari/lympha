@@ -1,13 +1,11 @@
 /**
  * Choose a brand and a recipe, in one place.
  *
- * These were separate screens early in the design and were merged, because brand
- * alone is never the goal — nobody opens this wanting to "be on Apax". You come
- * here to change what you are making.
+ * One screen for both, because brand alone is never the goal — nobody opens this
+ * wanting to "be on Apax". You come here to change what you are making.
  *
- * The vendor's own grouping is kept. Apax's current range has fifteen recipes
- * against the flat list of five to seven the handoff drew, and fifteen unlabelled
- * rows is not something to read at 6am.
+ * The vendor's own grouping is kept: Apax's range has fifteen recipes, and fifteen
+ * unlabelled rows is not something to read at 6am.
  */
 
 import { RecipeRow, ScreenHeader } from '@/components';
@@ -73,12 +71,8 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
         }}
         // Neither grows nor shrinks: a ScrollView in a flex column is shrinkable
         // by default, and the recipe list below can ask for far more height than
-        // the screen has. Left alone, Apax's fifteen rows squeeze this row
-        // noticeably shorter than Lotus's seven do.
-        // Neither grows nor shrinks. A ScrollView sized to its content in a flex
-        // column can squeeze its siblings, and this row sits above a list that is
-        // fifteen rows long for Apax against seven for Lotus — which is exactly
-        // when the chips were measured 18% shorter.
+        // the screen has, so Apax's fifteen rows would squeeze this row noticeably
+        // shorter than Lotus's seven.
         style={{ flexGrow: 0, flexShrink: 0 }}
       >
         {brands.map((b) => (
@@ -104,7 +98,7 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
       <ScrollView
         showsVerticalScrollIndicator={false}
         // Takes exactly the space left over, rather than sizing to its content and
-        // pushing against the row above — which is what did the squeezing.
+        // squeezing the row above.
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: space.blocks,

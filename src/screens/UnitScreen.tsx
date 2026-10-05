@@ -5,9 +5,9 @@
  * real numbers rather than against the words "drops" and "grams". At a litre Apax
  * is 2 g or 30 drops of TONIK, and seeing both is the entire argument.
  *
- * Automatic is offered alongside them, and is the default. The brief asks for the
- * unit to follow the magnitude of the dose with an override available — so there
- * has to be a way back to letting it decide.
+ * Automatic is offered alongside them, and is the default: the unit follows the
+ * magnitude of the dose unless overridden, so there has to be a way back to
+ * letting it decide.
  */
 
 import { useMemo } from 'react';
@@ -57,9 +57,9 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
     const remembered = rememberedId ? getRecipe(rememberedId) : undefined;
     return remembered?.brand === brandId ? remembered : recipesForBrand(brandId)[0];
   }, [brandId, rememberedId]);
-  // Read through `unitPreferenceFor`, which resolves the unit group. Reading the
-  // map by brand id misses — the key is the group ("apax", not "apax-lab") — so
-  // every option but Automatic looked unselected while the write landed correctly.
+  // Read through `unitPreferenceFor`, which resolves the unit group. The map is
+  // keyed by group ("apax", not "apax-lab"), so reading it by brand id misses and
+  // every option but Automatic shows as unselected.
   const preference = useStore((s) => unitPreferenceFor(s, brandId));
   const setUnitPreference = useStore((s) => s.setUnitPreference);
 

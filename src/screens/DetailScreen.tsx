@@ -4,8 +4,8 @@
  * Three things, in order of how much they change your morning: how far off you
  * are, which bottle is responsible, and what the water actually comes out like.
  *
- * The handoff drew a fixed table of Hardness / Alkalinity / TDS. TDS is not
- * derivable from anything either vendor publishes, and Apax publishes no ion
+ * Not a fixed Hardness / Alkalinity / TDS table, as `docs/designs/v1` draws: TDS
+ * is not derivable from anything either vendor publishes, and Apax publishes no ion
  * quantities at all, so the per-bottle table is the universal one and the
  * chemistry appears only where it can be computed. Showing zeroes for Apax would
  * read as soft water rather than as missing data.
@@ -141,10 +141,9 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
 /**
  * Names the figure the headline is quoting, then says why it is out.
  *
- * The attribution is the fix for a real report: with six numbers below and one
- * percentage above, a reader picked the row they assumed it came from, got a
- * different answer, and had no way to know which of them was wrong. It was the
- * alkalinity row, and nothing on the screen said so.
+ * With six numbers below and one percentage above, an unattributed headline
+ * leaves the reader to guess which row it came from; a wrong guess gives a
+ * different answer and no way to tell which of them is wrong.
  */
 function explain(
   dose: ReturnType<typeof useDose>,

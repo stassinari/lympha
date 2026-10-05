@@ -34,24 +34,20 @@ import type { DoseLine } from '@/engine';
  * A row marked as added recedes rather than disappearing, so the list keeps its
  * shape and you can still see what you poured.
  *
- * The handoff expresses this as `opacity: 0.42` on the whole row. That is a web
- * idiom, and on Android a group alpha over a card, its elevation shadow and its
- * text children composites badly — measured on a Pixel 8 it leaves a pale band,
- * exactly the height of the numeral's cap block, across an otherwise grey row.
- *
- * So the recession is built from three separate things instead, none of which is a
+ * Not a group alpha on the whole row, as `docs/designs/v1` draws it: on Android a
+ * group alpha over a card, its elevation shadow and its text children composites
+ * badly, leaving a pale band the height of the numeral's cap block across an
+ * otherwise grey row. The recession is three separate things, none of which is a
  * group alpha over a shadow:
  *
- *   - **The surface drops to the chip tone**, and the shadow goes with it. Not the
- *     page background, which was the first attempt and the bug this fixes: at 1.06
- *     against the card it was indistinguishable from the page, so a finished row
- *     read as *deleted* rather than as done-and-still-there. The chip tone is the
- *     app's existing sunken surface — darker than the card in light, lighter in
- *     dark, 1.20 against it either way — so the row visibly stops being raised
- *     without ceasing to be a row.
- *   - **The content dims to 62%.** Alpha on the content wrapper alone is safe where
- *     alpha on the row was not: the layer holds text over an opaque parent, with no
- *     elevation inside it to composite against.
+ *   - **The surface drops to the chip tone**, and the shadow goes with it. The
+ *     chip tone is the app's sunken surface — darker than the card in light,
+ *     lighter in dark, 1.20 against it either way — so the row visibly stops being
+ *     raised without ceasing to be a row. The page background is only 1.06 against
+ *     the card, so a row in that tone reads as *deleted* rather than done.
+ *   - **The content dims to 62%.** Alpha on the content wrapper alone is safe: the
+ *     layer holds text over an opaque parent, with no elevation inside it to
+ *     composite against.
  *   - **The bar fades**, a leaf view with nothing behind it, where alpha is
  *     unambiguous.
  *
@@ -83,10 +79,9 @@ export type DoseRowProps = {
  * column of doses reads ragged for no reason.
  *
  * The plural is laid out invisibly to fix the column's width and give the row its
- * baseline; the real label is drawn over it. Two earlier attempts failed for
- * instructive reasons — hiding a nested "s" with `opacity` does nothing, because a
- * nested Text is a span rather than a view, and hiding it with `color:
- * 'transparent'` does nothing either on Android's text renderer.
+ * baseline; the real label is drawn over it. Hiding a nested "s" instead does not
+ * work: `opacity` on a nested Text does nothing, because it is a span rather than
+ * a view, and `color: 'transparent'` does nothing on Android's text renderer.
  *
  * The explicit width on the overlay is what stops it wrapping: left to inherit the
  * sizer's width it measures a fraction of a pixel wider than the identical string
@@ -120,7 +115,7 @@ function UnitColumn({ unit, count }: { unit: DoseUnit; count: number }) {
  * suppressed under Reduce Motion, where it is pure decoration — the strike-through,
  * the dim and the row's drop to the sunken tone all say the same thing without
  * moving. The dim is not suppressed: it is a state, not a motion, and at zero
- * duration it simply arrives without a transition, as the whole row already did.
+ * duration it simply arrives without a transition.
  */
 function useDoneRecession(done: boolean, reduced: boolean) {
   const [progress] = useState(() => new Animated.Value(done ? 1 : 0));
@@ -178,8 +173,8 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
   const recession = useDoneRecession(done, reduced);
 
   const mark = () => {
-    // A short tap you can feel. The brief's user is not looking at the screen
-    // between bottles — they are counting drops into a jug in the dark.
+    // A short tap you can feel. Between bottles the user is not looking at the
+    // screen — they are counting drops into a jug in the dark.
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();
   };

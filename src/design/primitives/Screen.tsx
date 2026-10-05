@@ -9,8 +9,8 @@
  * Nothing is added above that inset here. Every screen's first child is a header
  * band of a fixed height — see `HEADER_BAND` — and top spacing is measured inside
  * it, against the header's cap height. A screen-level top padding on top of that
- * would be a second, invisible offset that each screen could get wrong, which is
- * exactly how the content start line drifted apart in the first place.
+ * would be a second, invisible offset that each screen could get wrong, and the
+ * content start line would drift apart between screens.
  */
 
 import { View } from 'react-native';

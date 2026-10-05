@@ -1,12 +1,10 @@
 /**
  * Makes the splash a plain page-coloured screen on both platforms.
  *
- * Lympha's splash deliberately has no image: only the page background for each
- * scheme, from `backgroundColor` and `dark.backgroundColor` on
- * `expo-splash-screen` in `app.json`. That plugin assumes there is an image, and
- * without one it leaves each platform broken in a different way. This fills in
- * the two missing steps on every prebuild, so they hold on EAS too, where the
- * native folders are regenerated from scratch and a hand edit would be lost.
+ * The splash has no image, only each scheme's page background, set on
+ * `expo-splash-screen` in `app.json`. That plugin assumes an image, and without
+ * one breaks each platform differently. This supplies the two missing steps at
+ * prebuild, so they also hold on EAS, which regenerates the native folders.
  *
  * **iOS.** It generates a `SplashScreenBackground` colour set with a dark
  * variant, but only wires it into `SplashScreen.storyboard` when there is an

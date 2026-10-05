@@ -89,16 +89,14 @@ export function useTrackingInset(role: TypeRole): number {
  *
  * Everything derived from the type scale — the cap-squaring padding on a dose
  * row, the optical inset a card measures its edges against, the height of the
- * volume caret — was computed once at module load from an unscaled font size.
- * Turn the system text size up and the text grows while those numbers do not, so
- * the optical centring the whole design system exists to get right quietly stops
- * being centred, and the caret ends up two thirds the height of the digits it
- * stands beside.
+ * volume caret — has to be read here rather than computed at module load: the
+ * system text size grows the text but not a precomputed number, so optical
+ * centring drifts and the caret falls short of the digits beside it.
  *
  * React Native scales `fontSize` and `lineHeight` by the same multiplier, so the
- * fix is to run the same metric functions against the scaled pair rather than
- * the nominal one. The role's own ceiling applies, so a capped role's geometry
- * stops moving at exactly the point its type does.
+ * same metric functions run against the scaled pair. The role's own ceiling
+ * applies, so a capped role's geometry stops moving at exactly the point its type
+ * does.
  */
 export function useTypeMetrics(role: TypeRole) {
   const spec = typeScale[role];
@@ -134,7 +132,7 @@ export function useTypeMetrics(role: TypeRole) {
  * differently" — side-by-side becomes stacked, pinned becomes scrollable. React
  * Native does not surface the category, but it surfaces the multiplier, and the
  * two ranges do not overlap: the largest standard size is 1.35 and the smallest
- * accessibility size is 1.786 (measured on device). Anything between them
+ * accessibility size is 1.786. Anything between them
  * separates the two cleanly.
  *
  * Android has no equivalent split, so the same number is applied there, where it

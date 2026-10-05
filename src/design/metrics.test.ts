@@ -21,8 +21,7 @@ import type { FontWeight, TextPlatform } from './metrics';
 import { typeScale, typeSpecs } from './typography';
 import type { TypeRole } from './typography';
 
-/** The existing expectations were all written against iOS; bind them explicitly
- *  now that the module models both platforms. */
+/** iOS-bound shorthands for the single-platform expectations below. */
 const inkInsets = (fs: number, lh: number, w: FontWeight, e: 'digits' | 'text' = 'text') =>
   inkInsetsFor('ios', fs, lh, w, e);
 const capBoxPadding = (fs: number, lh: number, w: FontWeight, e: 'digits' | 'text') =>
@@ -231,7 +230,7 @@ describe('capBoxInset', () => {
 
   it('keeps a squared row the same height as an unsquared one', () => {
     // Squaring the box moves slack around; it must not make the row grow. If this
-    // fails, the row is bottom-heavy — which is exactly the bug it was written for.
+    // fails, the row is bottom-heavy.
     const t = typeScale.doseValue;
     const pad = capBoxPadding(t.fontSize, t.lineHeight, t.weight, 'digits');
     const boxHeight = t.lineHeight + pad.paddingTop + pad.paddingBottom;
@@ -345,8 +344,7 @@ describe('the same layout lands on both platforms', () => {
   const t = typeScale.doseValue;
 
   it('gives a dose row the same height either way', () => {
-    // The row is the case that went wrong: identical code rendered top-heavy on
-    // Android because the model only knew iOS's rule.
+    // Identical code renders top-heavy on Android if iOS's rule is applied to both.
     const height = (platform: TextPlatform) => {
       const pad = capBoxPaddingFor(platform, t.fontSize, t.lineHeight, t.weight, 'digits');
       const inset = capBoxInsetFor(platform, t.fontSize, t.lineHeight, t.weight, 'digits');
@@ -385,8 +383,8 @@ describe('trackingInset', () => {
     const tracked = (Object.keys(typeScale) as TypeRole[]).filter(
       (role) => typeScale[role].letterSpacing < 0,
     );
-    // The bug was only ever *seen* at hero, where it is 2.9px of a 72px digit. It
-    // was latent everywhere else the handoff tightened the tracking.
+    // Most visible at hero, where it is 2.9px of a 72px digit, but present at
+    // every role with negative tracking.
     expect(tracked.length).toBeGreaterThan(1);
     for (const role of tracked) {
       expect(typeScale[role].trackingInset).toBeCloseTo(-typeScale[role].letterSpacing, 9);
@@ -411,8 +409,8 @@ describe('capBlockBox', () => {
   });
 
   it('is why a text background cannot be used as a selection band', () => {
-    // The measured asymmetry behind the iOS bug: a background filling the line box
-    // sits ~24px lower on its digits than the same background does on Android.
+    // The measured asymmetry: on iOS a background filling the line box sits ~24px
+    // lower on its digits than the same background does on Android.
     const above = (platform: TextPlatform) =>
       capBlockBoxFor(platform, hero.fontSize, hero.lineHeight, hero.weight, hero.extent).top;
     const below = (platform: TextPlatform) =>
@@ -431,8 +429,8 @@ describe('capBlockBox', () => {
   });
 
   it('centres a padded band on the digits on both platforms', () => {
-    // What the volume screen actually draws. Symmetric by construction, so the band
-    // needs no per-platform correction — which is the property that was missing.
+    // What the volume screen draws. Symmetric by construction, so the band needs no
+    // per-platform correction.
     const PAD = 7.2;
     for (const platform of ['ios', 'android'] as TextPlatform[]) {
       const box = capBlockBoxFor(
