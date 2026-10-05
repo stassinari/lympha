@@ -77,12 +77,11 @@ export function AppHeader({ onOpenSettings }: AppHeaderProps) {
         justifyContent: 'space-between',
       }}
     >
-      {/* The leading side is a group of its own rather than a bare child, so the
-          brand mark that will eventually sit left of the wordmark can be added
-          here without touching anything else. Three bare children under
-          `space-between` would spread mark / wordmark / gear across the bar and
-          strand the name in the middle; inside a group, the mark is additive and
-          the band, the content start line and the type tests all stay put. */}
+      {/* The leading side is a group of its own rather than a bare child, so
+          anything that joins the wordmark lands beside it rather than spread
+          across the bar: three bare children under `space-between` would strand
+          the name in the middle. A `(Ly)` mark was tried here and dropped in
+          favour of the wordmark alone. */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.snug }}>
         {/* Decorative: a screen reader already announces the app by name on
             launch, so reading it again at the top of the only screen is noise. */}

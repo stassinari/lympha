@@ -96,9 +96,10 @@ export const COLOUR_BAR_WIDTH = 12;
  * bar above the screen. The 24pt title's caps land at 23.5pt in the same band,
  * still with room to spare, which is why the two headers look like one strip.
  *
- * The extra room is also what a brand mark will eventually sit in: a ~24pt glyph
- * left of the wordmark fits with 20pt either side, so adding it later moves
- * neither this number nor the content start line.
+ * The band also has room to spare beyond the wordmark: a ~24pt glyph beside it
+ * would fit with 20pt either side. A `(Ly)` mark was tried there and dropped in
+ * favour of the wordmark alone, but the headroom costs nothing, and anything that
+ * joins the header later moves neither this number nor the content start line.
  *
  * The content start line itself is the band plus `space.belowHeader`, which each
  * screen's scroller applies as top padding. It is padding inside the scroller,

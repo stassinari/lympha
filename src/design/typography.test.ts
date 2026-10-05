@@ -206,10 +206,11 @@ describe('the header band', () => {
   });
 
   /**
-   * Headroom for the brand mark that will eventually sit left of the wordmark.
-   * It does not exist yet, so nothing here draws one — this only records that the
-   * band was sized with room for it, so adding it is additive to `AppHeader` and
-   * reaches neither `HEADER_BAND` nor the content start line.
+   * Headroom beyond the wordmark. A `(Ly)` brand mark was tried beside it and
+   * dropped — the header is the wordmark alone — so nothing here draws one. This
+   * only records that the band still has room for a glyph that size, so anything
+   * added beside the wordmark stays additive to `AppHeader` and reaches neither
+   * `HEADER_BAND` nor the content start line.
    */
   it('has room for a ~24pt brand mark beside the wordmark', () => {
     expect(HEADER_BAND - 24).toBeGreaterThanOrEqual(2 * 16);
