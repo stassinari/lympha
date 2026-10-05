@@ -64,6 +64,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: space.screenH,
+          paddingTop: space.belowHeader,
           paddingBottom: space.loose,
           gap: space.rows,
         }}

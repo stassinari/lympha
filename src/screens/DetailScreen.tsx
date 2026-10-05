@@ -76,6 +76,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: space.screenH,
+          paddingTop: space.belowHeader,
           paddingBottom: space.loose,
           gap: space.rows,
         }}

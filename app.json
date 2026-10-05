@@ -25,7 +25,14 @@
     },
     "plugins": [
       "expo-font",
-      "expo-splash-screen",
+      "./plugins/withSplashBackground.js",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBF8F4",
+          "dark": { "backgroundColor": "#161211" }
+        }
+      ],
       [
         "expo-build-properties",
         {

@@ -18,7 +18,7 @@
  */
 
 import { View } from 'react-native';
-import { Body, Icon, Touchable, resolveAccent, useTheme } from '@/design';
+import { ActionText, Body, Icon, Touchable, resolveAccent, useTheme } from '@/design';
 import type { RoundingSummary } from '@/format/rounding';
 
 /**
@@ -34,7 +34,7 @@ const TAP_BAND = 11;
 const GAP_ABOVE = 14;
 
 /**
- * The status mark: a filled circle either way, amber or teal.
+ * The status mark: a filled circle either way, amber or leaf green.
  *
  * Both states used to be coloured dots, which carry their whole meaning in hue —
  * so they said nothing in greyscale, nothing to a red-green reader, and nothing
@@ -56,10 +56,13 @@ const MARK = 16;
  * The clear state sits a step back from the caution state.
  *
  * Problems should have more presence than non-problems, and left alone these two
- * would have the same: the teal and the amber are within a tenth of each other
- * against the dark background, and a filled disc carries more ink than the
- * outline it replaces. Alpha rather than a paler teal, so the mute holds on both
- * schemes without a second value to keep in step.
+ * would not: at full strength the green is the *brighter* of the two against the
+ * dark background (8.6:1 to the amber's 7.7), and a filled disc carries more ink
+ * than the outline it replaces. Alpha rather than a paler green, so the mute
+ * holds on both schemes without a second value to keep in step.
+ *
+ * `palette.test.ts` restates this value to check the mark's contrast as drawn,
+ * so change the two together.
  *
  * The mark only. The sentence beside it stays at the secondary tone in both
  * states — it clears AA on the page background by a tenth of a point, and
@@ -112,7 +115,7 @@ export function RoundingLine({ summary, brandAccent, onDetails }: RoundingLinePr
       <Body tone="secondary" style={{ flex: 1 }}>
         {summary.text}
       </Body>
-      <Body style={{ color: accent }}>Details</Body>
+      <ActionText style={{ color: accent }}>Details</ActionText>
     </Touchable>
   );
 }

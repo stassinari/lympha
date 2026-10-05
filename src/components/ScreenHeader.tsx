@@ -22,7 +22,7 @@
 import { Platform, View } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import {
-  Body,
+  ActionText,
   HEADER_BAND,
   Icon,
   ScreenTitle,
@@ -116,7 +116,7 @@ export function ScreenHeader({
       </ScreenTitle>
       {Platform.OS === 'ios' ? (
         <Touchable onPress={onClose} hitSlop={HIT_SLOP} accessibilityLabel="Done">
-          <Body style={{ color: tint }}>Done</Body>
+          <ActionText style={{ color: tint }}>Done</ActionText>
         </Touchable>
       ) : null}
     </View>

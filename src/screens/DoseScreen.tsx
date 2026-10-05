@@ -84,6 +84,7 @@ export function DoseScreen({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           gap: space.blocks,
+          paddingTop: space.belowHeader,
           paddingBottom: space.blocks,
           paddingHorizontal: space.screenH,
         }}

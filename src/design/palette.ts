@@ -34,18 +34,23 @@ export type SemanticTokens = {
 export const NEUTRAL_SLATE = { light: '#7E8A8C', dark: '#9DAAAC' } as const;
 
 /**
- * `ok` is the potassium bar teal, deliberately.
+ * `ok` is a leaf green of its own, not a bottle's colour.
  *
- * It was a generic success green, which made it the only colour in the app
- * outside the identity palette — terracotta, rose, cream, teal, amber. Reusing
- * the teal keeps that list closed, and the teal is not otherwise spoken for as a
- * state.
+ * It used to be Lotus's potassium teal, to keep the palette closed. But a bottle
+ * colour used as a state reads as that bottle: next to the teal bar the check
+ * looked like part of the dose list, while the caution state beside it is an
+ * amber that belongs to no bottle. The teal also failed contrast, at 2.34:1 in
+ * light as drawn.
  *
- * The two values are restated here rather than imported from `data/lotus`, which
- * is where the same pair sits as Lotus's published label colour. They are the
- * same colour on purpose and should be changed together — but a semantic token
- * must not move because a vendor revised a sticker, so the theme does not depend
- * on the data layer to know what "fine" looks like.
+ * Leaf sits at hue ~96°, warm enough to live with terracotta, rose, cream and
+ * amber, and clear of every green a bottle or brand already uses: Lotus's
+ * potassium teal (~175°), Apax's forest accent (~138°) and TONIK's mint (~133°).
+ * Apax's accent matters most, because it colours the "Details" link that sits
+ * beside the check.
+ *
+ * As drawn, at the clear mark's 80% opacity, it clears 3:1 against `background`
+ * in both schemes: 3.30 light, 5.89 dark. `palette.test.ts` holds it there.
+ * Chosen on device 2026-10-05 over moss, sage and a hueless neutral.
  */
 export const light: ColourTokens = {
   background: '#FBF8F4',
@@ -57,7 +62,7 @@ export const light: ColourTokens = {
   textOnCard: '#7D6D66',
   textWarning: '#96632F',
   divider: '#EDE4DC',
-  ok: '#4E9E98',
+  ok: '#4D7A31',
 };
 
 export const dark: ColourTokens = {
@@ -70,7 +75,7 @@ export const dark: ColourTokens = {
   textOnCard: '#B6A79F',
   textWarning: '#D99A4E',
   divider: '#2C2523',
-  ok: '#5AB3AC',
+  ok: '#8DBE6A',
 };
 
 /** Shared across both schemes: this reads acceptably on either background. */

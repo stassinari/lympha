@@ -25,6 +25,7 @@ export type TypeRole =
   | 'rowTitle'
   | 'cardTitle'
   | 'body'
+  | 'action'
   | 'caption'
   | 'sectionHeader'
   | 'unitLabel'
@@ -107,6 +108,17 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   rowTitle: { weight: '800', size: 20, lineHeightRatio: 1.2, trackingEm: -0.01, extent: 'text' },
   cardTitle: { weight: '800', size: 17, lineHeightRatio: 1.25, trackingEm: -0.005, extent: 'text' },
   body: { weight: '600', size: 15, lineHeightRatio: 1.5, trackingEm: 0, extent: 'text' },
+  /**
+   * A control drawn as a word and nothing else: "Done" in an iOS header,
+   * "Details" in the dose screen's footer.
+   *
+   * `body` in everything but weight. It shares a line with body text — "Details"
+   * sits beside the rounding sentence — so a matching size and line box keeps
+   * the two on one baseline. The extra step of weight is what tells a control
+   * apart from prose once the accent alone stops doing it: in greyscale, in
+   * sunlight, or under a brand whose accent sits close to the text tone.
+   */
+  action: { weight: '700', size: 15, lineHeightRatio: 1.5, trackingEm: 0, extent: 'text' },
   caption: { weight: '600', size: 13.5, lineHeightRatio: 1.35, trackingEm: 0, extent: 'text' },
   sectionHeader: {
     weight: '800',

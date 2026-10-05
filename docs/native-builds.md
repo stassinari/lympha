@@ -140,6 +140,26 @@ magick identify -format "%wx%h opaque=%[opaque] bbox=%@\n" assets/android-icon-*
 
 `opaque=False` and a bounding box within 264px are what you want.
 
+## Splash colour
+
+The splash has no image, by decision, only the page background for each scheme, set on
+`expo-splash-screen` in `app.json`. Two things are not obvious:
+
+- **iOS needs `plugins/withSplashBackground.js`.** Without an image, `expo-splash-screen`
+  generates the colour set but never points the storyboard at it (expo/expo#26491), so iOS
+  shows the template's `systemBackgroundColor`, pure white or black. The plugin must be
+  listed **before** `expo-splash-screen`, or prebuild fails with "Provider must be the last
+  mod added".
+- **The colours are restated in `app.json`**, because the splash is drawn before any
+  JavaScript runs. `palette.test.ts` fails if they drift from `palette.ts`.
+
+Check after prebuild:
+
+```sh
+grep backgroundColor ios/Lympha/SplashScreen.storyboard   # name="SplashScreenBackground"
+grep splash android/app/src/main/res/values*/colors.xml   # light and night values
+```
+
 ## Which simulator or emulator gets used
 
 Expo has no preference of its own; it defers to the platform tools.

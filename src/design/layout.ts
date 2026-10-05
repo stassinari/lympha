@@ -33,6 +33,22 @@ export const space = {
    *  intrinsic slack both platforms leave above a display numeral — see
    *  `VolumeCard` — so the two render the same gap. */
   labelGap: 10,
+  /**
+   * Between the header band and the first thing in a screen's scroller.
+   *
+   * A ScrollView clips to its own bounds, so a card that starts flush with the
+   * scroller's top edge has the top of its shadow sliced off. Home's recipe card
+   * and Details' headline row both did, faintly on Android and invisibly on iOS.
+   * The visible part of `cardShadow` reaches about 4pt above a card on iOS (a
+   * 14pt blur, offset 3pt down, at 6% opacity) and about 2dp on Android at
+   * elevation 2, so 8 clears both with room to spare.
+   *
+   * Applied to every screen whose content starts directly under the header, not
+   * only the two that clip, because the content start line has to stay shared —
+   * see `HEADER_BAND`. Giving it only to the screens that start with a card would
+   * put Home's card and Settings' first label 8pt apart again.
+   */
+  belowHeader: 8,
   /** Small internal gaps. */
   tight: 6,
   snug: 8,
@@ -83,6 +99,11 @@ export const COLOUR_BAR_WIDTH = 12;
  * The extra room is also what a brand mark will eventually sit in: a ~24pt glyph
  * left of the wordmark fits with 20pt either side, so adding it later moves
  * neither this number nor the content start line.
+ *
+ * The content start line itself is the band plus `space.belowHeader`, which each
+ * screen's scroller applies as top padding. It is padding inside the scroller,
+ * not more band, because its job is to give a card's shadow room inside the
+ * scroller's clip.
  *
  * A `minHeight`, never a `height`. `screenTitle` scales without limit, and at the
  * larger accessibility sizes its line box passes 64 — a fixed height would shear

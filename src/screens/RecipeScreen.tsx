@@ -66,8 +66,10 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
           gap: space.snug,
           paddingHorizontal: space.screenH,
           // Room for the chips' own press feedback to render without being sliced
-          // by the scroller's bounds.
-          paddingVertical: 4,
+          // by the scroller's bounds. The top is the shared start line under the
+          // header, which is more than that room and so covers it.
+          paddingTop: space.belowHeader,
+          paddingBottom: 4,
         }}
         // Neither grows nor shrinks: a ScrollView in a flex column is shrinkable
         // by default, and the recipe list below can ask for far more height than

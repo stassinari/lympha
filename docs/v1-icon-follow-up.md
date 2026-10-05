@@ -51,11 +51,13 @@ Three constraints on this one:
 
 - **`CheckCircle`, not plain `Check`.** It shares `Info`'s circular silhouette, so the two
   states swap at the same optical size without the row reflowing or shifting weight.
-- **Teal, not green.** Use the existing potassium-bar teal from the theme. A generic success
+- ~~**Teal, not green.** Use the existing potassium-bar teal from the theme. A generic success
   green would be the only colour in the app outside the palette (terracotta, rose, cream,
-  teal, amber).
+  teal, amber).~~ **Reversed 2026-10-05.** A bottle's colour used as a state reads as that
+  bottle, and the teal fails 3:1 in light mode at the mark's 80% mute. Replaced by a leaf
+  green of its own (`#4D7A31` / `#8DBE6A`): see `v1-checklist.md`.
 - **Quieter than the caution state.** Problems should have more presence than non-problems.
-  Mute both the teal check and its label; leave the amber line's contrast as it is today.
+  Mute both the check and its label; leave the amber line's contrast as it is today.
 
 Also worth checking while in here: what does **"Details"** do when nothing is off? If there's
 nothing to explain, the link probably shouldn't render at all, and the good-state footer

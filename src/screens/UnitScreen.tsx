@@ -95,6 +95,7 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: space.screenH,
+          paddingTop: space.belowHeader,
           paddingBottom: space.loose,
           gap: space.rows,
         }}
