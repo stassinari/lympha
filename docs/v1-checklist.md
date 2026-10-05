@@ -52,7 +52,10 @@ Verified on device 2026-08-25: haptics land and read as pleasant rather than noi
 
 ## Release
 
-- [ ] **App icon.** Still Expo's default blue "A" on both platforms.
+- [x] **App icon.** Done: the "(Ly)" mark on `#241E1C`. iOS uses an Icon Composer bundle (`assets/app.icon`); Android uses an adaptive icon with a flat background colour. Verified 2026-10-05 on iPhone 18 Pro / iOS 27 (light, dark, tinted) and Pixel 10 Pro / Android 17 (the circle mask). The compiled iOS asset is the layered `app.iconstack`, not the PNG fallback.
+
+      On Android the brackets come within ~4dp of the circle's edge. They are inside the safe zone and not clipped, and accepted as-is for now. Android's themed (monochrome) icon has not been checked on device yet.
+- [x] **iOS 27 crashed on launch.** Fixed. Built with Xcode 27, the app trapped in UIKit's `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`, because the iOS 27 SDK requires the UIScene lifecycle and SDK 57's template still generates an `AppDelegate` that owns its window. Fixed with Expo's official opt-in (expo/expo#46664): `expo` ≥ 57.0.23 plus `expo-build-properties` with `ios.enableSceneSupport: true`. **Remove the setting when moving to SDK 58**, which adopts scenes by default.
 - [ ] **Splash: deliberately leave it alone.** Cold start is effectively instant, and Saverio's judgement on device is that a designed splash would be *more* jarring than none. Recorded as a decision so it is not mistaken for an oversight later. The native splash is still held until fonts and stored state are ready, which is what keeps the app from flashing a wrong volume.
 
 ---

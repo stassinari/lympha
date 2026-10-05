@@ -15,13 +15,26 @@ silently reports.
 | [`docs/design-brief.md`](docs/design-brief.md)       | The brief given to Claude Design.                                                                          |
 | [`docs/designs/v1/`](docs/designs/v1/)               | Design handoff. **Source of truth for pixels, not for data** — it was written without sight of the schema. |
 | [`docs/plan-v1.md`](docs/plan-v1.md)                 | Implementation plan, including where the designs and the schema disagree.                                  |
-| [`docs/rn-notes/`](docs/rn-notes/)                   | Notes for a web developer learning React Native, one per slice.                                            |
+| [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**         |
 
 ## Running it
 
 ```sh
 npm install
-npm run ios      # or: npm run android
+npm start        # Metro, in its own terminal; leave it running
+npm run ios      # or: npm run android — native Debug build, installed and launched
 ```
 
-Expo Go is sufficient — no dev build, no native folders.
+`npm run ios` / `npm run android` compile a native build and install it, but deliberately
+do **not** start a bundler (`--no-bundler`): the app fetches its JavaScript from the Metro
+you already have running. Without Metro it opens to a black screen reading _"No script URL
+provided"_ — the build is fine, there is simply nothing to run.
+
+Android builds need **JDK 17** as `JAVA_HOME`; a newer JDK fails the Gradle build.
+
+For JS-only work, Expo Go is still enough: `npm start`, then press `i` or `a`.
+
+**Anything native is different.** The app icon, splash screen, permissions and plugins
+all need a real build — and `expo run:ios` / `expo run:android` will _not_ pick up your
+change on their own, because they only run prebuild when `ios/`/`android/` are missing.
+See [`docs/native-builds.md`](docs/native-builds.md) for the loop that actually works.
