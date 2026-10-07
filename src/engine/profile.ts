@@ -19,7 +19,7 @@ export type ProfileComparison = {
   target: Profile;
   /** What the quantised dose actually delivers at this volume. */
   delivered: Profile;
-  /** Signed and relative. Negative means the water is softer than asked for. */
+  /** Signed and relative. Negative means the water is softer than the target. */
   hardnessError: number;
   alkalinityError: number;
 };
@@ -58,7 +58,7 @@ export function targetProfile(
  * The profile a set of delivered doses actually produces.
  *
  * `deliveredInDoseUnits` is post-quantisation — whole drops, not the ideal — which
- * is the entire point: this is what is in the jug, not what was asked for.
+ * is the entire point: this is what is in the jug, not the target.
  */
 export function deliveredProfile(
   deliveredInDoseUnits: { component: string; amount: number }[],

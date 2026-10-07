@@ -230,8 +230,8 @@ describe('the case that justifies the app', () => {
   it('is exactly reproducible at one litre, and only there', () => {
     // Rao's is the only recipe whose targets were reverse-engineered onto whole
     // drops, so it is the control: near-zero error at 1 L, real error below it.
-    const clean = deliveredAt('lotus-raos-recipe', 1000);
-    expect(Math.abs(Number(errorPct(clean.hardness, 72.3)))).toBeLessThan(0.1);
+    const exact = deliveredAt('lotus-raos-recipe', 1000);
+    expect(Math.abs(Number(errorPct(exact.hardness, 72.3)))).toBeLessThan(0.1);
 
     const cup = deliveredAt('lotus-raos-recipe', 250);
     expect(Math.abs(Number(errorPct(cup.alkalinity, 20.1)))).toBeGreaterThan(15);
@@ -352,6 +352,6 @@ describe('Apax', () => {
 
   it('groups its recipes, because fifteen is too many to read as a flat list', () => {
     const groups = groupedRecipesForBrand('apax-lab').map((g) => g.group);
-    expect(groups).toEqual(['process', 'roast', 'brew-method', 'varietal', 'signature']);
+    expect(groups).toEqual(['process', 'roast', 'brew-method', 'varietal', 'barista']);
   });
 });

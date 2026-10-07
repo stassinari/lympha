@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { componentMap, getRecipe } from '@/data';
 import type { Recipe } from '@/data/types';
 import { computeDose } from './dose';
-import { findCleanVolume, landsCleanly } from './cleanVolume';
+import { findExactVolume, landsExactly } from './exactVolume';
 import { MAX_COMFORTABLE_DROPS } from './units';
 
 const recipe = (id: string): Recipe => {
@@ -178,10 +178,10 @@ describe('profiles', () => {
   });
 
   it('compare the delivered water against the target, not against itself', () => {
-    const { target, delivered: got } = dose('lotus-simple-and-sweet', 1000).profile!;
+    const { target, delivered } = dose('lotus-simple-and-sweet', 1000).profile!;
     expect(target).toEqual({ hardness: 90, alkalinity: 40 });
-    expect(got.hardness).toBeCloseTo(88.39, 2);
-    expect(got.alkalinity).toBeCloseTo(40.18, 2);
+    expect(delivered.hardness).toBeCloseTo(88.39, 2);
+    expect(delivered.alkalinity).toBeCloseTo(40.18, 2);
   });
 
   it('hold the target steady as volume changes, since ppm is a concentration', () => {
@@ -194,22 +194,22 @@ describe('profiles', () => {
   });
 });
 
-describe('the clean volume search', () => {
-  it('finds a volume that lands clean, and it really does land clean', () => {
+describe('the exact volume search', () => {
+  it('finds an exact volume, and it really is exact', () => {
     const raos = recipe('lotus-raos-recipe');
-    const found = findCleanVolume(raos, componentMap, 1100);
+    const found = findExactVolume(raos, componentMap, 1100);
     expect(found).not.toBeNull();
     const fixed = computeDose(raos, found!, componentMap);
     expect(fixed.zeroed).toEqual([]);
-    expect(landsCleanly(fixed)).toBe(true);
+    expect(landsExactly(fixed)).toBe(true);
   });
 
-  it('stays within a quarter of what was asked for', () => {
+  it('stays within a quarter of the requested volume', () => {
     // A flat allowance is sensible from a litre and absurd from a cup: 800 ml for
     // someone asking for 350 is a different drink, not a nudge.
     for (const recipeId of ['lotus-raos-recipe', 'lotus-simple-and-sweet', 'lotus-ultra-light']) {
       for (const volumeMl of [200, 250, 350, 500, 1000, 1500, 2000]) {
-        const found = findCleanVolume(recipe(recipeId), componentMap, volumeMl);
+        const found = findExactVolume(recipe(recipeId), componentMap, volumeMl);
         if (found === null) continue;
         expect(Math.abs(found - volumeMl)).toBeLessThanOrEqual(volumeMl * 0.25);
       }
@@ -217,31 +217,31 @@ describe('the clean volume search', () => {
   });
 
   it('says nothing rather than sending you to a different drink', () => {
-    // Rao's at a cup has no clean volume nearby — the nearest is 1000 ml, four
-    // times what was asked for. The nudge is required to admit that plainly.
-    expect(findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 250)).toBeNull();
+    // Rao's at a cup has no exact volume nearby — the nearest is 1000 ml, four
+    // times the requested volume. The nudge is required to admit that plainly.
+    expect(findExactVolume(recipe('lotus-raos-recipe'), componentMap, 250)).toBeNull();
   });
 
   it('searches downward as well as upward', () => {
     // The handoff is explicit: a smaller honest volume is often the better answer,
     // and a search that only ever suggests "brew more" is a worse tool.
-    const found = findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 1100);
+    const found = findExactVolume(recipe('lotus-raos-recipe'), componentMap, 1100);
     expect(found).toBe(1000);
   });
 
   it('prefers the nearest volume', () => {
-    const found = findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 975);
+    const found = findExactVolume(recipe('lotus-raos-recipe'), componentMap, 975);
     expect(found).toBe(1000);
   });
 
   it('never suggests below the floor', () => {
-    const found = findCleanVolume(recipe('lotus-raos-recipe'), componentMap, 200);
+    const found = findExactVolume(recipe('lotus-raos-recipe'), componentMap, 200);
     expect(found === null || found >= 150).toBe(true);
   });
 
   it('returns null rather than inventing a suggestion', () => {
     // A recipe with a component whose dose is minute at any reachable volume has
-    // no clean answer, and the nudge is required to say so plainly.
+    // no exact volume, and the nudge is required to say so plainly.
     const impossible: Recipe = {
       ...recipe('lotus-raos-recipe'),
       id: 'impossible',
@@ -252,11 +252,11 @@ describe('the clean volume search', () => {
       ],
       target: undefined,
     };
-    expect(findCleanVolume(impossible, componentMap, 500)).toBeNull();
+    expect(findExactVolume(impossible, componentMap, 500)).toBeNull();
   });
 
   it('declines to search in grams, where every volume would qualify', () => {
-    expect(findCleanVolume(recipe('apax-lab-washed'), componentMap, 1000)).toBeNull();
+    expect(findExactVolume(recipe('apax-lab-washed'), componentMap, 1000)).toBeNull();
   });
 });
 

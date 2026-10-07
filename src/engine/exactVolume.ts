@@ -22,7 +22,7 @@ import type { Component, Recipe } from '@/data/types';
 import { computeDose } from './dose';
 import type { Dose, DoseOptions } from './dose';
 
-export type CleanVolumeOptions = DoseOptions & {
+export type ExactVolumeOptions = DoseOptions & {
   stepMl?: number;
   /** How far the search may stray, as a fraction of the requested volume. */
   maxDistanceFraction?: number;
@@ -41,7 +41,7 @@ const DEFAULTS = {
 
 /** Every bottle lands essentially on a whole unit, and none is so small it
  *  rounds away or sits under half a unit. */
-export function landsCleanly(dose: Dose, tolerance = DEFAULTS.tolerance): boolean {
+export function landsExactly(dose: Dose, tolerance = DEFAULTS.tolerance): boolean {
   if (dose.lines.length === 0) return false;
   return dose.lines.every((line) => {
     const { step } = line.dispenser;
@@ -50,16 +50,16 @@ export function landsCleanly(dose: Dose, tolerance = DEFAULTS.tolerance): boolea
 }
 
 /**
- * The nearest volume that divides evenly, or null if there isn't one.
+ * The nearest volume that is exact, or null if there isn't one.
  *
  * Returning null matters as much as returning a number: the design requires the
  * nudge to say so plainly rather than invent a suggestion.
  */
-export function findCleanVolume(
+export function findExactVolume(
   recipe: Recipe,
   components: ReadonlyMap<string, Component>,
   currentVolumeMl: number,
-  options: CleanVolumeOptions = {},
+  options: ExactVolumeOptions = {},
 ): number | null {
   const { stepMl, maxDistanceFraction, minVolumeMl, tolerance } = { ...DEFAULTS, ...options };
   const maxDistanceMl = currentVolumeMl * maxDistanceFraction;
@@ -73,7 +73,7 @@ export function findCleanVolume(
   // Pin the search to the unit in use. Left free, the search drifts into whatever
   // regime happens to divide evenly — it would answer "brew 400 ml" to someone
   // holding a scale at a litre, which is not the same recipe experience at all.
-  const pinned: CleanVolumeOptions = {
+  const pinned: ExactVolumeOptions = {
     ...options,
     unitPreference: current.lines[0]?.dispenser.unit ?? options.unitPreference ?? 'auto',
   };
@@ -84,7 +84,7 @@ export function findCleanVolume(
       if (candidate < minVolumeMl) continue;
       const dose = computeDose(recipe, candidate, components, pinned);
       if (!dose.showsRounding) continue;
-      if (landsCleanly(dose, tolerance)) return candidate;
+      if (landsExactly(dose, tolerance)) return candidate;
     }
   }
   return null;

@@ -19,10 +19,10 @@ import type { Band } from '@/format/rounding';
 
 export type VolumeNudgeProps = {
   dose: Dose;
-  /** The nearest volume that divides evenly, or null if there isn't one. */
-  cleanVolumeMl: number | null;
+  /** The nearest volume that is exact, or null if there isn't one. */
+  exactVolumeMl: number | null;
   flagAbove: number;
-  onUseClean: (volumeMl: number) => void;
+  onUseExact: (volumeMl: number) => void;
   onDismiss: () => void;
 };
 
@@ -48,7 +48,7 @@ function title(dose: Dose, which: Band): string {
 
 /** The band's sentence, then the way out. A missing bottle has no band sentence:
  *  the title has already said everything there is to say about it. */
-function body(dose: Dose, which: Band, cleanVolumeMl: number | null): string {
+function body(dose: Dose, which: Band, exactVolumeMl: number | null): string {
   const percent = Math.round(Math.abs(headlineGap(dose)) * 100);
   const why =
     which === 'missing'
@@ -59,15 +59,15 @@ function body(dose: Dose, which: Band, cleanVolumeMl: number | null): string {
 
   // Never invent a suggestion. Saying so plainly is the honest output, and the
   // card then offers only a dismiss.
-  const way = cleanVolumeMl ? `${cleanVolumeMl} ml is exact.` : 'No exact volume nearby.';
+  const way = exactVolumeMl ? `${exactVolumeMl} ml is exact.` : 'No exact volume nearby.';
   return why ? `${why} ${way}` : way;
 }
 
 export function VolumeNudge({
   dose,
-  cleanVolumeMl,
+  exactVolumeMl,
   flagAbove,
-  onUseClean,
+  onUseExact,
   onDismiss,
 }: VolumeNudgeProps) {
   const { colour } = useTheme();
@@ -81,15 +81,15 @@ export function VolumeNudge({
       <BarRow barColour={severe ? colour.error : colour.warning}>
         <CardTitle>{title(dose, which)}</CardTitle>
         <Body tone="onCard" style={{ marginTop: 4 }}>
-          {body(dose, which, cleanVolumeMl)}
+          {body(dose, which, exactVolumeMl)}
         </Body>
         <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.blocks }}>
-          {cleanVolumeMl ? (
+          {exactVolumeMl ? (
             <>
               <Pill
-                label={`Use ${cleanVolumeMl} ml`}
+                label={`Use ${exactVolumeMl} ml`}
                 emphasis="primary"
-                onPress={() => onUseClean(cleanVolumeMl)}
+                onPress={() => onUseExact(exactVolumeMl)}
               />
               <Pill label={`Keep ${dose.volumeMl} ml`} onPress={onDismiss} />
             </>

@@ -34,7 +34,7 @@ import {
 } from '@/data';
 import { availableUnits, computeDose } from '@/engine';
 import type { DoseLine, UnitPreference } from '@/engine';
-import { EXACT } from '@/format/rounding';
+import { ON_TARGET } from '@/format/rounding';
 import { formatDoseAmount, formatUnit } from '@/format/units';
 import { unitPreferenceFor, useStore } from '@/state';
 
@@ -141,6 +141,6 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
 function missSuffix(line: DoseLine): string {
   if (line.dispenser.allowPartial || line.exact <= 0) return '';
   const gap = line.error / line.exact;
-  if (Math.abs(gap) < EXACT) return '';
+  if (Math.abs(gap) < ON_TARGET) return '';
   return `, ${Math.round(Math.abs(gap) * 100)}% ${gap < 0 ? 'under' : 'over'}`;
 }

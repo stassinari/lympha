@@ -37,11 +37,11 @@
         { "id": "milk-drinks", "name": "Latte / Flat White / Cappuccino", "group": "brew-method", "doses": { "tonik": 0.0, "jamm": 2.0, "lylac": 1.0, "konflux": 1.0 } },
         { "id": "washed-geisha", "name": "Washed Geisha", "group": "varietal", "doses": { "tonik": 1.0, "jamm": 0.0, "lylac": 2.0, "konflux": 1.0 } },
         { "id": "natural-geisha", "name": "Natural Geisha", "group": "varietal", "doses": { "tonik": 0.0, "jamm": 1.0, "lylac": 2.0, "konflux": 1.0 } },
-        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "signature", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0, "konflux": 0.0 },
+        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "barista", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0, "konflux": 0.0 },
           "note": "Identical in both the legacy and current ranges, and uses no KONFLUX." },
-        { "id": "simon-gautherin", "name": "Simon Gautherin go-to", "group": "signature", "doses": { "tonik": 0.5, "jamm": 0.5, "lylac": 1.5, "konflux": 1.5 } },
-        { "id": "carlos-escobar", "name": "Carlos Escobar go-to", "group": "signature", "doses": { "tonik": 0.0, "jamm": 2.5, "lylac": 0.0, "konflux": 1.5 } },
-        { "id": "nemo-pop", "name": "Némo Pop go-to", "group": "signature", "doses": { "tonik": 0.0, "jamm": 0.5, "lylac": 2.0, "konflux": 1.0 },
+        { "id": "simon-gautherin", "name": "Simon Gautherin go-to", "group": "barista", "doses": { "tonik": 0.5, "jamm": 0.5, "lylac": 1.5, "konflux": 1.5 } },
+        { "id": "carlos-escobar", "name": "Carlos Escobar go-to", "group": "barista", "doses": { "tonik": 0.0, "jamm": 2.5, "lylac": 0.0, "konflux": 1.5 } },
+        { "id": "nemo-pop", "name": "Némo Pop go-to", "group": "barista", "doses": { "tonik": 0.0, "jamm": 0.5, "lylac": 2.0, "konflux": 1.0 },
           "note": "Totals 3.5 g/L rather than 4.0. Published as-is; likely intentional for a personal recipe." }
       ]
     },
@@ -66,7 +66,7 @@
         { "id": "heavily-fermented", "name": "Heavily Fermented", "group": "process", "doses": { "tonik": 1.0, "jamm": 2.0, "lylac": 1.0 } },
         { "id": "light-roast", "name": "Light Roast", "group": "roast", "doses": { "tonik": 1.0, "jamm": 3.0, "lylac": 0.0 } },
         { "id": "dark-roast", "name": "Dark Roast", "group": "roast", "doses": { "tonik": 3.0, "jamm": 0.0, "lylac": 1.0 } },
-        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "signature", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0 } }
+        { "id": "martin-wolfl-2024", "name": "Martin Wölfl — 2024 World Brewers Cup winning recipe", "group": "barista", "doses": { "tonik": 1.0, "jamm": 1.0, "lylac": 2.0 } }
       ]
     }
   ],

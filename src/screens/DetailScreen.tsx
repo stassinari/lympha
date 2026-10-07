@@ -38,14 +38,14 @@ import {
   missSeverity,
 } from '@/format/rounding';
 import type { Band } from '@/format/rounding';
-import { useCleanVolume, useDose, useStore } from '@/state';
+import { useExactVolume, useDose, useStore } from '@/state';
 
 export type DetailScreenProps = { onClose: () => void };
 
 export function DetailScreen({ onClose }: DetailScreenProps) {
   const { colour } = useTheme();
   const dose = useDose();
-  const cleanVolumeMl = useCleanVolume();
+  const exactVolumeMl = useExactVolume();
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
 
@@ -70,8 +70,8 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
 
   const bottleRows: ComparisonRow[] = dose.lines.map((line) => ({
     label: line.component.name,
-    asked: formatIdealAmount(line.exact),
-    got: formatDoseAmount(line.delivered, line.dispenser.step),
+    target: formatIdealAmount(line.exact),
+    delivered: formatDoseAmount(line.delivered, line.dispenser.step),
     off: missSeverity(line.relativeError, flagAbove, line.zeroed),
     direction: line.delivered < line.exact ? 'under' : 'over',
     gap: line.exact > 0 ? line.error / line.exact : undefined,
@@ -82,16 +82,16 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
     ? [
         {
           label: 'Hardness',
-          asked: formatPpm(profile.target.hardness),
-          got: formatPpm(profile.delivered.hardness),
+          target: formatPpm(profile.target.hardness),
+          delivered: formatPpm(profile.delivered.hardness),
           off: missSeverity(profile.hardnessError, flagAbove),
           direction: profile.hardnessError < 0 ? 'under' : 'over',
           gap: profile.hardnessError,
         },
         {
           label: 'Alkalinity',
-          asked: formatPpm(profile.target.alkalinity),
-          got: formatPpm(profile.delivered.alkalinity),
+          target: formatPpm(profile.target.alkalinity),
+          delivered: formatPpm(profile.delivered.alkalinity),
           off: missSeverity(profile.alkalinityError, flagAbove),
           direction: profile.alkalinityError < 0 ? 'under' : 'over',
           gap: profile.alkalinityError,
@@ -157,15 +157,15 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           </Body>
         ) : null}
 
-        {cleanVolumeMl ? (
+        {exactVolumeMl ? (
           <BarRow barColour={colour.ok} style={{ marginTop: space.snug }}>
-            <Body tone="onCard">{`At ${cleanVolumeMl} ml, every bottle hits its target exactly.`}</Body>
+            <Body tone="onCard">{`At ${exactVolumeMl} ml, every bottle hits its target exactly.`}</Body>
             <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.blocks }}>
               <Pill
-                label={`Switch to ${cleanVolumeMl} ml`}
+                label={`Switch to ${exactVolumeMl} ml`}
                 emphasis="primary"
                 onPress={() => {
-                  setVolume(cleanVolumeMl);
+                  setVolume(exactVolumeMl);
                   onClose();
                 }}
               />

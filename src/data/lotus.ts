@@ -207,7 +207,7 @@ const SPECS: RecipeSpec[] = [
     attribution: 'Scott Rao',
     notes:
       'The odd decimals are reverse-engineered to land on whole drops at exactly one ' +
-      'litre. It is the only Lotus recipe that comes out clean.',
+      'litre. It is the only Lotus recipe that comes out exact.',
     target: [
       { component: MG, caco3Ppm: 32.1 },
       { component: CA, caco3Ppm: 40.2 },

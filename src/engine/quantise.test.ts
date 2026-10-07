@@ -85,7 +85,7 @@ describe('quantise', () => {
     expect(quantise(6.2, dropper).error).toBeLessThan(0);
   });
 
-  it('flags a bottle that rounds away, but not one never asked for', () => {
+  it('flags a bottle that rounds away, but not one with no target', () => {
     expect(quantise(0.4, dropper).zeroed).toBe(true);
     expect(quantise(0, dropper).zeroed).toBe(false);
     expect(quantise(0, dropper).relativeError).toBe(0);

@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { componentMap, getBrand, getRecipe } from '@/data';
 import type { Brand, Recipe } from '@/data/types';
-import { computeDose, findCleanVolume } from '@/engine';
+import { computeDose, findExactVolume } from '@/engine';
 import type { Dose } from '@/engine';
 import { roundingSummary } from '@/format/rounding';
 import type { RoundingSummary } from '@/format/rounding';
@@ -51,9 +51,9 @@ export function useRoundingSummary(dose: Dose): RoundingSummary {
   return useMemo(() => roundingSummary(dose, flagAbove), [dose, flagAbove]);
 }
 
-/** The nearest volume that divides evenly, or null. Off when the user has said
+/** The nearest volume that is exact, or null. Off when the user has said
  *  they do not want suggestions. */
-export function useCleanVolume(): number | null {
+export function useExactVolume(): number | null {
   const recipe = useRecipe();
   const volumeMl = useStore((s) => s.volumeMl);
   const suggest = useStore((s) => s.suggest);
@@ -61,7 +61,7 @@ export function useCleanVolume(): number | null {
   return useMemo(
     () =>
       suggest
-        ? findCleanVolume(recipe, componentMap, volumeMl, { unitPreference: preference })
+        ? findExactVolume(recipe, componentMap, volumeMl, { unitPreference: preference })
         : null,
     [recipe, volumeMl, suggest, preference],
   );

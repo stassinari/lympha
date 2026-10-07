@@ -39,7 +39,7 @@ export type PersistedState = {
    * of them. Water volume stays global — that is the kettle, not the brand.
    */
   units: Record<string, UnitPreference>;
-  /** Offer a nearby volume that divides evenly. */
+  /** Offer a nearby volume that is exact. */
   suggest: boolean;
   /**
    * The volume the app opens on. `null` means whatever you last brewed; someone

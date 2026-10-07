@@ -15,7 +15,7 @@ export type RoundingStatus = 'ok' | 'warning' | 'error';
 /**
  * How far off a dose is, in the steps that change what the app says.
  *
- * - `onTarget`: under `EXACT`, which displays as 0%.
+ * - `onTarget`: under `ON_TARGET`, which displays as 0%.
  * - `close`: within the user's flag threshold.
  * - `off`: past the threshold.
  * - `farOff`: more than `FAR_OFF`, whatever the threshold.
@@ -37,9 +37,9 @@ export const SEVERITY: Record<Band, RoundingStatus> = {
 /** Null when rounding is not worth mentioning — see `Dose.showsRounding`. */
 export type RoundingSummary = { status: RoundingStatus; text: string } | null;
 
-/** Below this the dose is exact for any practical purpose, and saying "0% off"
- *  would be pedantry rather than honesty. */
-export const EXACT = 0.005;
+/** Below this a gap is on target: too small to be worth a number, and saying
+ *  "0% off" would be pedantry rather than honesty. */
+export const ON_TARGET = 0.005;
 
 /** A third off. Fixed rather than relative to the flag threshold: the threshold is
  *  a preference about when to be told, and this is a fact about the water. The
@@ -82,7 +82,7 @@ export type Headline = {
 
 /**
  * The gap worth reporting, signed, and where it came from. Negative means the
- * water is weaker than asked.
+ * water is weaker than the target.
  *
  * Where the vendor publishes ion data this is the error in the *water* — which is
  * what the user actually cares about, and is usually far smaller than the error on
@@ -136,7 +136,7 @@ export function band(dose: Dose, flagAbove: number): Band | null {
   if (!dose.showsRounding) return null;
   if (dose.zeroed.length > 0) return 'missing';
   const gap = Math.abs(headlineGap(dose));
-  if (gap < EXACT) return 'onTarget';
+  if (gap < ON_TARGET) return 'onTarget';
   if (isFarOff(gap)) return 'farOff';
   return gap > flagAbove ? 'off' : 'close';
 }

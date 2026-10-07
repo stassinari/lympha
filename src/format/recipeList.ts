@@ -15,14 +15,14 @@ export type RecipeSubtitle = {
   tone: 'secondary' | 'error';
 };
 
-/** Section headings, in the vendor's own grouping. Apax's current range has
- *  fifteen recipes, which is too many to read as one flat list at 6am. */
+/** Section headings. Apax's KONFLUX range has fifteen recipes, which is too many
+ *  to read as one flat list at 6am. */
 const GROUP_LABEL: Record<RecipeGroup, string> = {
   process: 'By process',
   roast: 'By roast',
   'brew-method': 'By brew method',
   varietal: 'By varietal',
-  signature: 'By barista',
+  barista: 'By barista',
 };
 
 export const groupLabel = (group: RecipeGroup | undefined): string | undefined =>
@@ -32,8 +32,8 @@ export const groupLabel = (group: RecipeGroup | undefined): string | undefined =
  * What to say under a recipe's name.
  *
  * Only a bottle actually vanishing is worth a warning here. Flagging every recipe
- * that merely rounds hard sounds thorough and is useless: at 350 ml every Lotus
- * recipe rounds hard, so the same amber sentence would sit on all seven rows, say
+ * that is merely off target sounds thorough and is useless: at 350 ml every Lotus
+ * recipe is off target, so the same amber sentence would sit on all seven rows, say
  * nothing about which to pick, and bury the one fact that does distinguish them.
  * A warning that is always on is not a warning.
  *

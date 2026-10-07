@@ -48,7 +48,7 @@ export type Quantised = {
   delivered: number;
   /** Signed, in dispenser units. Negative means short. */
   error: number;
-  /** Unsigned, as a fraction of the ideal. Zero when nothing was asked for. */
+  /** Unsigned, as a fraction of the ideal. Zero when the target is zero. */
   relativeError: number;
   /**
    * The recipe calls for some of this component and the dispenser delivers

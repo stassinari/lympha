@@ -12,13 +12,13 @@
 
 import { View } from 'react-native';
 import { Caption, Card, CardTitle, Divider, Icon, space, useTheme, useTypeMetrics } from '@/design';
-import { EXACT } from '@/format/rounding';
+import { ON_TARGET } from '@/format/rounding';
 import { formatGapPercent } from '@/format/units';
 
 export type ComparisonRow = {
   label: string;
-  asked: string;
-  got: string;
+  target: string;
+  delivered: string;
   /** Draws the delivered value, and its arrow, in that state's colour. */
   off?: 'warning' | 'error' | null;
   /** Which side of the target it landed on. Only read when `off`. */
@@ -83,14 +83,14 @@ function MissMark({
 /** What the row says to a screen reader, which cannot see the column headings. */
 function rowLabel(row: ComparisonRow, unit?: string): string {
   const scale = unit ? ` ${unit}` : '';
-  return `${row.label}: target ${row.asked}${scale}, you get ${row.got}${scale}${spokenGap(row.gap)}`;
+  return `${row.label}: target ${row.target}${scale}, you get ${row.delivered}${scale}${spokenGap(row.gap)}`;
 }
 
 /** Words rather than a signed figure: a screen reader reads "+7%" as "plus seven percent",
  *  which says which way only to someone who knows the sign convention. */
 function spokenGap(gap: number | undefined): string {
   if (gap === undefined) return '';
-  if (Math.abs(gap) < EXACT) return ', on target';
+  if (Math.abs(gap) < ON_TARGET) return ', on target';
   return `, ${Math.round(Math.abs(gap) * 100)} percent ${gap < 0 ? 'under' : 'over'}`;
 }
 
@@ -138,7 +138,7 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
               {row.label}
             </CardTitle>
             <Caption tone="secondary" style={COLUMN}>
-              {row.asked}
+              {row.target}
             </Caption>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline' }}>
               {row.off && row.direction ? (
@@ -154,7 +154,7 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
                     row.off === 'error' ? colour.error : row.off ? colour.textWarning : colour.text,
                 }}
               >
-                {row.got}
+                {row.delivered}
               </CardTitle>
             </View>
             {showGap ? (

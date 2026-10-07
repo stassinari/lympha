@@ -28,7 +28,7 @@ import {
 import { ScreenHeader } from '@/components';
 import { VolumeNudge, shouldNudge } from '@/components/VolumeNudge';
 import { componentMap } from '@/data';
-import { computeDose, findCleanVolume } from '@/engine';
+import { computeDose, findExactVolume } from '@/engine';
 import {
   VOLUME_MAX_ML,
   VOLUME_MIN_ML,
@@ -183,17 +183,17 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
     () => computeDose(recipe, pendingMl, componentMap, { unitPreference: preference }),
     [recipe, pendingMl, preference],
   );
-  const cleanVolumeMl = useMemo(
+  const exactVolumeMl = useMemo(
     () =>
       suggest
-        ? findCleanVolume(recipe, componentMap, pendingMl, { unitPreference: preference })
+        ? findExactVolume(recipe, componentMap, pendingMl, { unitPreference: preference })
         : null,
     [recipe, pendingMl, suggest, preference],
   );
 
   /**
    * The nudge is the suggestion, so turning suggestions off removes the card
-   * rather than leaving it to report that no volume divides evenly — which would
+   * rather than leaving it to report that no volume is exact — which would
    * be both alarming and untrue, since nothing has been looked for.
    *
    * Honesty is not lost: the dose screen still reports the gap on every brew.
@@ -278,9 +278,9 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
       {nudging ? (
         <VolumeNudge
           dose={dose}
-          cleanVolumeMl={cleanVolumeMl}
+          exactVolumeMl={exactVolumeMl}
           flagAbove={flagAbove}
-          onUseClean={commit}
+          onUseExact={commit}
           onDismiss={() => setDismissed(pendingMl)}
         />
       ) : null}

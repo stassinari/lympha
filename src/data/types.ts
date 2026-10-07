@@ -147,7 +147,7 @@ export type Brand = {
  * How a vendor organises its recipe list. Apax's current range has fifteen
  * recipes, which is too many to read as a flat list at 6am.
  */
-export type RecipeGroup = 'process' | 'roast' | 'brew-method' | 'varietal' | 'signature';
+export type RecipeGroup = 'process' | 'roast' | 'brew-method' | 'varietal' | 'barista';
 
 /**
  * A published value that departs from the vendor's own stated pattern.

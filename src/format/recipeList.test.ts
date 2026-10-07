@@ -24,7 +24,7 @@ describe('recipeSubtitle', () => {
     });
   });
 
-  it('does not warn merely because a recipe rounds hard', () => {
+  it('does not warn merely because a recipe is off target', () => {
     // Ultra Light is 19.6% short on alkalinity at a litre, and the dose screen
     // says so. Repeating it here would put the same sentence on nearly every row
     // — at 350 ml, on all seven — which distinguishes nothing.
@@ -34,8 +34,8 @@ describe('recipeSubtitle', () => {
     });
   });
 
-  it('leaves the list calm when every recipe rounds hard', () => {
-    // At 350 ml every Lotus recipe rounds hard; no row should shout when they all would.
+  it('leaves the list calm when every recipe is off target', () => {
+    // At 350 ml every Lotus recipe is off target; no row should shout when they all would.
     const warned = [
       'lotus-light-and-bright',
       'lotus-simple-and-sweet',
@@ -75,7 +75,7 @@ describe('groupLabel', () => {
   it('labels the vendor groupings', () => {
     expect(groupLabel('process')).toBe('By process');
     expect(groupLabel('brew-method')).toBe('By brew method');
-    expect(groupLabel('signature')).toBe('By barista');
+    expect(groupLabel('barista')).toBe('By barista');
   });
 
   it('has nothing to say for an ungrouped list', () => {
