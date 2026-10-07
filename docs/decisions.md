@@ -5,7 +5,8 @@ says *why*. A reversed decision is edited in place, saying what replaced it and 
 Rejected alternatives are listed so they are not proposed again.
 
 Vendor numbers live in [`water-schema-v0.md`](water-schema-v0.md) (Lotus, data model)
-and [`apax-lab-brief.md`](apax-lab-brief.md) (Apax). Outstanding work lives in
+and [`apax-lab-brief.md`](apax-lab-brief.md) (Apax). Store listing text lives in
+[`store-listing.md`](store-listing.md). Outstanding work lives in
 [`roadmap.md`](roadmap.md).
 
 ---
@@ -21,11 +22,16 @@ teach or onboard.
 **Opens to the answer.** The last brand, recipe and volume survive a cold start, so
 repeating yesterday's brew needs near-zero input.
 
-**Honest rounding is the point of difference.** Drops are integers and doses are not.
-Vendor calculators round silently and report the ideal: Lotus's Ultra Light is 19.6%
-short on alkalinity at 1 L. Lympha shows what you actually get, and offers a nearby
-volume that comes out exact. The gap should be nearly invisible when it is small, and
-noticed when it is 20%.
+**Visible rounding is a point of difference, not the point.** Drops are integers and
+doses are not. Vendor calculators round to keep things simple and report the ideal:
+Lotus's Ultra Light is 19.6% short on alkalinity at 1 L. Lympha shows what you
+actually get, and offers a nearby volume that comes out exact. The gap should be
+nearly invisible when it is small, and noticed when it is 20%. It sits alongside the
+rest of the app: a quick dose, for more than one brand, on iOS and Android.
+
+*Revised 2026-10-07:* was "Honest rounding is the point of difference". "Honest"
+implied other calculators are not, and rounding is one difference among several, not
+the reason the app exists.
 
 **Scope.** iOS and Android phones (`supportsTablet: false`). Fully offline. No
 accounts or sync.
@@ -110,14 +116,14 @@ The dispenser never lives inside a recipe. A dropper is `step: 1, allow_partial:
 false`; a scale is `step: 0.01, allow_partial: true`; a sachet has the dropper's shape.
 
 **Each component keeps its vendor's unit** (drops for Lotus, grams for Apax). Lotus
-drops cannot be honestly converted to grams without data nobody publishes.
+drops cannot be converted to grams accurately without data nobody publishes.
 
 **The research overrides the design handoff's numbers**, which were written without
 it:
 
 | Handoff | Research | Resolution |
 | --- | --- | --- |
-| Lotus recipes in drops per litre | Lotus is target-first: ppm as CaCO₃ | Store ppm, derive drops. Without an ideal to compare against, honest rounding is impossible at any volume but 1 L. |
+| Lotus recipes in drops per litre | Lotus is target-first: ppm as CaCO₃ | Store ppm, derive drops. Without an ideal to compare against, rounding cannot be measured at any volume but 1 L. |
 | Fractional Lotus drop counts | Derived from ppm (Ultra Light: 2/2/0/2 at 1 L) | Use the schema. |
 | Apax drops-first, grams = `exact × 0.3375` | Apax is grams-first; 1 g = 15 drops | Grams are the source. `0.3375` is wrong by ~5×. |
 | Seven invented Apax recipes | Two ranges, 23 recipes | All shipped from the Apax data. |
@@ -157,7 +163,8 @@ excluded. Recipes store the author, not Lotus's marketing copy.
 
 **Modelled, not shipped:**
 
-- **Third Wave Water.** Sachets don't divide, so most volumes have no honest dose.
+- **Third Wave Water.** Sachets don't divide, so at most volumes no dose matches the
+  recipe.
 - **Barista Hustle.** Numbers unverified.
 - **Apax limited editions.** How they combine with the standard range is
   unconfirmed.
@@ -472,6 +479,7 @@ These words, with these meanings, everywhere.
 **Words are judged in context, not banned.** A word that read badly in one
 string can be right in another, so there is no list of forbidden words. Two
 judgements stand behind the current copy:
+
 - **"Target" heads the Rounding screen's first column**, not "Asked", because the
   status line says "under target": the table defines the word the home screen
   uses. "Exact volume" follows from the suggestion's own words, "400 ml is exact".
@@ -576,3 +584,66 @@ choice is made.
 - A caption under the volume presets. The `ml` beside the value suffices, and each
   preset is announced as "250 millilitres".
 - A footnote at the end of the Bottles list about brands not yet supported.
+
+### Store listing
+
+The strings live in [`store-listing.md`](store-listing.md); the reasons are here.
+
+**The listing is read by people who haven't opened the app.** So the description
+says what rounding does to a dose, with one worked number, which *Voice* rules out
+inside the app. Everything else in *Voice* applies.
+
+**Name: "Lympha: Water for Coffee".** The name field is indexed for search, so it
+carries two descriptive words after the brand. "Water for Coffee" is how people say
+it. The colon reads as "name, then what it is". The home screen name stays "Lympha".
+
+- **Rejected: "Lympha: Coffee Water".** Reads oddly, as water that tastes of coffee.
+- **Rejected: a spaced hyphen or a mid dot as separator.** The hyphen looks like the
+  dash *Voice* avoids; the mid dot reads as decoration.
+
+**Subtitle: "Mineral recipes across brands".** It leads on Lympha covering more than
+one brand. "Mineral" and "recipes" stay true when non-drop recipes arrive (Pavlis,
+Barista Hustle: recipes from authors, see *Glossary*); "drops" would not.
+
+- **Rejected: "for any volume"** in any form. An odd thing to lead with.
+- **Rejected: "Multi-brand".**
+- **Rejected: "Mineral drops for coffee water".** Repeats the name.
+- **"Any brand" or "every brand"** would overclaim with two.
+
+**Short description (Play): "Mineral calculator for brewing water, with recipes from
+several brands."** Play has no subtitle or keyword field, so this line carries
+"calculator". No leading article: it reads as a headline in search results.
+
+**Brand names appear in the description and keywords, never in the name, subtitle or
+short description.** Naming the bottles Lympha works with describes it; putting them
+in its branding would borrow theirs, and App Review is strictest about trademarks
+there. The description ends with a not-affiliated line covering every brand and app
+it names.
+
+- **`lotus` and `apax` are keywords** because Apple does not index the description:
+  without them, a search for "Lotus drops" cannot find Lympha. Guideline 2.3.7 is
+  aimed at keywords that game search, and these describe the app accurately. If App
+  Review objects, they come out and the build is resubmitted.
+- **Brewer names (V60, AeroPress, Chemex) are not keywords.** They are trademarks,
+  and Lympha has nothing to do with them.
+
+**Keywords skip words already in the name and subtitle**, which Apple indexes anyway.
+`drops` is a keyword because it left the subtitle; with `lotus` it matches "Lotus
+drops". No `tds`, which Lympha does not show, and no `remineralise`, whose British and
+American spellings split the search.
+
+**Other calculators are described as fact**: they round to keep things simple. Never
+as hiding anything.
+
+**Blossom Rain is credited** near the end of the description. Lympha started as an
+attempt to bring it to more brands and to Android.
+
+**The description is written by hand and edited lightly.** Generated drafts gave
+themselves away: mirrored pairs ("A small difference… A bigger one…"), runs of short
+sentences of one length each ending on a neat point, and dramatic framings ("wouldn't
+exist without"). "Wonky" stays, though it is casual, because it is what makes the line
+sound like a person.
+
+**Non-drop recipes** should not need a new name or subtitle. The parts to revise then
+are the `drops` keyword and the description's "Works with" list. Keywords change with
+any new version.
