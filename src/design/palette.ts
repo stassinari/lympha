@@ -21,10 +21,19 @@ export type ColourTokens = {
    * two-value hue: see the note on the light table below.
    */
   ok: string;
-};
-
-export type SemanticTokens = {
+  /**
+   * Off target past the flag threshold: bars and the status mark. Lighter than
+   * `textWarning` in light, because a mark needs 3:1 where text needs 4.5:1.
+   */
   warning: string;
+  /**
+   * Far off target, or a bottle missing: the recipe is no longer the recipe.
+   * Bars, the status mark and text alike, since it clears 4.5:1 in both schemes.
+   *
+   * Vermilion rather than crimson, to stay clear of Lotus's Magnesium and
+   * accent (#B8404F); Apax's JAMM coral is the nearest bottle colour.
+   */
+  error: string;
 };
 
 /**
@@ -60,6 +69,8 @@ export const light: ColourTokens = {
   textWarning: '#96632F',
   divider: '#EDE4DC',
   ok: '#4D7A31',
+  warning: '#A8742F',
+  error: '#B8321A',
 };
 
 export const dark: ColourTokens = {
@@ -73,10 +84,6 @@ export const dark: ColourTokens = {
   textWarning: '#D99A4E',
   divider: '#2C2523',
   ok: '#8DBE6A',
-};
-
-/** Shared across both schemes: this reads acceptably on either background. */
-export const semantic: SemanticTokens = {
-  /** Rounding is over the flag threshold, or a bottle would round to zero. */
   warning: '#D99A4E',
+  error: '#EF6A4A',
 };

@@ -16,6 +16,8 @@ import { MIN_TARGET } from './Pill';
 
 export type ChipProps = {
   label: string;
+  /** For a label a screen reader would mangle, such as one with brackets. */
+  accessibilityLabel?: string;
   selected: boolean;
   onPress: () => void;
   /** Rendered before the label — a bar cluster, usually. */
@@ -25,7 +27,7 @@ export type ChipProps = {
 
 const CHIP_RADIUS = Platform.select({ android: radius.chipAndroid, default: radius.pill });
 
-export function Chip({ label, selected, onPress, leading, style }: ChipProps) {
+export function Chip({ label, accessibilityLabel, selected, onPress, leading, style }: ChipProps) {
   const { colour } = useTheme();
 
   // The border is always present and only changes colour. Adding or removing it
@@ -49,6 +51,7 @@ export function Chip({ label, selected, onPress, leading, style }: ChipProps) {
         onPress={onPress}
         // One of a mutually exclusive row, so a choice rather than a button.
         accessibilityRole="radio"
+        accessibilityLabel={accessibilityLabel}
         accessibilityState={{ selected, checked: selected }}
         style={[
           {

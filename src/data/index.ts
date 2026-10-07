@@ -65,8 +65,8 @@ export function unitGroups(): { id: string; label: string; brandIds: string[] }[
     const id = unitGroupOf(brand.id);
     const existing = groups.get(id);
     if (existing) existing.brandIds.push(brand.id);
-    // The first brand in a group names it, which gives "Apax Lab" rather than
-    // "Apax Lab (Original 3-drop)".
+    // The first brand in a group names it: the base range, so "Apax Lab" rather
+    // than "Apax Lab with KONFLUX".
     else groups.set(id, { id, label: brand.name, brandIds: [brand.id] });
   }
   return [...groups.values()];

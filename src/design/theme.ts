@@ -10,8 +10,8 @@
 import { createContext, useContext } from 'react';
 import { Platform } from 'react-native';
 import type { ViewStyle } from 'react-native';
-import { dark, light, semantic } from './palette';
-import type { ColourTokens, SemanticTokens } from './palette';
+import { dark, light } from './palette';
+import type { ColourTokens } from './palette';
 
 export * from './layout';
 
@@ -37,13 +37,13 @@ export const cardShadow: ViewStyle = Platform.select<ViewStyle>({
 
 export type Theme = {
   scheme: ResolvedScheme;
-  colour: ColourTokens & SemanticTokens;
+  colour: ColourTokens;
 };
 
 export function buildTheme(scheme: ResolvedScheme): Theme {
   return {
     scheme,
-    colour: { ...(scheme === 'dark' ? dark : light), ...semantic },
+    colour: scheme === 'dark' ? dark : light,
   };
 }
 

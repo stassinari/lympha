@@ -104,7 +104,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         </SectionHeader>
         <SettingsRow
           label="Opens at"
-          detail="Pin a volume, or pick up where you left off."
+          detail="Start with a set amount of water, or wherever you left off."
           wide
           control={
             // Every pill carries the setting's name, because a screen reader
@@ -134,8 +134,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           }
         />
         <SettingsRow
-          label="Flag rounding above"
-          detail="How far off the recipe before the dose screen says so."
+          label="Flag when off by"
+          detail="How far off target a dose can be before Lympha flags it."
           wide
           control={
             <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: space.snug }}>
@@ -144,7 +144,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                   key={value}
                   label={`${Math.round(value * 100)}%`}
                   accessibilityRole="radio"
-                  accessibilityLabel={`Flag rounding above ${Math.round(value * 100)} percent`}
+                  accessibilityLabel={`Flag when off by ${Math.round(value * 100)} percent`}
                   selected={Math.abs(flagAbove - value) < 1e-9}
                   onPress={() => setFlagAbove(value)}
                   style={{ flex: 1 }}
@@ -154,8 +154,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           }
         />
         <SettingsRow
-          label="Suggest a cleaner volume"
-          detail="Offer a nearby volume that divides evenly."
+          label="Suggest an exact volume"
+          detail="When rounding puts you off target, offer a nearby volume that’s exact."
           control={
             <Switch
               value={suggest}
@@ -163,8 +163,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
               // The row's label belongs to a sibling `Text`, and the card is not a
               // single tap target, so the switch reaches a screen reader on its
               // own and has to say what it switches.
-              accessibilityLabel="Suggest a cleaner volume"
-              accessibilityHint="Offer a nearby volume that divides evenly"
+              accessibilityLabel="Suggest an exact volume"
+              accessibilityHint="When rounding puts you off target, offer a nearby volume that’s exact"
               trackColor={{ true: accent, false: colour.control }}
               // Android's thumb defaults to the platform accent, which lands a
               // Material blue in the middle of a brand-tinted track. iOS draws its

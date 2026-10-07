@@ -82,3 +82,31 @@ describe('clear-state mark', () => {
     expect(taken).not.toContain(tokens.ok.toUpperCase());
   });
 });
+
+describe('off-target colours', () => {
+  const schemes = [
+    ['light', light],
+    ['dark', dark],
+  ] as const;
+
+  /** Both draw the status mark, which is a meaningful graphic: 3:1. */
+  it.each(schemes)('draw a legible mark in %s', (_, tokens) => {
+    expect(contrast(tokens.warning, tokens.background)).toBeGreaterThanOrEqual(3);
+    expect(contrast(tokens.error, tokens.background)).toBeGreaterThanOrEqual(3);
+  });
+
+  /** `error` is also a text colour, on the page and on cards: 4.5:1. */
+  it.each(schemes)('lets error double as text in %s', (_, tokens) => {
+    expect(contrast(tokens.error, tokens.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(tokens.error, tokens.card)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it.each(schemes)('are no bottle or brand colour in %s', (scheme, tokens) => {
+    const taken = [
+      ...components.flatMap((c) => (c.colour ? [c.colour[scheme]] : [])),
+      ...brands.map((b) => b.accent[scheme]),
+    ].map((c) => c.toUpperCase());
+    expect(taken).not.toContain(tokens.warning.toUpperCase());
+    expect(taken).not.toContain(tokens.error.toUpperCase());
+  });
+});

@@ -194,7 +194,7 @@ export function DoseRow({ line, done = false, onPress }: DoseRowProps) {
       // strike-through says the same thing to everyone else.
       accessibilityRole="checkbox"
       accessibilityLabel={`${line.component.name}, ${amount} ${unit}`}
-      accessibilityHint={done ? 'Mark as not added' : 'Mark as added'}
+      accessibilityHint={done ? 'Marks as not added' : 'Marks as added'}
       accessibilityState={{ checked: done }}
     >
       <Animated.View style={[{ flexDirection: 'row', alignItems: 'center' }, recession]}>

@@ -12,7 +12,7 @@ import type { Dose } from '@/engine';
 
 export type RecipeSubtitle = {
   text: string;
-  tone: 'secondary' | 'warning';
+  tone: 'secondary' | 'error';
 };
 
 /** Section headings, in the vendor's own grouping. Apax's current range has
@@ -22,7 +22,7 @@ const GROUP_LABEL: Record<RecipeGroup, string> = {
   roast: 'By roast',
   'brew-method': 'By brew method',
   varietal: 'By varietal',
-  signature: 'Signature',
+  signature: 'By barista',
 };
 
 export const groupLabel = (group: RecipeGroup | undefined): string | undefined =>
@@ -49,10 +49,10 @@ export const groupLabel = (group: RecipeGroup | undefined): string | undefined =
 export function recipeSubtitle(recipe: Recipe, dose: Dose): RecipeSubtitle | null {
   const zeroed = dose.zeroed;
   if (dose.showsRounding && zeroed.length === 1) {
-    return { text: `Loses ${zeroed[0]!.component.name} at ${dose.volumeMl} ml`, tone: 'warning' };
+    return { text: `No ${zeroed[0]!.component.name} at ${dose.volumeMl} ml`, tone: 'error' };
   }
   if (dose.showsRounding && zeroed.length > 1) {
-    return { text: `Loses ${zeroed.length} bottles at ${dose.volumeMl} ml`, tone: 'warning' };
+    return { text: `${zeroed.length} bottles missing at ${dose.volumeMl} ml`, tone: 'error' };
   }
 
   return recipe.attribution ? { text: recipe.attribution, tone: 'secondary' } : null;

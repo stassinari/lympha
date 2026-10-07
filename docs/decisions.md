@@ -34,9 +34,14 @@ accounts or sync.
 
 - vendor-calculator aesthetics: sliders, scatter plots, ppm charts, marketing copy
 - dashboards: there is a dose to execute, not data to explore
-- onboarding, tooltips, feature tours
+- onboarding, tooltips, feature tours, wherever they stand between the user and the
+  dose
 - lab styling that implies the user must understand chemistry
 - anything that needs a paragraph read before acting
+
+These describe what the app is not *yet*, not a ban. *Revised 2026-10-07:* the list
+read as never; a feature that earns its place can use any of these patterns. The
+first is the ⓘ on the Rounding screen, which explains the flag limit on request.
 
 ---
 

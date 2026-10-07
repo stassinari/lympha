@@ -11,3 +11,4 @@ export * from './pulse';
 export * from './Screen';
 export * from './Segmented';
 export * from './Touchable';
+export * from './InfoTip';

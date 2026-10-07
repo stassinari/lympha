@@ -1,44 +1,78 @@
 /**
- * "What you'll get" — the honest breakdown behind the rounding line.
+ * Rounding: the breakdown behind the status line.
  *
  * Three things, in order of how much they change your morning: how far off you
- * are, which bottle is responsible, and what the water actually comes out like.
+ * are and on what, what the water comes out like, and which bottles get it there.
  *
  * Not a fixed Hardness / Alkalinity / TDS table, as `docs/designs/v1` draws: TDS
  * is not derivable from anything either vendor publishes, and Apax publishes no ion
  * quantities at all, so the per-bottle table is the universal one and the
  * chemistry appears only where it can be computed. Showing zeroes for Apax would
  * read as soft water rather than as missing data.
+ *
+ * Where there is chemistry, it comes first: the headline quotes it, so the table
+ * the number came from sits directly under it.
  */
 
 import { ScrollView, View } from 'react-native';
-import { BarRow, Body, DoseValue, Pill, Screen, SectionHeader, space, useTheme } from '@/design';
+import {
+  BarRow,
+  Body,
+  DoseValue,
+  InfoTip,
+  Pill,
+  Screen,
+  SectionHeader,
+  space,
+  useTheme,
+} from '@/design';
 import { ComparisonTable, ScreenHeader } from '@/components';
 import type { ComparisonRow } from '@/components';
 import { formatDoseAmount, formatIdealAmount, formatPpm, formatUnit } from '@/format/units';
-import { headline } from '@/format/rounding';
-import type { HeadlineSource } from '@/format/rounding';
-import { useBrand, useCleanVolume, useDose, useStore } from '@/state';
+import {
+  SEVERITY,
+  band,
+  blendNote,
+  headline,
+  headlineLabel,
+  missSeverity,
+} from '@/format/rounding';
+import type { Band } from '@/format/rounding';
+import { useCleanVolume, useDose, useStore } from '@/state';
 
 export type DetailScreenProps = { onClose: () => void };
 
 export function DetailScreen({ onClose }: DetailScreenProps) {
   const { colour } = useTheme();
-  const brand = useBrand();
   const dose = useDose();
   const cleanVolumeMl = useCleanVolume();
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
 
-  const { gap, source } = headline(dose);
-  const percent = Math.round(Math.abs(gap) * 100);
-  const direction = gap < 0 ? 'under' : 'over';
+  // Only reachable from the status line, which is only shown when rounding is.
+  const which = band(dose, flagAbove) ?? 'onTarget';
+  const barColour = { ok: colour.ok, warning: colour.warning, error: colour.error }[
+    SEVERITY[which]
+  ];
+  const limit = Math.round(flagAbove * 100);
+  const volumeMl = dose.volumeMl;
+
+  const { gap } = headline(dose);
+  const figure =
+    which === 'missing'
+      ? { big: '100%', small: `under target on ${headlineLabel(dose)}` }
+      : which === 'onTarget'
+        ? { big: '0%', small: 'on target' }
+        : {
+            big: `${Math.round(Math.abs(gap) * 100)}%`,
+            small: `${gap < 0 ? 'under' : 'over'} target on ${headlineLabel(dose)}`,
+          };
 
   const bottleRows: ComparisonRow[] = dose.lines.map((line) => ({
     label: line.component.name,
     asked: formatIdealAmount(line.exact),
     got: formatDoseAmount(line.delivered, line.dispenser.step),
-    off: line.zeroed || line.relativeError > flagAbove,
+    off: missSeverity(line.relativeError, flagAbove, line.zeroed),
     direction: line.delivered < line.exact ? 'under' : 'over',
     gap: line.exact > 0 ? line.error / line.exact : undefined,
   }));
@@ -50,7 +84,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           label: 'Hardness',
           asked: formatPpm(profile.target.hardness),
           got: formatPpm(profile.delivered.hardness),
-          off: Math.abs(profile.hardnessError) > flagAbove,
+          off: missSeverity(profile.hardnessError, flagAbove),
           direction: profile.hardnessError < 0 ? 'under' : 'over',
           gap: profile.hardnessError,
         },
@@ -58,7 +92,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           label: 'Alkalinity',
           asked: formatPpm(profile.target.alkalinity),
           got: formatPpm(profile.delivered.alkalinity),
-          off: Math.abs(profile.alkalinityError) > flagAbove,
+          off: missSeverity(profile.alkalinityError, flagAbove),
           direction: profile.alkalinityError < 0 ? 'under' : 'over',
           gap: profile.alkalinityError,
         },
@@ -66,10 +100,11 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
     : [];
 
   const unitLabel = dose.lines[0] ? formatUnit(dose.lines[0].dispenser.unit, 2) : undefined;
+  const blend = blendNote(dose);
 
   return (
     <Screen horizontalPadding={0}>
-      <ScreenHeader title="What you’ll get" onClose={onClose} />
+      <ScreenHeader title="Rounding" onClose={onClose} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -81,22 +116,27 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
           gap: space.rows,
         }}
       >
-        <BarRow barColour={colour.warning}>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-            <DoseValue>{`${percent}%`}</DoseValue>
-            <Body tone="secondary" style={{ marginLeft: 8 }}>
-              {direction} target
-            </Body>
+        <BarRow barColour={barColour}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.snug }}>
+            <View
+              style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap' }}
+            >
+              <DoseValue style={{ marginRight: 8 }}>{figure.big}</DoseValue>
+              <Body tone="secondary" style={{ flexShrink: 1 }}>
+                {figure.small}
+              </Body>
+            </View>
+            <InfoTip
+              title={`${limit}% limit`}
+              body="Lympha flags any gap above this. You can change it in Settings, under Flag when off by."
+              accessibilityLabel="About the limit"
+              accessibilityHint="Explains the limit"
+            />
           </View>
           <Body tone="onCard" style={{ marginTop: 6 }}>
-            {explain(dose, direction, source)}
+            {sentence(which, dose, limit)}
           </Body>
         </BarRow>
-
-        <SectionHeader tone="secondary" style={{ marginTop: space.snug }}>
-          Per bottle
-        </SectionHeader>
-        <ComparisonTable rows={bottleRows} unit={unitLabel} />
 
         {profileRows.length > 0 ? (
           <>
@@ -105,21 +145,21 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
             </SectionHeader>
             <ComparisonTable rows={profileRows} unit="ppm CaCO₃" />
           </>
-        ) : (
+        ) : null}
+
+        <SectionHeader tone="secondary" style={{ marginTop: space.snug }}>
+          Per bottle
+        </SectionHeader>
+        <ComparisonTable rows={bottleRows} unit={unitLabel} />
+        {blend ? (
           <Body tone="secondary" style={{ paddingHorizontal: 8, marginTop: 4 }}>
-            {brand.name} publishes what is in each bottle but not how much, so what the water ends
-            up like cannot be worked out.
+            {blend}
           </Body>
-        )}
+        ) : null}
 
         {cleanVolumeMl ? (
           <BarRow barColour={colour.ok} style={{ marginTop: space.snug }}>
-            <Body tone="onCard">
-              {`At ${cleanVolumeMl} ml every bottle lands on a whole ${formatUnit(
-                dose.lines[0]?.dispenser.unit ?? 'drop',
-                1,
-              )}.`}
-            </Body>
+            <Body tone="onCard">{`At ${cleanVolumeMl} ml, every bottle hits its target exactly.`}</Body>
             <View style={{ flexDirection: 'row', gap: space.snug, marginTop: space.blocks }}>
               <Pill
                 label={`Switch to ${cleanVolumeMl} ml`}
@@ -129,7 +169,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
                   onClose();
                 }}
               />
-              <Pill label="Brew it" onPress={onClose} />
+              <Pill label={`Keep ${volumeMl} ml`} onPress={onClose} />
             </View>
           </BarRow>
         ) : null}
@@ -138,26 +178,21 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   );
 }
 
-/**
- * Names the figure the headline is quoting, then says why it is out.
- *
- * With six numbers below and one percentage above, an unattributed headline
- * leaves the reader to guess which row it came from; a wrong guess gives a
- * different answer and no way to tell which of them is wrong.
- */
-function explain(
-  dose: ReturnType<typeof useDose>,
-  direction: string,
-  source: HeadlineSource | null,
-): string {
-  const zeroed = dose.zeroed;
-  if (zeroed.length === 1) {
-    return `${zeroed[0]!.component.name} rounds away to nothing at this volume, so it is missing from the water entirely.`;
+/** What the headline means, by band. The figure above it already says how far and
+ *  on what, so this says what that amounts to. */
+function sentence(which: Band, dose: ReturnType<typeof useDose>, limit: number): string {
+  switch (which) {
+    case 'onTarget':
+      return 'That’s as close as drops get.';
+    case 'close':
+      return `That’s within the ${limit}% limit.`;
+    case 'off':
+      return `That’s more than the ${limit}% limit.`;
+    case 'farOff':
+      return 'That’s more than a third off, enough that the water no longer matches the recipe.';
+    case 'missing':
+      return dose.zeroed.length === 1
+        ? `${dose.zeroed[0]!.component.name} rounds to zero drops at this volume, so it’s missing from your water.`
+        : `${dose.zeroed.length} bottles round to zero drops at this volume, so they’re missing from your water.`;
   }
-  if (zeroed.length > 1) {
-    return `${zeroed.length} bottles round away to nothing at this volume, so they are missing from the water entirely.`;
-  }
-  const unit = dose.lines[0]?.dispenser.unit ?? 'drop';
-  const attribution = source ? `${source.label} is the widest gap. ` : '';
-  return `${attribution}A ${formatUnit(unit, 1)} cannot be halved, so the closest you can actually make is a little ${direction} what the recipe asks for.`;
 }

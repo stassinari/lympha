@@ -235,7 +235,10 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
         // The selection is a visual cue, so it is said out loud too — otherwise the
         // one group of users who cannot see it is also the group most likely to
         // assume they have to clear the field first.
-        accessibilityHint={selected ? 'Selected. Type to replace the volume' : 'Edit the volume'}
+        accessibilityHint={
+          selected ? 'Typing replaces the current amount' : 'Edits the amount of water'
+        }
+        accessibilityState={{ selected }}
         style={{ flexDirection: 'row', alignItems: 'baseline' }}
       >
         {/* First child, so it paints behind the digits. Absolute, so it is not part
@@ -276,6 +279,7 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
         <VolumeNudge
           dose={dose}
           cleanVolumeMl={cleanVolumeMl}
+          flagAbove={flagAbove}
           onUseClean={commit}
           onDismiss={() => setDismissed(pendingMl)}
         />

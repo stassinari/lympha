@@ -17,7 +17,7 @@ import type { TypeRole } from './typography';
 import { useTheme } from './theme';
 import { useTrackingInset } from './textMetrics';
 
-export type Tone = 'primary' | 'secondary' | 'onCard' | 'warning' | 'ok';
+export type Tone = 'primary' | 'secondary' | 'onCard' | 'warning' | 'error' | 'ok';
 
 export type TextProps = Omit<RNTextProps, 'style'> & {
   tone?: Tone;
@@ -54,6 +54,7 @@ function useTextStyle(variant: TypeRole, tone: Tone) {
     secondary: colour.textSecondary,
     onCard: colour.textOnCard,
     warning: colour.textWarning,
+    error: colour.error,
     ok: colour.ok,
   };
   return [

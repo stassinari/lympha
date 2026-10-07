@@ -113,6 +113,9 @@ export type Brand = {
   name: string;
   /** Short form for chips and tight spaces. */
   shortName: string;
+  /** How a screen reader should say `shortName`, where reading it aloud would
+   *  mangle it: "Apax [K]" reads its brackets. */
+  spokenShortName?: string;
   /** Disambiguates two ranges from the same vendor, e.g. "Pre-KONFLUX range". */
   subtitle?: string;
   source: Source;

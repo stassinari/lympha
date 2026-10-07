@@ -13,8 +13,6 @@
 import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
-  BarRow,
-  Body,
   Caption,
   Card,
   CardTitle,
@@ -25,10 +23,18 @@ import {
   useTheme,
 } from '@/design';
 import { ScreenHeader } from '@/components';
-import { componentMap, componentsForBrand, getBrand, getRecipe, recipesForBrand } from '@/data';
-import type { DoseUnit } from '@/data/types';
+import {
+  componentMap,
+  componentsForBrand,
+  getBrand,
+  getRecipe,
+  recipesForBrand,
+  unitGroupOf,
+  unitGroups,
+} from '@/data';
 import { availableUnits, computeDose } from '@/engine';
-import type { UnitPreference } from '@/engine';
+import type { DoseLine, UnitPreference } from '@/engine';
+import { EXACT } from '@/format/rounding';
 import { formatDoseAmount, formatUnit } from '@/format/units';
 import { unitPreferenceFor, useStore } from '@/state';
 
@@ -44,6 +50,10 @@ export type UnitScreenProps = { brandId: string; onClose: () => void };
 export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
   const { colour, scheme } = useTheme();
   const brand = getBrand(brandId);
+  // Both Apax ranges share this screen, as they share the setting, so it carries
+  // the setting's name rather than either range's.
+  const groupName =
+    unitGroups().find((g) => g.id === unitGroupOf(brandId))?.label ?? brand?.name ?? '';
   const volumeMl = useStore((s) => s.volumeMl);
   const rememberedId = useStore((s) => s.recipeIds[brandId]);
 
@@ -69,7 +79,7 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
   /** The same dose, read on each instrument. */
   const previews = useMemo(() => {
     const options: { key: UnitPreference; label: string; preview: string }[] = [
-      { key: 'auto', label: 'Automatic', preview: 'Whichever suits the volume' },
+      { key: 'auto', label: 'Automatic', preview: 'Drops for small batches, grams for large ones' },
     ];
     if (!recipe) return options;
     for (const unit of offered) {
@@ -79,7 +89,7 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
         key: unit,
         label: UNIT_NAME[unit] ?? unit,
         preview: line
-          ? `${line.component.name} — ${formatDoseAmount(line.delivered, line.dispenser.step)} ${formatUnit(line.dispenser.unit, line.delivered)} at ${volumeMl} ml`
+          ? `${formatDoseAmount(line.delivered, line.dispenser.step)} ${formatUnit(line.dispenser.unit, line.delivered)} of ${line.component.name} for ${volumeMl} ml${missSuffix(line)}`
           : '',
       });
     }
@@ -88,7 +98,7 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
 
   return (
     <Screen horizontalPadding={0}>
-      <ScreenHeader title={brand?.shortName ?? 'Concentrate'} onClose={onClose} accent={accent} />
+      <ScreenHeader title={groupName} onClose={onClose} accent={accent} />
 
       <ScrollView
         style={{ flex: 1 }}
@@ -119,19 +129,18 @@ export function UnitScreen({ brandId, onClose }: UnitScreenProps) {
             </Card>
           ))}
         </View>
-
-        {offered.includes('drop' as DoseUnit) && offered.length > 1 ? (
-          // Kept in the dose-row anatomy so a caution reads as the same family of
-          // object as a dose, not as an error.
-          <BarRow barColour={colour.warning} style={{ marginTop: space.snug }}>
-            <CardTitle>Drops are the least precise</CardTitle>
-            <Body tone="onCard" style={{ marginTop: 4 }}>
-              Dropper size varies between bottles. If you own a scale, grams will get you closer to
-              the recipe than counting will.
-            </Body>
-          </BarRow>
-        ) : null}
       </ScrollView>
     </Screen>
   );
+}
+
+/**
+ * How far the previewed bottle misses, in drops only. Grams are read to 0.01 g,
+ * which is exact for any practical purpose, so a gram preview never has one.
+ */
+function missSuffix(line: DoseLine): string {
+  if (line.dispenser.allowPartial || line.exact <= 0) return '';
+  const gap = line.error / line.exact;
+  if (Math.abs(gap) < EXACT) return '';
+  return `, ${Math.round(Math.abs(gap) * 100)}% ${gap < 0 ? 'under' : 'over'}`;
 }

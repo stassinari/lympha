@@ -1,5 +1,5 @@
 /**
- * Asked against got, and how far apart they are.
+ * Target against what you get, and how far apart they are.
  *
  * The whole differentiator in one shape: one row per thing being measured, and
  * the delivered value marked when it misses. Vendor calculators print only the
@@ -12,14 +12,15 @@
 
 import { View } from 'react-native';
 import { Caption, Card, CardTitle, Divider, Icon, space, useTheme, useTypeMetrics } from '@/design';
+import { EXACT } from '@/format/rounding';
 import { formatGapPercent } from '@/format/units';
 
 export type ComparisonRow = {
   label: string;
   asked: string;
   got: string;
-  /** Draws the delivered value in the warning tone. */
-  off?: boolean;
+  /** Draws the delivered value, and its arrow, in that state's colour. */
+  off?: 'warning' | 'error' | null;
   /** Which side of the target it landed on. Only read when `off`. */
   direction?: 'under' | 'over';
   /** Signed relative error. Omitted on every row hides the column. */
@@ -82,8 +83,15 @@ function MissMark({
 /** What the row says to a screen reader, which cannot see the column headings. */
 function rowLabel(row: ComparisonRow, unit?: string): string {
   const scale = unit ? ` ${unit}` : '';
-  const gap = row.gap === undefined ? '' : `, off by ${formatGapPercent(row.gap)}`;
-  return `${row.label}: asked ${row.asked}${scale}, get ${row.got}${scale}${gap}`;
+  return `${row.label}: target ${row.asked}${scale}, you get ${row.got}${scale}${spokenGap(row.gap)}`;
+}
+
+/** Words rather than a signed figure: a screen reader reads "+7%" as "plus seven percent",
+ *  which says which way only to someone who knows the sign convention. */
+function spokenGap(gap: number | undefined): string {
+  if (gap === undefined) return '';
+  if (Math.abs(gap) < EXACT) return ', on target';
+  return `, ${Math.round(Math.abs(gap) * 100)} percent ${gap < 0 ? 'under' : 'over'}`;
 }
 
 export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: string }) {
@@ -91,7 +99,7 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
   const { capHeight } = useTypeMetrics('cardTitle');
 
   const showGap = rows.some((row) => row.gap !== undefined);
-  const headings = showGap ? 'Asked, get, and off by.' : 'Asked, and get.';
+  const headings = showGap ? 'Target, you get, off by.' : 'Target, you get.';
 
   return (
     <Card paddingVertical={space.blocks}>
@@ -104,10 +112,10 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
           {unit ?? ''}
         </Caption>
         <Caption tone="secondary" style={COLUMN}>
-          Asked
+          Target
         </Caption>
         <Caption tone="secondary" style={COLUMN}>
-          Get
+          You get
         </Caption>
         {showGap ? (
           <Caption tone="secondary" style={COLUMN}>
@@ -136,11 +144,16 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
               {row.off && row.direction ? (
                 <MissMark
                   direction={row.direction}
-                  colour={colour.textWarning}
+                  colour={row.off === 'error' ? colour.error : colour.textWarning}
                   capHeight={capHeight}
                 />
               ) : null}
-              <CardTitle style={{ color: row.off ? colour.textWarning : colour.text }}>
+              <CardTitle
+                style={{
+                  color:
+                    row.off === 'error' ? colour.error : row.off ? colour.textWarning : colour.text,
+                }}
+              >
                 {row.got}
               </CardTitle>
             </View>

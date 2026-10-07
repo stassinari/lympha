@@ -113,11 +113,41 @@ const dispensersFor = () => [
   },
 ];
 
+/**
+ * How the ranges are named and ordered on screen. The source keeps the research's
+ * own labels and default as provenance; what the app shows is copy, and lives here.
+ *
+ * The three-bottle range is plain "Apax" and comes first: it is the base set, and
+ * KONFLUX is an addition to it. "[K]" is Apax's own shorthand for that addition.
+ */
+const DISPLAY: Record<
+  string,
+  Pick<Brand, 'name' | 'shortName'> &
+    Partial<Pick<Brand, 'spokenShortName' | 'displayNote' | 'isDefault'>>
+> = {
+  'apax-lab-original': {
+    name: 'Apax Lab',
+    shortName: 'Apax',
+    displayNote:
+      'From Apax Lab’s last three-bottle calculator, so a few amounts differ slightly from the card that comes with the set.',
+    isDefault: true,
+  },
+  'apax-lab': {
+    name: 'Apax Lab with KONFLUX',
+    shortName: 'Apax [K]',
+    spokenShortName: 'Apax with KONFLUX',
+  },
+};
+
+const DISPLAY_ORDER = ['apax-lab-original', 'apax-lab'];
+
 function buildBrand(sb: SourceBrand): Brand {
+  const display = DISPLAY[sb.id]!;
   return {
     id: sb.id,
-    name: sb.name,
-    shortName: sb.id === 'apax-lab' ? 'Apax' : 'Apax 3',
+    name: display.name,
+    shortName: display.shortName,
+    ...(display.spokenShortName ? { spokenShortName: display.spokenShortName } : {}),
     subtitle: sb.subtitle,
     source: {
       url: 'https://apaxlab.com',
@@ -125,8 +155,8 @@ function buildBrand(sb: SourceBrand): Brand {
       confidence: 'high',
       notes: sb.source,
     },
-    ...('display_note' in sb && sb.display_note ? { displayNote: sb.display_note } : {}),
-    ...(sb.default ? { isDefault: true } : {}),
+    ...(display.displayNote ? { displayNote: display.displayNote } : {}),
+    ...(display.isDefault ? { isDefault: true } : {}),
     // Both ranges are the same physical concentrates on the same scale, so they
     // share one unit preference.
     unitGroup: 'apax',
@@ -180,6 +210,8 @@ function buildRecipes(sb: SourceBrand): Recipe[] {
   });
 }
 
-export const apaxBrands: Brand[] = source.brands.map(buildBrand);
+export const apaxBrands: Brand[] = source.brands
+  .map(buildBrand)
+  .sort((a, b) => DISPLAY_ORDER.indexOf(a.id) - DISPLAY_ORDER.indexOf(b.id));
 export const apaxComponents: Component[] = source.brands.flatMap(buildComponents);
 export const apaxRecipes: Recipe[] = source.brands.flatMap(buildRecipes);

@@ -12,8 +12,8 @@ describe('recipeSubtitle', () => {
   it('names a bottle the volume would lose, ahead of anything else', () => {
     // Rao's is credited to Scott Rao, but at a cup that is not the useful fact.
     expect(subtitle('lotus-raos-recipe', 250)).toEqual({
-      text: 'Loses Potassium at 250 ml',
-      tone: 'warning',
+      text: 'No Potassium at 250 ml',
+      tone: 'error',
     });
   });
 
@@ -41,7 +41,7 @@ describe('recipeSubtitle', () => {
       'lotus-simple-and-sweet',
       'lotus-bright-and-juicy',
       'lotus-ultra-light',
-    ].filter((id) => subtitle(id, 350)?.tone === 'warning');
+    ].filter((id) => subtitle(id, 350)?.tone === 'error');
     expect(warned).toEqual([]);
   });
 
@@ -56,7 +56,7 @@ describe('recipeSubtitle', () => {
     for (const volumeMl of [200, 250, 350, 500, 1000]) {
       for (const recipe of recipesForBrand('lotus')) {
         const dose = computeDose(recipe, volumeMl, componentMap);
-        const warned = recipeSubtitle(recipe, dose)?.tone === 'warning';
+        const warned = recipeSubtitle(recipe, dose)?.tone === 'error';
         expect(warned, `${recipe.id} at ${volumeMl}`).toBe(dose.zeroed.length > 0);
       }
     }
@@ -66,8 +66,8 @@ describe('recipeSubtitle', () => {
     // At 250 ml Rao's loses potassium and Ultra Light loses magnesium; Simple and
     // Sweet survives. Three rows, two warnings.
     expect(subtitle('lotus-simple-and-sweet', 250)?.tone).toBe('secondary');
-    expect(subtitle('lotus-raos-recipe', 250)?.text).toBe('Loses Potassium at 250 ml');
-    expect(subtitle('lotus-ultra-light', 250)?.text).toBe('Loses Magnesium at 250 ml');
+    expect(subtitle('lotus-raos-recipe', 250)?.text).toBe('No Potassium at 250 ml');
+    expect(subtitle('lotus-ultra-light', 250)?.text).toBe('No Magnesium at 250 ml');
   });
 });
 
@@ -75,7 +75,7 @@ describe('groupLabel', () => {
   it('labels the vendor groupings', () => {
     expect(groupLabel('process')).toBe('By process');
     expect(groupLabel('brew-method')).toBe('By brew method');
-    expect(groupLabel('signature')).toBe('Signature');
+    expect(groupLabel('signature')).toBe('By barista');
   });
 
   it('has nothing to say for an ungrouped list', () => {

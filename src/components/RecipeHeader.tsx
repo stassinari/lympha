@@ -27,7 +27,7 @@ export function RecipeHeader({ recipeName, brandName, bottleColours, onPress }: 
       paddingVertical={14}
       paddingHorizontal={16}
       accessibilityLabel={`${recipeName}, ${brandName}`}
-      accessibilityHint="Change the brand or recipe"
+      accessibilityHint="Changes the brand or recipe"
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.blocks }}>
         <BarCluster colours={bottleColours} />

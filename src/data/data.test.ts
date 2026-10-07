@@ -239,7 +239,8 @@ describe('the case that justifies the app', () => {
 });
 
 describe('Apax', () => {
-  const APAX_BRAND_IDS = ['apax-lab', 'apax-lab-original'];
+  // The base range first, then the one that adds KONFLUX.
+  const APAX_BRAND_IDS = ['apax-lab-original', 'apax-lab'];
   const totalGPerLitre = (recipeId: string) => {
     const recipe = apaxRecipes.find((r) => r.id === recipeId);
     if (!recipe) throw new Error(`no recipe ${recipeId}`);
@@ -251,7 +252,7 @@ describe('Apax', () => {
     // KONFLUX did not simply get added to the old recipes — Apax rebalanced the
     // rest — so the ranges are not derivable from one another.
     expect(apaxBrands.map((b) => b.id)).toEqual(APAX_BRAND_IDS);
-    expect(apaxBrands.find((b) => b.id === 'apax-lab')?.isDefault).toBe(true);
+    expect(apaxBrands.find((b) => b.id === 'apax-lab-original')?.isDefault).toBe(true);
     expect(componentsForBrand('apax-lab')).toHaveLength(4);
     expect(componentsForBrand('apax-lab-original')).toHaveLength(3);
     expect(recipesForBrand('apax-lab')).toHaveLength(15);
@@ -266,7 +267,8 @@ describe('Apax', () => {
 
   it('tells the user the original range came from the calculator, not the card', () => {
     const original = apaxBrands.find((b) => b.id === 'apax-lab-original');
-    expect(original?.displayNote).toMatch(/differs slightly from supplied card/i);
+    expect(original?.displayNote).toMatch(/calculator/i);
+    expect(original?.displayNote).toMatch(/card/i);
   });
 
   it('holds the 4.0 g/L envelope except where the vendor published otherwise', () => {

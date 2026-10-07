@@ -69,7 +69,7 @@ export function VolumeCard({ volumeMl, onEdit }: VolumeCardProps) {
             </VolumeUnit>
           </View>
         </View>
-        <Pill label="Edit" onPress={onEdit} accessibilityHint="Change the water volume" />
+        <Pill label="Edit" onPress={onEdit} accessibilityHint="Changes the amount of water" />
       </View>
     </Card>
   );

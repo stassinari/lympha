@@ -16,6 +16,13 @@ The app is feature-complete and on TestFlight.
   - The unit screen's "Drops are the least precise…" callout. The pattern stays;
     the words are undecided.
   - The Apax original-range label and note, unread in context.
+- [ ] **Copy decisions on record**, once the copy is final. The voice; the taxonomy
+      as a glossary table (term, meaning, where users see it), with the rounding
+      bands and the retired words; typographic apostrophes (’, never '); and the
+      reasons behind the contested strings go into
+      `decisions.md` under *Copy*; the working handoffs (`docs/lympha-copy-pass-*.md`)
+      are then deleted. Code comments and identifiers follow the taxonomy
+      (`asked`/`got`, `signature`, "clean volume").
 - [ ] **Store listing text**, in the same voice: name, subtitle (iOS), short
       description (Play), full description, keywords (iOS).
 

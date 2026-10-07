@@ -79,6 +79,7 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
           <Chip
             key={b.id}
             label={b.shortName}
+            accessibilityLabel={b.spokenShortName}
             selected={b.id === brand.id}
             onPress={() => setBrand(b.id)}
             leading={<BarCluster size="chip" colours={clusterFor(b.id)} />}
