@@ -137,6 +137,9 @@ export const ScreenTitle = variantComponent('screenTitle', 'ScreenTitle', HEADIN
 export const RowTitle = variantComponent('rowTitle', 'RowTitle');
 export const CardTitle = variantComponent('cardTitle', 'CardTitle');
 export const Body = variantComponent('body', 'Body');
+export const BodyRegular = variantComponent('bodyRegular', 'BodyRegular');
+/** What the Rounding headline's figure quotes. */
+export const HeadlineSubject = variantComponent('headlineSubject', 'HeadlineSubject');
 /** A text-only control's label. Not pressable itself; it goes inside a `Touchable`. */
 export const ActionText = variantComponent('action', 'ActionText');
 export const Caption = variantComponent('caption', 'Caption');

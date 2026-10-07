@@ -214,9 +214,17 @@ describe('headlineFigure', () => {
   it('is a percentage, with what it quotes, everywhere between', () => {
     expect(figure('lotus-bright-and-juicy', 250)).toEqual({
       kind: 'percent',
+      subject: 'Alkalinity',
       percent: '79%',
-      label: 'over target on alkalinity',
+      label: 'over target',
     });
+  });
+
+  it('capitalises the subject, which starts a line, and keeps bottle names as they are', () => {
+    expect(figure('lotus-bright-and-juicy', 500)).toMatchObject({
+      subject: 'Hardness and alkalinity',
+    });
+    expect(figure('apax-lab-washed', 200)).toMatchObject({ subject: 'JAMM and LYLAC' });
   });
 });
 

@@ -246,7 +246,15 @@ export function blendNote(dose: Dose): string | null {
  * line's own words instead, so the two screens name the state the same way.
  */
 export type HeadlineFigure =
-  { kind: 'words'; text: string } | { kind: 'percent'; percent: string; label: string };
+  | { kind: 'words'; text: string }
+  | {
+      kind: 'percent';
+      /** What the figure quotes, on its own line above it: "Alkalinity", "TONIK and LYLAC". */
+      subject: string;
+      percent: string;
+      /** Beside the figure: "under target". */
+      label: string;
+    };
 
 export function headlineFigure(dose: Dose, which: Band): HeadlineFigure {
   if (which === 'onTarget') return { kind: 'words', text: 'On target' };
@@ -258,10 +266,13 @@ export function headlineFigure(dose: Dose, which: Band): HeadlineFigure {
     };
   }
   const gap = headlineGap(dose);
+  const subject = headlineLabel(dose);
   return {
     kind: 'percent',
+    // It starts a line. Bottle names already carry their own casing, which this keeps.
+    subject: subject.charAt(0).toUpperCase() + subject.slice(1),
     percent: `${Math.round(Math.abs(gap) * 100)}%`,
-    label: `${gap < 0 ? 'under' : 'over'} target on ${headlineLabel(dose)}`,
+    label: `${gap < 0 ? 'under' : 'over'} target`,
   };
 }
 

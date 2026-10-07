@@ -18,15 +18,19 @@ import { ScrollView, View } from 'react-native';
 import {
   BarRow,
   Body,
+  BodyRegular,
   DoseValue,
+  HeadlineSubject,
   HeadlineWords,
+  INFO_GLYPH,
   InfoSheet,
   Pill,
   Screen,
   SectionHeader,
+  opticalGap,
   space,
-  useReflowedText,
   useTheme,
+  useTypeMetrics,
 } from '@/design';
 import { ComparisonTable, ScreenHeader } from '@/components';
 import type { ComparisonRow } from '@/components';
@@ -41,6 +45,9 @@ import {
 } from '@/format/rounding';
 import { useExactVolume, useDose, useStore } from '@/state';
 
+/** Keeps the first line of the headline clear of the ⓘ placed over it. */
+const INFO_CLEARANCE = INFO_GLYPH + space.snug;
+
 export type DetailScreenProps = { onClose: () => void };
 
 export function DetailScreen({ onClose }: DetailScreenProps) {
@@ -49,7 +56,8 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   const exactVolumeMl = useExactVolume();
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
-  const reflowed = useReflowedText();
+  const subjectType = useTypeMetrics('headlineSubject');
+  const valueType = useTypeMetrics('doseValue');
 
   // Only reachable from the status line, which is only shown when rounding is.
   const which = band(dose, flagAbove) ?? 'onTarget';
@@ -60,6 +68,11 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   const volumeMl = dose.volumeMl;
 
   const figure = headlineFigure(dose, which);
+  // The ⓘ explains the limit, so it appears only where the sentence names it.
+  const showsLimit = which === 'close' || which === 'off';
+  // Measured between the subject's ink and the digits', as the Water card does
+  // between its label and the volume.
+  const subjectGap = opticalGap(space.labelGap, subjectType.inkInsets, valueType.inkInsets);
   const profile = dose.profile;
 
   // Where there is chemistry, the limit applies to the water, not the bottles: a
@@ -114,45 +127,65 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
         }}
       >
         <BarRow barColour={barColour}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.snug }}>
+          <View>
             {figure.kind === 'words' ? (
-              <HeadlineWords style={{ flex: 1 }}>{figure.text}</HeadlineWords>
+              <HeadlineWords>{figure.text}</HeadlineWords>
             ) : (
-              // The label wraps beside the figure, each line starting under its
-              // first: a baseline row aligns the label's first line with the
-              // digits, and `flex: 1` gives it the rest of the width to wrap in.
-              // Past the accessibility text sizes there is no width left beside
-              // the figure, so the label goes beneath it.
+              // One element, read as "Alkalinity, 7% under target": the subject
+              // first, as a sighted reader meets it.
               <View
                 accessible
-                accessibilityLabel={`${figure.percent} ${figure.label}`}
-                style={{
-                  flex: 1,
-                  flexDirection: reflowed ? 'column' : 'row',
-                  alignItems: reflowed ? 'flex-start' : 'baseline',
-                  columnGap: space.snug,
-                }}
+                accessibilityLabel={`${figure.subject}, ${figure.percent} ${figure.label}`}
               >
-                <DoseValue>{figure.percent}</DoseValue>
-                <Body tone="secondary" style={reflowed ? null : { flex: 1 }}>
-                  {figure.label}
-                </Body>
+                <View style={{ paddingRight: showsLimit ? INFO_CLEARANCE : 0 }}>
+                  <HeadlineSubject>{figure.subject}</HeadlineSubject>
+                </View>
+                {/* Wraps whole: when "under target" no longer fits beside the
+                    figure, it goes beneath it rather than breaking. */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'baseline',
+                    columnGap: space.snug,
+                    marginTop: subjectGap,
+                  }}
+                >
+                  <DoseValue>{figure.percent}</DoseValue>
+                  <BodyRegular tone="secondary">{figure.label}</BodyRegular>
+                </View>
               </View>
             )}
-            <InfoSheet
-              title={`${limit}% limit`}
-              body={
-                profile
-                  ? `Hardness and alkalinity can each be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
-                  : `Each bottle can be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
-              }
-              accessibilityLabel="About the limit"
-              accessibilityHint="Explains the limit"
-            />
+            <BodyRegular tone="secondary" style={{ marginTop: 6 }}>
+              {headlineSentence(dose, which, limit)}
+            </BodyRegular>
+
+            {/* Placed over the subject line, centred on its height, and last in
+                the tree so a screen reader reaches it after the headline and its
+                sentence rather than before them. */}
+            {showsLimit ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  height: subjectType.lineHeight,
+                  justifyContent: 'center',
+                }}
+              >
+                <InfoSheet
+                  title={`${limit}% limit`}
+                  body={
+                    profile
+                      ? `Hardness and alkalinity can each be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
+                      : `Each bottle can be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
+                  }
+                  accessibilityLabel="About the limit"
+                  accessibilityHint="Explains the limit"
+                />
+              </View>
+            ) : null}
           </View>
-          <Body tone="onCard" style={{ marginTop: 6 }}>
-            {headlineSentence(dose, which, limit)}
-          </Body>
         </BarRow>
 
         {profileRows.length > 0 ? (
@@ -169,9 +202,9 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
         </SectionHeader>
         <ComparisonTable rows={bottleRows} unit={unitLabel} />
         {blend ? (
-          <Body tone="secondary" style={{ paddingHorizontal: 8, marginTop: 4 }}>
+          <BodyRegular tone="secondary" style={{ paddingHorizontal: 8, marginTop: 4 }}>
             {blend}
-          </Body>
+          </BodyRegular>
         ) : null}
 
         {exactVolumeMl ? (

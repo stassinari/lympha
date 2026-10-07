@@ -359,6 +359,12 @@ default; `onum` is never enabled.
 
 The platform facts behind these are in `AGENTS.md`.
 
+**Weights by job.** Nunito Black (900) for display: page titles and figures.
+ExtraBold (800) for labels that name a thing: row labels, the headline subject,
+section headers, and Off by. Bold (700) for controls. SemiBold (600) for data and
+body text. Regular (400) for explanatory sentences that step back from the figures
+around them. The same name carries the same weight wherever it appears.
+
 ---
 
 ## Motion
@@ -503,15 +509,28 @@ the volume as the cause, as the Missing line does.
 **The Rounding screen is titled "Rounding"**, naming its subject as Water, Recipe
 and Settings do. The footer link stays "Details".
 
-**The headline names what it quotes**: `over target on alkalinity`, `on TONIK`.
-Figures showing the same signed whole percentage are tied and all named: two
-joined with "and", three or more as "{k} bottles".
+**The headline names what it quotes**, as a subject line above the figure:
+`Alkalinity`, `Hardness and alkalinity`, `TONIK and LYLAC`. Figures showing the
+same signed whole percentage are tied and all named: two joined with "and", three
+or more as "{k} bottles". The subject starts a line, so it is capitalised; bottle
+names keep their own casing.
 
 **The Rounding headline is words at the extremes**, in the status line's own words,
 at Large Title size (`headlineWords`) because a word is far wider than a figure:
-`On target`, `No {bottle}`, `{n} bottles missing`. Between them it is `{n}%` with
-`{under|over} target on {label}`, the label wrapping beside the figure, not under
-it, until accessibility text sizes leave no room.
+`On target`, `No {bottle}`, `{n} bottles missing`, with no subject line. Between
+them it is the subject, then `{n}%` with `{under|over} target` beside it.
+
+- **Two sizes on the card**: the figure, and body size for everything else. The
+  subject is `headlineSubject` (ExtraBold) in the primary tone: the weight the
+  tables give the same names, so a name is never quieter in the headline than in
+  its row. "{under|over} target" and the sentence are `bodyRegular` (Regular) in
+  the secondary tone, so they recede from it. Not uppercase, so the subject does not read as a section header. It sits
+  above the figure, separated by `opticalGap` as the Water card's label is.
+- **The ⓘ sits on the subject line.**
+- **"{under|over} target" wraps whole**, beneath the figure, when it no longer
+  fits beside it.
+- **Screen readers hear one element**, subject first: *"Alkalinity, 7% under
+  target"*, then the sentence, then the ⓘ.
 
 **Every band has a headline sentence**, because the card always needs a body. On
 target is *"That’s as close as drops get."* for both brands, since on target is
@@ -524,9 +543,11 @@ matches the recipe."*
 closer to target than Potassium alone."*) explains a Lotus table where a bottle is
 further out than the headline. It is shown only when that is visibly so, and never
 with a bottle missing. The bottles are read from the ion data, not hard-coded.
-"Cancel out" is retired: the bottles don't oppose each other.
+"Cancel out" is retired: the bottles don't oppose each other. Set in
+`bodyRegular`, like the headline sentence: both explain rather than report.
 
-**The limit ⓘ** on the Rounding card, in every band, opens a short sheet titled
+**The limit ⓘ** on the Rounding card appears only in Close and Off, the bands
+whose sentence names the limit. It opens a short sheet titled
 `{t}% limit`. It says what the limit applies to, which differs by brand:
 
 - Lotus: *"Hardness and alkalinity can each be up to {t}% off target before Lympha

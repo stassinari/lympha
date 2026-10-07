@@ -26,6 +26,8 @@ export type TypeRole =
   | 'rowTitle'
   | 'cardTitle'
   | 'body'
+  | 'bodyRegular'
+  | 'headlineSubject'
   | 'action'
   | 'caption'
   | 'sectionHeader'
@@ -123,6 +125,25 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   rowTitle: { weight: '800', size: 20, lineHeightRatio: 1.2, trackingEm: -0.01, extent: 'text' },
   cardTitle: { weight: '800', size: 17, lineHeightRatio: 1.25, trackingEm: -0.005, extent: 'text' },
   body: { weight: '600', size: 15, lineHeightRatio: 1.5, trackingEm: 0, extent: 'text' },
+  /**
+   * `body` a step lighter, for explanatory sentences that should recede from the
+   * labels and figures around them: the Rounding card's sentence, the note under
+   * its tables. The same size and line box as `body`, so the two share a baseline.
+   */
+  bodyRegular: { weight: '400', size: 15, lineHeightRatio: 1.5, trackingEm: 0, extent: 'text' },
+  /**
+   * What the Rounding headline quotes, on the line above its figure. ExtraBold,
+   * the weight the tables beneath give the same names, so "Alkalinity" is not
+   * quieter in the headline than in the row it comes from. Body size, so the card
+   * keeps to two sizes and the figure leads on size alone.
+   */
+  headlineSubject: {
+    weight: '800',
+    size: 15,
+    lineHeightRatio: 1.5,
+    trackingEm: 0,
+    extent: 'text',
+  },
   /**
    * A control drawn as a word and nothing else: "Done" in an iOS header,
    * "Details" in the dose screen's footer.

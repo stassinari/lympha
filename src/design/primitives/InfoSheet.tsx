@@ -13,8 +13,9 @@ import { Icon } from './Icon';
 import { NativeSheet } from './NativeSheet';
 import { Touchable } from './Touchable';
 
-/** Matches the settings glyph's treatment: chrome, so bold and muted. */
-const GLYPH = 20;
+/** Matches the settings glyph's treatment: chrome, so bold and muted. Exported
+ *  so a layout placing the glyph can keep text clear of it. */
+export const INFO_GLYPH = 20;
 
 /** Clears 44pt around the 20pt glyph without moving it. */
 const HIT_SLOP = 12;
@@ -39,7 +40,7 @@ export function InfoSheet({ title, body, accessibilityLabel, accessibilityHint }
         accessibilityLabel={accessibilityLabel}
         accessibilityHint={accessibilityHint}
       >
-        <Icon name="info" size={GLYPH} colour={colour.textSecondary} />
+        <Icon name="info" size={INFO_GLYPH} colour={colour.textSecondary} />
       </Touchable>
 
       <NativeSheet visible={open} onClose={() => setOpen(false)} title={title} body={body} />
