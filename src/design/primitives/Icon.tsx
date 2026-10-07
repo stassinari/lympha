@@ -1,11 +1,11 @@
 /**
  * The app's icon set, behind one door.
  *
- * Seven glyphs across the six usages the design allows, and one import site.
+ * Six glyphs across the five usages the design allows, and one import site.
  * Nothing else in the app touches `phosphor-react-native` — not a feature
  * component, not another primitive — so the set is countable from this file and
- * swapping the library is a one-file change. The seventh glyph is the rounding
- * line's second state, not a seventh place an icon appears.
+ * swapping the library is a one-file change. The sixth glyph is the rounding
+ * line's second state, not a sixth place an icon appears.
  *
  * Named imports rather than a namespace import, so a bundler that shakes (Expo's
  * is opt-in) can drop the other thousand icons.
@@ -42,7 +42,6 @@
 
 import { View } from 'react-native';
 import {
-  ArrowUpIcon,
   CaretDownIcon,
   CaretRightIcon,
   CheckCircleIcon,
@@ -63,7 +62,6 @@ const glyphs = {
   // plain one: it shares `info`'s silhouette, so the rounding line's two states
   // swap at the same optical size without the row shifting or changing weight.
   checkCircle: CheckCircleIcon,
-  arrowUp: ArrowUpIcon,
 } as const;
 
 export type IconName = keyof typeof glyphs;
@@ -81,11 +79,10 @@ export type IconProps = {
   /**
    * Degrees clockwise, applied to the box.
    *
-   * The set ships one arrow and one caret, and two places need the opposite of
-   * one: a value rounded *down*, and Android's back affordance. Phosphor's
-   * arrows and carets are symmetric about the axis they point along, so a half
-   * turn is the same drawing the library would have given us under another name —
-   * which is the point. It adds no name to the set.
+   * Android's back affordance is the right-pointing caret turned a half turn.
+   * Phosphor's carets are symmetric about the axis they point along, so this is
+   * the same drawing the library ships as a left caret, and it adds no name to
+   * the set.
    */
   rotate?: number;
 };
@@ -100,7 +97,7 @@ export function Icon({ name, size = 24, colour, weight = 'bold', rotate = 0 }: I
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
       // An honest box the size of the glyph, so callers aligning against it —
-      // the rounding-line status slot, the miss mark's optical lift — have a
+      // the rounding-line status slot — have a
       // number to measure from rather than a guess.
       style={[
         { width: size, height: size },

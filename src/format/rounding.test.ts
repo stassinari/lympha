@@ -1,7 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { componentMap, getRecipe } from '@/data';
 import { computeDose } from '@/engine';
-import { blendNote, headline, headlineLabel, missSeverity, roundingSummary } from './rounding';
+import {
+  band,
+  blendNote,
+  headline,
+  headlineFigure,
+  headlineLabel,
+  headlineSentence,
+  listNames,
+  missSeverity,
+  roundingSummary,
+} from './rounding';
 import { formatGapPercent, formatPpm } from './units';
 
 const summary = (recipeId: string, volumeMl: number, flagAbove?: number) =>
@@ -172,5 +182,62 @@ describe('blendNote', () => {
   it('says nothing with a bottle missing, or without ion data', () => {
     expect(blendNote(dose('lotus-raos-recipe', 250))).toBeNull();
     expect(blendNote(dose('apax-lab-washed', 350))).toBeNull();
+  });
+});
+
+describe('listNames', () => {
+  it('joins every name, the last with "and" and no serial comma', () => {
+    expect(listNames(['TONIK'])).toBe('TONIK');
+    expect(listNames(['TONIK', 'LYLAC'])).toBe('TONIK and LYLAC');
+    expect(listNames(['Magnesium', 'Sodium', 'Potassium'])).toBe('Magnesium, Sodium and Potassium');
+  });
+});
+
+describe('headlineFigure', () => {
+  const figure = (recipeId: string, volumeMl: number) => {
+    const d = dose(recipeId, volumeMl);
+    return headlineFigure(d, band(d, 0.1)!);
+  };
+
+  it('says on target in words, never 0%', () => {
+    expect(figure('lotus-raos-recipe', 1000)).toEqual({ kind: 'words', text: 'On target' });
+  });
+
+  it('names one missing bottle, and counts several, never 100%', () => {
+    expect(figure('lotus-raos-recipe', 250)).toEqual({ kind: 'words', text: 'No Potassium' });
+    expect(figure('lotus-bright-and-juicy', 200)).toEqual({
+      kind: 'words',
+      text: '2 bottles missing',
+    });
+  });
+
+  it('is a percentage, with what it quotes, everywhere between', () => {
+    expect(figure('lotus-bright-and-juicy', 250)).toEqual({
+      kind: 'percent',
+      percent: '79%',
+      label: 'over target on alkalinity',
+    });
+  });
+});
+
+describe('headlineSentence', () => {
+  const sentence = (recipeId: string, volumeMl: number) => {
+    const d = dose(recipeId, volumeMl);
+    return headlineSentence(d, band(d, 0.1)!, 10);
+  };
+
+  it('does not repeat a single missing bottle the headline already names', () => {
+    expect(sentence('lotus-raos-recipe', 250)).toBe(
+      'It rounds to zero drops at this volume, so none goes in.',
+    );
+  });
+
+  it('names every missing bottle when there are several', () => {
+    expect(sentence('lotus-bright-and-juicy', 200)).toBe(
+      'Sodium and Potassium round to zero drops at this volume.',
+    );
+    expect(sentence('lotus-raos-recipe', 100)).toBe(
+      'Magnesium, Sodium and Potassium round to zero drops at this volume.',
+    );
   });
 });

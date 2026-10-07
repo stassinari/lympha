@@ -45,6 +45,20 @@ function readTables(b) {
   return t;
 }
 
+/** The PostScript name (name ID 6), from the Windows Unicode record, which is UTF-16BE. */
+function postScriptName(b, t) {
+  const base = t.name.off;
+  const count = b.readUInt16BE(base + 2);
+  const strings = base + b.readUInt16BE(base + 4);
+  for (let i = 0; i < count; i++) {
+    const r = base + 6 + i * 12;
+    if (b.readUInt16BE(r) !== 3 || b.readUInt16BE(r + 6) !== 6) continue;
+    const start = strings + b.readUInt16BE(r + 10);
+    return b.subarray(start, start + b.readUInt16BE(r + 8)).swap16().toString('utf16le');
+  }
+  return null;
+}
+
 function cmapLookup(b, t) {
   const cm = t.cmap.off;
   const n = b.readUInt16BE(cm + 2);
@@ -137,6 +151,7 @@ for (const w of WEIGHTS) {
 
   rows.push({
     w,
+    postScriptName: postScriptName(b, t),
     upm,
     ascender,
     descender,
@@ -170,7 +185,7 @@ for (const r of rows) {
       `contentBox ${(r.contentBox / r.upm).toFixed(3)}  cap ${r.capHeight === null ? '   ?  ' : (r.capHeight / r.upm).toFixed(3)}  ` +
       `x ${r.xHeight === null ? '  ?  ' : (r.xHeight / r.upm).toFixed(3)}  ` +
       `inkTop ${(r.inkTop / r.upm).toFixed(3)}  digitTop ${(r.digitTop / r.upm).toFixed(3)}  ` +
-      `inkBottom ${(r.inkBottom / r.upm).toFixed(3)}`,
+      `inkBottom ${(r.inkBottom / r.upm).toFixed(3)}  postScriptName ${r.postScriptName}`,
   );
 }
 

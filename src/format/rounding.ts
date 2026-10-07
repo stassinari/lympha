@@ -177,6 +177,12 @@ function joinNames(names: string[]): string {
   return `${names.length} bottles`;
 }
 
+/** Every name, the last joined with "and" and no serial comma: "A, B and C". */
+export function listNames(names: string[]): string {
+  if (names.length <= 1) return names.join('');
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+}
+
 /**
  * What the headline percentage is quoting, for "14% over target on alkalinity".
  *
@@ -229,4 +235,54 @@ export function blendNote(dose: Dose): string | null {
   const feeders = dose.lines.filter((l) => l.component.ions?.asCaCO3[figure]);
   const name = figure === 'hardness' ? 'Hardness' : 'Alkalinity';
   return `${name} comes from ${joinNames(feeders.map((l) => l.component.name))} together, so it’s closer to target than ${furthest.component.name} alone.`;
+}
+
+/**
+ * The Rounding card's headline, which is a percentage only when there is
+ * something to measure.
+ *
+ * At On target and Missing a number misleads: "0%" beside "on target" reads as
+ * none of it on target, and a big "100%" reads as a score. Both show the status
+ * line's own words instead, so the two screens name the state the same way.
+ */
+export type HeadlineFigure =
+  { kind: 'words'; text: string } | { kind: 'percent'; percent: string; label: string };
+
+export function headlineFigure(dose: Dose, which: Band): HeadlineFigure {
+  if (which === 'onTarget') return { kind: 'words', text: 'On target' };
+  if (which === 'missing') {
+    const names = dose.zeroed.map((l) => l.component.name);
+    return {
+      kind: 'words',
+      text: names.length === 1 ? `No ${names[0]}` : `${names.length} bottles missing`,
+    };
+  }
+  const gap = headlineGap(dose);
+  return {
+    kind: 'percent',
+    percent: `${Math.round(Math.abs(gap) * 100)}%`,
+    label: `${gap < 0 ? 'under' : 'over'} target on ${headlineLabel(dose)}`,
+  };
+}
+
+/** What the headline means. The headline already says how far and on what, so
+ *  this says what that amounts to. */
+export function headlineSentence(dose: Dose, which: Band, limitPercent: number): string {
+  switch (which) {
+    case 'onTarget':
+      return 'That’s as close as drops get.';
+    case 'close':
+      return `That’s within the ${limitPercent}% limit.`;
+    case 'off':
+      return `That’s more than the ${limitPercent}% limit.`;
+    case 'farOff':
+      return 'That’s more than a third off, enough that the water no longer matches the recipe.';
+    case 'missing': {
+      // One bottle is already named by the headline, so the sentence need not repeat it.
+      const names = dose.zeroed.map((l) => l.component.name);
+      return names.length === 1
+        ? 'It rounds to zero drops at this volume, so none goes in.'
+        : `${listNames(names)} round to zero drops at this volume.`;
+    }
+  }
 }

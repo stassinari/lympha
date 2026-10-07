@@ -41,7 +41,7 @@ accounts or sync.
 
 These describe what the app is not *yet*, not a ban. *Revised 2026-10-07:* the list
 read as never; a feature that earns its place can use any of these patterns. The
-first is the ⓘ on the Rounding screen, which explains the flag limit on request.
+first is the ⓘ on the Rounding screen, which explains the limit on request.
 
 ---
 
@@ -69,6 +69,24 @@ Android back is wired by hand (`BackHandler` in `Overlay`).
 - **Water volume is global.** It belongs to the kettle, not the brand.
 - **Default volume** is "Last used", or a pinned value for someone who always brews
   the same amount.
+
+**Bottom sheets are the platform's own**, through `@expo/ui`: SwiftUI's `.sheet` on
+iOS, Material 3's `ModalBottomSheet` on Android (`NativeSheet`). Each brings the drag
+handle, scrim, dismiss gestures and screen-reader modality its platform users
+expect, which a sheet drawn in React Native would only imitate.
+
+- **iOS: tinted system glass, SwiftUI text.** On iOS 26 and 27 a short sheet
+  floats inset on Liquid Glass, whose translucency the reader sets (iOS 27:
+  Settings ▸ Appearance ▸ Liquid Glass). A translucent `presentationBackground`
+  tints the glass and an opaque one replaces it (measured on iOS 27.0), so the
+  sheet takes the card colour at 50%: steadier for a paragraph than the default
+  glass, while still following the reader's setting. Its text uses the
+  hierarchical styles drawn for glass. iOS 27 added no sheet API or guidance
+  beyond the retuned material. The text is SwiftUI, in Nunito
+  via `swiftUIFont`, because hosted React Native content cannot see the floating
+  sheet's width and wraps against the wrong one.
+- **Android: the card colour, React Native text.** Material's sheet is opaque and
+  edge to edge, so it takes `colour.card` and the app's own type components.
 
 **The engine never imports React Native.** `src/engine` and `src/data` run under
 Vitest in Node.
@@ -160,9 +178,9 @@ override offers drops or grams, each previewing the same dose. Millilitres would
 duplicate grams.
 
 **Rounding bands.** Every rounding message and colour comes from one band
-(`band()` in `src/format/rounding.ts`), measured on the headline gap:
+(`band()` in `src/format/rounding.ts`), measured on the headline figure:
 
-| Band | Gap | Colour |
+| Band | Off by | Colour |
 | --- | --- | --- |
 | On target | under 0.5% | Clear |
 | Close | up to the limit (default 10%) | Clear |
@@ -170,8 +188,8 @@ duplicate grams.
 | Far off | more than a third | Error |
 | Missing | a bottle rounds to zero | Error |
 
-- **The headline gap** is, for Lotus, the larger of the hardness and alkalinity gaps;
-  for Apax, the largest bottle gap. Each water figure combines bottles, so it is
+- **The headline figure** is, for Lotus, the larger of hardness and alkalinity; for
+  Apax, the largest bottle. Each water figure combines bottles, so it is
   never further out than the furthest bottle feeding it, and is usually nearer.
 - **Far off is fixed at a third**, not relative to the limit. The limit is a
   preference about when to be told; a third off is a fact about the water: it no
@@ -196,11 +214,21 @@ family as a dose.
 
 **Rounding screen** (opened by "Details").
 
-- A hero card with the headline gap, naming the figure it quotes.
-- Target versus delivered for every bottle, which works for every brand.
+- A hero card with the headline figure, naming what it quotes. A percentage only
+  where there is something to measure: On target and Missing show words.
+- Target, you get and off by for every bottle, which works for every brand.
 - Hardness and alkalinity only where the brand publishes ion data, in a table above
   the bottles, so the table the headline quotes sits directly under it.
 - No TDS.
+- **"Off by" carries the emphasis**, bold and in the band's colour; the two amounts
+  are regular weight. The difference is the answer, and the amounts are the working.
+- **No arrows** (removed 2026-10-07). The sign on "Off by" already shows direction.
+- **Number columns are right-aligned**, headings included, with a real minus (−):
+  Nunito draws the minus, plus and digits at one width, and the hyphen narrower.
+- **On Lotus, bottle rows are never amber**: the limit applies to the water, so only
+  Hardness and Alkalinity take band colours. A bottle 14% over in water 2% under is
+  not a problem. A bottle that rounds to zero is still red. Apax bottle rows take
+  band colours, since there the bottles are what the limit applies to.
 - ppm printed to two decimals, so the printed numbers reproduce the headline. A
   test asserts it.
 
@@ -358,7 +386,7 @@ The platform facts behind these are in `AGENTS.md`.
 **Phosphor, behind one wrapper** (`src/design/primitives/Icon.tsx`). Nothing else
 imports the library.
 
-**Six usages, seven glyphs, and no more without a design decision.** The design is
+**Five usages, six glyphs, and no more without a design decision.** The design is
 text-forward, so every glyph competes with the type and the bar marks.
 
 | Usage | Glyph |
@@ -369,7 +397,6 @@ text-forward, so every glyph competes with the type and the bar marks.
 | Footer, Off to Missing | `Info`. `WarningCircle` would shout over gentle copy. |
 | Footer, clear | `CheckCircle`: the same silhouette as `Info`, so the states swap without the row shifting. |
 | Selected recipe | `Check`, left of the title. The bar marks own the right edge. |
-| Rounded-up values on Detail | `ArrowUp`, not a caret: a caret reads as expand/collapse. |
 
 **Weights: chrome is `bold`, status is `fill`, nothing is `duotone`.**
 
@@ -390,8 +417,6 @@ surrounding control or adjacent text.
 
 - **`CaretCircleDown` for the recipe selector.** A third container in one row, and
   it implies only the caret is tappable.
-- **`ArrowFatLineUp` on Detail.** A "boost" glyph that blurs at 14–16px and makes a
-  quiet readout look alarmed.
 
 ---
 
@@ -431,10 +456,10 @@ These words, with these meanings, everywhere.
 | Water | How much distilled water is being made, in ml. | Volume card, Water screen |
 | Target | The amount a recipe calls for at this volume, per bottle and, for Lotus, for hardness and alkalinity. Never rounded. | "14% over target", Target column |
 | Dose | What is actually added: the target rounded to whole drops, or to 0.01 g. Internal. | The amounts in the dose rows |
-| On target | A gap under 0.5%. Not the same as exact. | "On target" |
-| Off by | How far a dose is from its target, as a percentage. | Status line, Rounding screen |
-| Headline gap | The gap the status line and Rounding screen report. See *Rounding bands*. | "14% over target on alkalinity" |
-| Limit | The "Flag when off by" setting. | "the 10% limit" |
+| On target | Off by less than 0.5%. Not the same as exact. | "On target" |
+| Off by | How far a dose, or a water figure, is from its target, as a percentage. | Status line, Rounding screen |
+| Headline figure | The off-by the status line and Rounding screen report. Lotus: the larger of hardness and alkalinity. Apax: the largest bottle. | "14% over target on alkalinity" |
+| Limit | The Rounding limit setting, `{t}`, default 10%. On Lotus it applies to hardness and alkalinity; on Apax, to each bottle. | "the 10% limit" |
 | Rounding | Everything about the difference between targets and doses. Drops only: grams are treated as exact. | Rounding screen |
 | Exact volume | A nearby volume where every bottle comes out within 0.06 of a whole drop. See *Exact volume*. | "400 ml is exact" |
 
@@ -446,6 +471,10 @@ judgements stand behind the current copy:
   uses. "Exact volume" follows from the suggestion's own words, "400 ml is exact".
 - **"Original"** is not used for the three-bottle Apax range, because it implies
   the KONFLUX range superseded it.
+- **"Flag" and "gap"** read as office language in the limit's name and
+  explanation, which say "Rounding limit", "off target" and "surfaces it".
+- **"0%" and "100%"** are not shown as the Rounding headline. "0% on target" read as
+  none of it on target, and a big "100%" read as a good score.
 
 Identifiers and comments use the glossary's terms (`target`, `exactVolume`,
 `ON_TARGET`), so code and screen describe the same thing in the same words.
@@ -478,9 +507,17 @@ and Settings do. The footer link stays "Details".
 Figures showing the same signed whole percentage are tied and all named: two
 joined with "and", three or more as "{k} bottles".
 
+**The Rounding headline is words at the extremes**, in the status line's own words,
+at Large Title size (`headlineWords`) because a word is far wider than a figure:
+`On target`, `No {bottle}`, `{n} bottles missing`. Between them it is `{n}%` with
+`{under|over} target on {label}`, the label wrapping beside the figure, not under
+it, until accessibility text sizes leave no room.
+
 **Every band has a headline sentence**, because the card always needs a body. On
 target is *"That’s as close as drops get."* for both brands, since on target is
-not exact. Far off states the consequence: *"…enough that the water no longer
+not exact. Missing, one bottle: *"It rounds to zero drops at this volume, so none
+goes in."*, since the headline names it. Several: *"{A}, {B} and {C} round to zero
+drops at this volume."* Far off states the consequence: *"…enough that the water no longer
 matches the recipe."*
 
 **The blend note** (*"Alkalinity comes from Sodium and Potassium together, so it’s
@@ -489,8 +526,17 @@ further out than the headline. It is shown only when that is visibly so, and nev
 with a bottle missing. The bottles are read from the ion data, not hard-coded.
 "Cancel out" is retired: the bottles don't oppose each other.
 
-**The limit ⓘ** on the Rounding card, in every band, names the setting by its label
-("Flag when off by"). The two labels must stay in sync.
+**The limit ⓘ** on the Rounding card, in every band, opens a short sheet titled
+`{t}% limit`. It says what the limit applies to, which differs by brand:
+
+- Lotus: *"Hardness and alkalinity can each be up to {t}% off target before Lympha
+  surfaces it. You can change this in Settings, under Rounding limit."*
+- Apax: *"Each bottle can be up to {t}% off target before Lympha surfaces it. You
+  can change this in Settings, under Rounding limit."*
+
+It names the setting by its label, so the two must stay in sync. The setting is
+**"Rounding limit"**, *"How far off target is still close enough."*, which names
+neither water nor bottles so it is true for both brands.
 
 **The suggestion card is plain**, since it appears mid-task in a narrow card: a
 title, then at most the band's sentence and either "{ml} ml is exact." or "No exact

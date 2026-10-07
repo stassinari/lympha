@@ -48,9 +48,16 @@ export type FontWeight = '400' | '600' | '700' | '800' | '900';
  */
 export type TextPlatform = 'ios' | 'android';
 
-/** One loaded face: its RN family name and its own ink extents. */
+/** One loaded face: its names and its own ink extents. */
 export type FontFace = {
+  /** The alias React Native's `fontFamily` resolves, as registered by `expo-font`. */
   family: string;
+  /**
+   * The name CoreText registers the face under, read from the TTF's `name` table.
+   * Native text outside React Native, such as SwiftUI's `Font.custom`, finds the
+   * face by this name and knows nothing of the alias.
+   */
+  postScriptName: string;
   /** Tallest ink above the baseline. Heavier weights are taller: the outlines grow
    *  outward, so the safe line height grows with the weight. */
   inkTop: number;
@@ -90,11 +97,41 @@ export type FontMetrics = {
 };
 
 const NUNITO_FACES = {
-  '400': { family: 'Nunito_400Regular', inkTop: 0.714, digitTop: 0.714, inkBottom: -0.195 },
-  '600': { family: 'Nunito_600SemiBold', inkTop: 0.714, digitTop: 0.714, inkBottom: -0.198 },
-  '700': { family: 'Nunito_700Bold', inkTop: 0.721, digitTop: 0.715, inkBottom: -0.203 },
-  '800': { family: 'Nunito_800ExtraBold', inkTop: 0.732, digitTop: 0.716, inkBottom: -0.207 },
-  '900': { family: 'Nunito_900Black', inkTop: 0.743, digitTop: 0.716, inkBottom: -0.212 },
+  '400': {
+    family: 'Nunito_400Regular',
+    postScriptName: 'Nunito-Regular',
+    inkTop: 0.714,
+    digitTop: 0.714,
+    inkBottom: -0.195,
+  },
+  '600': {
+    family: 'Nunito_600SemiBold',
+    postScriptName: 'Nunito-SemiBold',
+    inkTop: 0.714,
+    digitTop: 0.714,
+    inkBottom: -0.198,
+  },
+  '700': {
+    family: 'Nunito_700Bold',
+    postScriptName: 'Nunito-Bold',
+    inkTop: 0.721,
+    digitTop: 0.715,
+    inkBottom: -0.203,
+  },
+  '800': {
+    family: 'Nunito_800ExtraBold',
+    postScriptName: 'Nunito-ExtraBold',
+    inkTop: 0.732,
+    digitTop: 0.716,
+    inkBottom: -0.207,
+  },
+  '900': {
+    family: 'Nunito_900Black',
+    postScriptName: 'Nunito-Black',
+    inkTop: 0.743,
+    digitTop: 0.716,
+    inkBottom: -0.212,
+  },
 } satisfies Record<FontWeight, FontFace>;
 
 /** The app's text face, for every role but the wordmark. */
@@ -129,7 +166,13 @@ export const FIGTREE: FontMetrics = {
   capHeight: 0.7,
   xHeight: 0.5,
   faces: {
-    '600': { family: 'Figtree_600SemiBold', inkTop: 0.727, digitTop: 0.712, inkBottom: -0.215 },
+    '600': {
+      family: 'Figtree_600SemiBold',
+      postScriptName: 'Figtree-SemiBold',
+      inkTop: 0.727,
+      digitTop: 0.712,
+      inkBottom: -0.215,
+    },
   },
 };
 

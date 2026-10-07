@@ -5,8 +5,8 @@
  * and nothing here is something you would visit before coffee.
  */
 
-import { useState } from 'react';
-import { Platform, ScrollView, Switch, View } from 'react-native';
+import { ScreenHeader, SettingsRow } from '@/components';
+import { brands, componentsForBrand, unitGroups } from '@/data';
 import {
   BarCluster,
   Overlay,
@@ -18,11 +18,11 @@ import {
   space,
   useTheme,
 } from '@/design';
-import { ScreenHeader, SettingsRow } from '@/components';
-import { brands, componentsForBrand, unitGroups } from '@/data';
 import { availableUnits } from '@/engine';
-import { FLAG_CHOICES, useBrand, useStore } from '@/state';
 import type { ThemeMode } from '@/state';
+import { FLAG_CHOICES, useBrand, useStore } from '@/state';
+import { useState } from 'react';
+import { Platform, ScrollView, Switch, View } from 'react-native';
 import { UnitScreen } from './UnitScreen';
 
 const APPEARANCE: readonly { value: ThemeMode; label: string }[] = [
@@ -104,7 +104,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         </SectionHeader>
         <SettingsRow
           label="Opens at"
-          detail="Start with a set amount of water, or wherever you left off."
+          detail="Start where you left off, or with a set amount of water."
           wide
           control={
             // Every pill carries the setting's name, because a screen reader
@@ -134,8 +134,8 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
           }
         />
         <SettingsRow
-          label="Flag when off by"
-          detail="How far off target a dose can be before Lympha flags it."
+          label="Rounding limit"
+          detail="How far off target is still close enough."
           wide
           control={
             <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', gap: space.snug }}>
@@ -144,7 +144,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                   key={value}
                   label={`${Math.round(value * 100)}%`}
                   accessibilityRole="radio"
-                  accessibilityLabel={`Flag when off by ${Math.round(value * 100)} percent`}
+                  accessibilityLabel={`Rounding limit, ${Math.round(value * 100)} percent`}
                   selected={Math.abs(flagAbove - value) < 1e-9}
                   onPress={() => setFlagAbove(value)}
                   style={{ flex: 1 }}

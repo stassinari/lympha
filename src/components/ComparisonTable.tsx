@@ -2,7 +2,7 @@
  * Target against what you get, and how far apart they are.
  *
  * The whole differentiator in one shape: one row per thing being measured, and
- * the delivered value marked when it misses. Vendor calculators print only the
+ * how far each one misses. Vendor calculators print only the
  * first column.
  *
  * The last column is what makes the headline percentage checkable. Without it the
@@ -11,7 +11,7 @@
  */
 
 import { View } from 'react-native';
-import { Caption, Card, CardTitle, Divider, Icon, space, useTheme, useTypeMetrics } from '@/design';
+import { Body, Caption, Card, CardTitle, Divider, space, useTheme } from '@/design';
 import { ON_TARGET } from '@/format/rounding';
 import { formatGapPercent } from '@/format/units';
 
@@ -19,66 +19,20 @@ export type ComparisonRow = {
   label: string;
   target: string;
   delivered: string;
-  /** Draws the delivered value, and its arrow, in that state's colour. */
-  off?: 'warning' | 'error' | null;
-  /** Which side of the target it landed on. Only read when `off`. */
-  direction?: 'under' | 'over';
   /** Signed relative error. Omitted on every row hides the column. */
   gap?: number;
+  /** Draws the off-by figure in that state's colour. */
+  tone?: 'warning' | 'error' | null;
 };
 
-const COLUMN = { flex: 1, alignItems: 'flex-end' } as const;
 const LABEL_COLUMN = { flex: 1.4 } as const;
 
-const MARK_SIZE = 14;
-
 /**
- * A miss is marked with an arrow as well as a colour.
- *
- * The warning tone alone carries the whole message here, which fails anyone with
- * a red-green deficiency and everyone reading a phone in sunlight — the two
- * values are otherwise identical in size, weight and position. The arrow is
- * shape rather than hue, and it says something the colour could not: which way
- * the miss went.
- *
- * An arrow, not a caret: a caret is the shape for expand and collapse, and what
- * this means is *rounded up*. Plain `ArrowUp` rather than a fatter one: this appears four
- * times in one small table, and a chunky glyph both blurs at 14pt and overstates
- * the message — drops are integers so we nudged, not "significant increase".
- *
- * It takes the app's default `bold` like every other non-status icon; at 14pt
- * beside a 17pt semibold value a hairline reads as a smudge rather than a mark.
- *
- * Rounded down turns the same arrow through half a turn. Phosphor's arrow is
- * symmetric about its shaft, so this is exactly the drawing the set would ship
- * as `ArrowDown` — and it keeps the app's icon count at the six it means to have.
+ * Number columns are right-aligned, headings included, so units line up under
+ * units and a column reads down as one set of figures. Nunito's figures are
+ * tabular by default, so no font feature is needed for the digits to stack.
  */
-function MissMark({
-  direction,
-  colour,
-  capHeight,
-}: {
-  direction: 'under' | 'over';
-  colour: string;
-  capHeight: number;
-}) {
-  // Baseline-aligned, like everything else in the row, which puts the mark's
-  // bottom edge on the baseline. Lifting it by half the difference centres it in
-  // the band the digits occupy rather than leaving it sitting on the floor. Read
-  // from the scaled cap height, so it stays centred at any text size.
-  const lift = Math.max(0, (capHeight - MARK_SIZE) / 2);
-
-  return (
-    <View style={{ marginRight: 4, marginBottom: lift }}>
-      <Icon
-        name="arrowUp"
-        size={MARK_SIZE}
-        colour={colour}
-        rotate={direction === 'under' ? 180 : 0}
-      />
-    </View>
-  );
-}
+const COLUMN = { flex: 1, textAlign: 'right' } as const;
 
 /** What the row says to a screen reader, which cannot see the column headings. */
 function rowLabel(row: ComparisonRow, unit?: string): string {
@@ -94,9 +48,13 @@ function spokenGap(gap: number | undefined): string {
   return `, ${Math.round(Math.abs(gap) * 100)} percent ${gap < 0 ? 'under' : 'over'}`;
 }
 
+/**
+ * The emphasis is on "Off by", not "You get": the difference is the answer, and
+ * the two amounts are the working. The figure itself says how far and which way;
+ * its colour adds only the band, which the headline above states in words.
+ */
 export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: string }) {
   const { colour } = useTheme();
-  const { capHeight } = useTypeMetrics('cardTitle');
 
   const showGap = rows.some((row) => row.gap !== undefined);
   const headings = showGap ? 'Target, you get, off by.' : 'Target, you get.';
@@ -137,30 +95,26 @@ export function ComparisonTable({ rows, unit }: { rows: ComparisonRow[]; unit?: 
             <CardTitle style={LABEL_COLUMN} numberOfLines={1}>
               {row.label}
             </CardTitle>
-            <Caption tone="secondary" style={COLUMN}>
+            <Body tone="secondary" style={COLUMN}>
               {row.target}
-            </Caption>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline' }}>
-              {row.off && row.direction ? (
-                <MissMark
-                  direction={row.direction}
-                  colour={row.off === 'error' ? colour.error : colour.textWarning}
-                  capHeight={capHeight}
-                />
-              ) : null}
-              <CardTitle
-                style={{
-                  color:
-                    row.off === 'error' ? colour.error : row.off ? colour.textWarning : colour.text,
-                }}
-              >
-                {row.delivered}
-              </CardTitle>
-            </View>
+            </Body>
+            <Body style={COLUMN}>{row.delivered}</Body>
             {showGap ? (
-              <Caption tone="secondary" style={COLUMN}>
+              <CardTitle
+                style={[
+                  COLUMN,
+                  {
+                    color:
+                      row.tone === 'error'
+                        ? colour.error
+                        : row.tone === 'warning'
+                          ? colour.textWarning
+                          : colour.text,
+                  },
+                ]}
+              >
                 {row.gap === undefined ? '' : formatGapPercent(row.gap)}
-              </Caption>
+              </CardTitle>
             ) : null}
           </View>
         </View>

@@ -43,8 +43,9 @@ const maxScaleFor = (variant: TypeRole) => typeScale[variant].maxScale;
  * `hero` digit, less at the smaller tracked roles.
  *
  * Padding, not a negative margin: the frame has to grow for the ink to survive.
- * Nothing in the app right-aligns text within its own box, so widening the box
- * moves no glyph.
+ * Left-aligned text keeps its glyphs where they were. Right-aligned text moves
+ * left by the inset, which ends its last glyph's advance at the box edge, where the
+ * column's other figures end.
  */
 function useTextStyle(variant: TypeRole, tone: Tone) {
   const { colour } = useTheme();
@@ -130,6 +131,8 @@ export const Hero = variantComponent('hero', 'Hero');
 export const Volume = variantComponent('volume', 'Volume');
 /** Per-bottle dose. Numerals only. */
 export const DoseValue = variantComponent('doseValue', 'DoseValue');
+/** The Rounding headline when it is words. */
+export const HeadlineWords = variantComponent('headlineWords', 'HeadlineWords');
 export const ScreenTitle = variantComponent('screenTitle', 'ScreenTitle', HEADING);
 export const RowTitle = variantComponent('rowTitle', 'RowTitle');
 export const CardTitle = variantComponent('cardTitle', 'CardTitle');

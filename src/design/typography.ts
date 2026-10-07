@@ -21,6 +21,7 @@ export type TypeRole =
   | 'hero'
   | 'volume'
   | 'doseValue'
+  | 'headlineWords'
   | 'screenTitle'
   | 'rowTitle'
   | 'cardTitle'
@@ -98,6 +99,20 @@ const ROLES: Record<TypeRole, RoleSpec> = {
   },
 
   // Prose roles — must clear the taller floor (up to 1.096 at Black).
+  /**
+   * The Rounding card's headline where it is words rather than a percentage: "On
+   * target", "No Potassium". The weight of `doseValue`, a step smaller, because a
+   * word at 40 is far wider than a figure and "2 bottles missing" would not hold a
+   * line. Uncapped, unlike the figure it stands in for: it is read, not composed
+   * against a unit beside it.
+   */
+  headlineWords: {
+    weight: '900',
+    size: 34,
+    lineHeightRatio: 1.15,
+    trackingEm: -0.02,
+    extent: 'text',
+  },
   screenTitle: {
     weight: '900',
     size: 24,
@@ -283,4 +298,23 @@ export function styleForRole(
     ...style
   } = typeScale[role];
   return style;
+}
+
+/**
+ * A role as SwiftUI text takes it, for the few places the app draws native text.
+ *
+ * SwiftUI has no line height, only `lineSpacing`, the gap added between the
+ * natural line boxes the font defines (its content box). So the role's line
+ * height is expressed as what it adds over that box, and a role tighter than the
+ * box adds nothing. The size is nominal: SwiftUI scales it with Dynamic Type when
+ * given a text style to scale against.
+ */
+export function swiftUIFont(role: TypeRole) {
+  const { font, weight, fontSize, lineHeight, letterSpacing } = typeScale[role];
+  return {
+    family: faceFor(font, weight).postScriptName,
+    size: fontSize,
+    lineSpacing: Math.max(0, lineHeight - font.contentBox * fontSize),
+    kerning: letterSpacing,
+  };
 }

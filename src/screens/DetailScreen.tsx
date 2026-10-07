@@ -19,11 +19,13 @@ import {
   BarRow,
   Body,
   DoseValue,
-  InfoTip,
+  HeadlineWords,
+  InfoSheet,
   Pill,
   Screen,
   SectionHeader,
   space,
+  useReflowedText,
   useTheme,
 } from '@/design';
 import { ComparisonTable, ScreenHeader } from '@/components';
@@ -33,11 +35,10 @@ import {
   SEVERITY,
   band,
   blendNote,
-  headline,
-  headlineLabel,
+  headlineFigure,
+  headlineSentence,
   missSeverity,
 } from '@/format/rounding';
-import type { Band } from '@/format/rounding';
 import { useExactVolume, useDose, useStore } from '@/state';
 
 export type DetailScreenProps = { onClose: () => void };
@@ -48,6 +49,7 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   const exactVolumeMl = useExactVolume();
   const flagAbove = useStore((s) => s.flagAbove);
   const setVolume = useStore((s) => s.setVolume);
+  const reflowed = useReflowedText();
 
   // Only reachable from the status line, which is only shown when rounding is.
   const which = band(dose, flagAbove) ?? 'onTarget';
@@ -57,43 +59,38 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
   const limit = Math.round(flagAbove * 100);
   const volumeMl = dose.volumeMl;
 
-  const { gap } = headline(dose);
-  const figure =
-    which === 'missing'
-      ? { big: '100%', small: `under target on ${headlineLabel(dose)}` }
-      : which === 'onTarget'
-        ? { big: '0%', small: 'on target' }
-        : {
-            big: `${Math.round(Math.abs(gap) * 100)}%`,
-            small: `${gap < 0 ? 'under' : 'over'} target on ${headlineLabel(dose)}`,
-          };
+  const figure = headlineFigure(dose, which);
+  const profile = dose.profile;
 
+  // Where there is chemistry, the limit applies to the water, not the bottles: a
+  // bottle 14% over inside water 2% under is not a problem, and colouring it as
+  // one would contradict the headline. A bottle that rounds to zero still is.
   const bottleRows: ComparisonRow[] = dose.lines.map((line) => ({
     label: line.component.name,
     target: formatIdealAmount(line.exact),
     delivered: formatDoseAmount(line.delivered, line.dispenser.step),
-    off: missSeverity(line.relativeError, flagAbove, line.zeroed),
-    direction: line.delivered < line.exact ? 'under' : 'over',
+    tone: profile
+      ? line.zeroed
+        ? 'error'
+        : null
+      : missSeverity(line.relativeError, flagAbove, line.zeroed),
     gap: line.exact > 0 ? line.error / line.exact : undefined,
   }));
 
-  const profile = dose.profile;
   const profileRows: ComparisonRow[] = profile
     ? [
         {
           label: 'Hardness',
           target: formatPpm(profile.target.hardness),
           delivered: formatPpm(profile.delivered.hardness),
-          off: missSeverity(profile.hardnessError, flagAbove),
-          direction: profile.hardnessError < 0 ? 'under' : 'over',
+          tone: missSeverity(profile.hardnessError, flagAbove),
           gap: profile.hardnessError,
         },
         {
           label: 'Alkalinity',
           target: formatPpm(profile.target.alkalinity),
           delivered: formatPpm(profile.delivered.alkalinity),
-          off: missSeverity(profile.alkalinityError, flagAbove),
-          direction: profile.alkalinityError < 0 ? 'under' : 'over',
+          tone: missSeverity(profile.alkalinityError, flagAbove),
           gap: profile.alkalinityError,
         },
       ]
@@ -118,23 +115,43 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
       >
         <BarRow barColour={barColour}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.snug }}>
-            <View
-              style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap' }}
-            >
-              <DoseValue style={{ marginRight: 8 }}>{figure.big}</DoseValue>
-              <Body tone="secondary" style={{ flexShrink: 1 }}>
-                {figure.small}
-              </Body>
-            </View>
-            <InfoTip
+            {figure.kind === 'words' ? (
+              <HeadlineWords style={{ flex: 1 }}>{figure.text}</HeadlineWords>
+            ) : (
+              // The label wraps beside the figure, each line starting under its
+              // first: a baseline row aligns the label's first line with the
+              // digits, and `flex: 1` gives it the rest of the width to wrap in.
+              // Past the accessibility text sizes there is no width left beside
+              // the figure, so the label goes beneath it.
+              <View
+                accessible
+                accessibilityLabel={`${figure.percent} ${figure.label}`}
+                style={{
+                  flex: 1,
+                  flexDirection: reflowed ? 'column' : 'row',
+                  alignItems: reflowed ? 'flex-start' : 'baseline',
+                  columnGap: space.snug,
+                }}
+              >
+                <DoseValue>{figure.percent}</DoseValue>
+                <Body tone="secondary" style={reflowed ? null : { flex: 1 }}>
+                  {figure.label}
+                </Body>
+              </View>
+            )}
+            <InfoSheet
               title={`${limit}% limit`}
-              body="Lympha flags any gap above this. You can change it in Settings, under Flag when off by."
+              body={
+                profile
+                  ? `Hardness and alkalinity can each be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
+                  : `Each bottle can be up to ${limit}% off target before Lympha surfaces it. You can change this in Settings, under Rounding limit.`
+              }
               accessibilityLabel="About the limit"
               accessibilityHint="Explains the limit"
             />
           </View>
           <Body tone="onCard" style={{ marginTop: 6 }}>
-            {sentence(which, dose, limit)}
+            {headlineSentence(dose, which, limit)}
           </Body>
         </BarRow>
 
@@ -176,23 +193,4 @@ export function DetailScreen({ onClose }: DetailScreenProps) {
       </ScrollView>
     </Screen>
   );
-}
-
-/** What the headline means, by band. The figure above it already says how far and
- *  on what, so this says what that amounts to. */
-function sentence(which: Band, dose: ReturnType<typeof useDose>, limit: number): string {
-  switch (which) {
-    case 'onTarget':
-      return 'That’s as close as drops get.';
-    case 'close':
-      return `That’s within the ${limit}% limit.`;
-    case 'off':
-      return `That’s more than the ${limit}% limit.`;
-    case 'farOff':
-      return 'That’s more than a third off, enough that the water no longer matches the recipe.';
-    case 'missing':
-      return dose.zeroed.length === 1
-        ? `${dose.zeroed[0]!.component.name} rounds to zero drops at this volume, so it’s missing from your water.`
-        : `${dose.zeroed.length} bottles round to zero drops at this volume, so they’re missing from your water.`;
-  }
 }

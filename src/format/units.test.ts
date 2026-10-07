@@ -74,7 +74,11 @@ describe('formatGapPercent', () => {
   it('signs the direction and rounds to whole percent', () => {
     expect(formatGapPercent(0.0661)).toBe('+7%');
     expect(formatGapPercent(0.10685)).toBe('+11%');
-    expect(formatGapPercent(-0.0373)).toBe('-4%');
+    expect(formatGapPercent(-0.0373)).toBe('\u22124%');
+  });
+
+  it('uses a real minus sign, not a hyphen', () => {
+    expect(formatGapPercent(-0.0373)).not.toContain('-');
   });
 
   it('drops the sign where there is nothing to sign', () => {

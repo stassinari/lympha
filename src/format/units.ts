@@ -57,9 +57,13 @@ export function formatPpm(value: number): string {
  *
  * Whole, deliberately: this exists so the headline can be checked, and the
  * headline is a whole number. A decimal here would disagree with it.
+ *
+ * The minus is U+2212, not a hyphen. Nunito draws the minus, the plus and every
+ * digit 600/1000 em wide, and the hyphen narrower, so only the minus keeps a
+ * right-aligned column of signed figures in step.
  */
 export function formatGapPercent(fraction: number): string {
   const percent = Math.round(fraction * 100);
   if (percent === 0) return '0%';
-  return `${percent > 0 ? '+' : '-'}${Math.abs(percent)}%`;
+  return `${percent > 0 ? '+' : '\u2212'}${Math.abs(percent)}%`;
 }
