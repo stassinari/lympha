@@ -8,7 +8,7 @@
     "@expo-google-fonts/nunito": "^0.4.2",
     "@expo/ui": "~57.0.22",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "~57.0.26",
+    "expo": "~57.0.27",
     "expo-build-properties": "~57.0.22",
     "expo-font": "~57.0.4",
     "expo-haptics": "~57.0.3",
@@ -16,20 +16,21 @@
     "expo-status-bar": "~57.0.1",
     "phosphor-react-native": "^3.0.6",
     "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-svg": "15.15.4",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.6.4",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.9.6",
+    "prettier": "^3.9.9",
     "typescript": "~6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "start": "expo start",
