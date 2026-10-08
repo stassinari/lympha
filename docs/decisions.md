@@ -477,7 +477,7 @@ These words, with these meanings, everywhere.
 | Exact volume | A nearby volume where every bottle comes out within 0.06 of a whole drop. See *Exact volume*. | "400 ml is exact" |
 
 **Words are judged in context, not banned.** A word that read badly in one
-string can be right in another, so there is no list of forbidden words. Two
+string can be right in another, so there is no list of forbidden words. These
 judgements stand behind the current copy:
 
 - **"Target" heads the Rounding screen's first column**, not "Asked", because the
@@ -602,8 +602,9 @@ it. The colon reads as "name, then what it is". The home screen name stays "Lymp
   dash *Voice* avoids; the mid dot reads as decoration.
 
 **Subtitle: "Mineral recipes across brands".** It leads on Lympha covering more than
-one brand. "Mineral" and "recipes" stay true when non-drop recipes arrive (Pavlis,
-Barista Hustle: recipes from authors, see *Glossary*); "drops" would not.
+one brand. "Mineral" and "recipes" would stay true if non-drop recipes were added
+(Barista Hustle and R Pavlis are candidates; see *Glossary* for recipes from authors);
+"drops" would not.
 
 - **Rejected: "for any volume"** in any form. An odd thing to lead with.
 - **Rejected: "Multi-brand".**
@@ -644,6 +645,6 @@ sentences of one length each ending on a neat point, and dramatic framings ("wou
 exist without"). "Wonky" stays, though it is casual, because it is what makes the line
 sound like a person.
 
-**Non-drop recipes** should not need a new name or subtitle. The parts to revise then
-are the `drops` keyword and the description's "Works with" list. Keywords change with
+**Non-drop recipes**, if added, should not need a new name or subtitle. The parts to revise
+would be the `drops` keyword and the description's "Works with" list. Keywords change with
 any new version.

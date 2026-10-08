@@ -9,13 +9,6 @@ The app is feature-complete and on TestFlight.
 
 ## Before v1
 
-### Copy
-
-- [ ] **Store listing text**, in the voice recorded in `decisions.md` under *Copy*:
-      name, subtitle (iOS), short description (Play), full description, keywords
-      (iOS). Keywords skip words already in the name and subtitle, which Apple
-      indexes anyway, and other companies' trademarks, which Apple can reject.
-
 ### Store submission
 
 - [ ] **Google Play closed testing, if it applies.** Personal developer accounts
@@ -49,6 +42,7 @@ In rough order of likelihood.
   not the recipe.
 - **Barista Hustle.** The `prepared` component shape is modelled; the numbers are
   unverified. Once verified, BH and Lotus compare directly in ppm as CaCO₃.
+- **R Pavlis.** Another possible non-drop recipe source, alongside Barista Hustle.
 - **Third Wave Water.** Sachets are modelled as an indivisible dispenser; a
   dissolved-sachet stock is the `prepared` shape. Weigh a sachet first.
 - **Apax limited editions** (TANAT, HYDRANGEA, NEMO AEROPRESS), once it is known how
