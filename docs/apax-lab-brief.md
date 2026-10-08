@@ -9,9 +9,11 @@ rest is provenance.
 
 ## Ranges
 
-- `apax-lab`: the current four-concentrate range (TONIK, JAMM, LYLAC, KONFLUX), 15
-  recipes. Default.
-- `apax-lab-original`: the pre-KONFLUX range (TONIK, JAMM, LYLAC), 8 recipes.
+- `apax-lab-original`: the three-bottle range (TONIK, JAMM, LYLAC), 8 recipes.
+  Default.
+- `apax-lab`: the four-bottle range with KONFLUX, 15 recipes.
+
+The IDs keep the research's names; *Data* in [`decisions.md`](decisions.md) says why.
 
 ## Units and conversion
 
@@ -32,19 +34,19 @@ All are recorded in `anomalies[]` in the JSON.
 
 | Where | What | Handling |
 |---|---|---|
-| Original / Natural | JAMM 2.6 g/L gives a 4.1 g/L total. The card says 2.7; the pattern suggests 2.5. | Ship 2.6, flagged internally |
-| Current / Némo Pop | Totals 3.5 g/L, the only exception in the current range. Plausibly intentional for a personal recipe. | Ship as-is, with no user-facing flag |
-| Both / Light and Dark Roast | Profiles effectively swapped between versions. Legacy Light is JAMM-dominant and current Light has no JAMM; legacy Dark is TONIK-dominant and current Dark has no TONIK. | Transcribed faithfully |
+| Three-bottle / Natural | JAMM 2.6 g/L gives a 4.1 g/L total. The card says 2.7; the pattern suggests 2.5. | Ship 2.6, flagged internally |
+| KONFLUX / Némo Pop | Totals 3.5 g/L, the only exception in the KONFLUX range. Plausibly intentional for a personal recipe. | Ship as-is, with no user-facing flag |
+| Both / Light and Dark Roast | Profiles effectively swapped between ranges. The three-bottle Light is JAMM-dominant and the KONFLUX Light has no JAMM; the three-bottle Dark is TONIK-dominant and the KONFLUX Dark has no TONIK. | Transcribed faithfully |
 
 ## Sources
 
-- **Current range:** the official Apax Lab calculator, live as of 2026-08-23 and
+- **KONFLUX range:** the official Apax Lab calculator, live as of 2026-08-23 and
   unchanged since the April 2026 revision.
-- **Original range:** the official calculator as archived on 2025-12-08 by the
+- **Three-bottle range:** the official calculator as archived on 2025-12-08 by the
   Wayback Machine. A third-party calculator carrying identical values corroborates
   it.
 
-The **printed card** that shipped with the original set is *not* a data source. Where
+The **printed card** that shipped with the three-bottle set is *not* a data source. Where
 the archived calculator gives 2.5 / 0.5, the card gives 2.7 / 0.3: an 8:3:1 ratio
 against the calculator's 5:2:1, with the same recipe shape and the same 4.0 total.
 The card's values look back-calculated from drops per 200 ml cup, and it has no

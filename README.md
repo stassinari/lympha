@@ -1,11 +1,15 @@
 # Lympha
 
-Brewing-water mineral dosing for specialty coffee. Pick your concentrate brand, pick a
-recipe, say how much water you have, get the dose — offline, no accounts, iOS and Android.
+A brewing-water calculator for specialty coffee, on iOS and Android. Pick a brand of
+mineral concentrate and a recipe, enter the volume, and Lympha gives the dose in drops
+or grams. Fully offline, with no accounts.
 
-The point of difference is **honest rounding**: drops are whole numbers and doses aren't,
-so Lympha shows what you actually get rather than the ideal figure every vendor calculator
-silently reports.
+Drops are whole numbers and doses are not, so at most volumes the dose cannot match the
+recipe exactly. Lympha shows what is actually added and how far it is from the recipe,
+and suggests a nearby volume that comes out exact.
+
+Supports Lotus Coffee Products and Apax Lab. Lympha is independent and not affiliated
+with either.
 
 ## Docs
 
@@ -15,6 +19,7 @@ silently reports.
 | [`docs/decisions.md`](docs/decisions.md)             | Every product, design and engineering decision, with its reason. Check here before re-arguing one.       |
 | [`docs/water-schema-v0.md`](docs/water-schema-v0.md) | Data model and verified Lotus numbers. **Source of truth for anything numeric.**                         |
 | [`docs/apax-lab-brief.md`](docs/apax-lab-brief.md)   | Sources, units and anomalies behind `src/data/sources/apax-lab.json`, the only copy of the Apax numbers. |
+| [`docs/store-listing.md`](docs/store-listing.md)     | App Store and Google Play listing text.                                                                  |
 | [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**       |
 | [`docs/designs/v1/`](docs/designs/v1/)               | The original design handoff: a picture of the intent, not a spec. Its numbers are wrong.                 |
 
