@@ -1,6 +1,7 @@
 {
   "name": "lympha",
   "version": "0.1.0",
+  "license": "GPL-3.0-or-later",
   "main": "index.ts",
   "dependencies": {
     "@expo-google-fonts/figtree": "^0.4.1",

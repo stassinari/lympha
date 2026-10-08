@@ -36,6 +36,16 @@ the reason the app exists.
 **Scope.** iOS and Android phones (`supportsTablet: false`). Fully offline. No
 accounts or sync.
 
+**Licence: GPL-3.0-or-later.** The source is public, and anything built from it must
+publish its source under the same terms. The GPL does not forbid selling a copy.
+
+- **Rejected: MIT and other permissive licences.** They allow a closed fork.
+- **Rejected: PolyForm Noncommercial.** It forbids commercial forks, but it is not
+  open source.
+- Apple's terms conflict with the GPL, so a third party cannot ship this code on the
+  App Store. The copyright holder can. Lympha keeps shipping on iOS only while one
+  person holds the copyright, or while contributors agree to store distribution.
+
 **Anti-references**, for copy and design alike:
 
 - vendor-calculator aesthetics: sliders, scatter plots, ppm charts, marketing copy

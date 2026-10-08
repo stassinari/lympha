@@ -44,3 +44,8 @@ For JS-only work, Expo Go is still enough: `npm start`, then press `i` or `a`.
 all need a real build — and `expo run:ios` / `expo run:android` will _not_ pick up your
 change on their own, because they only run prebuild when `ios/`/`android/` are missing.
 See [`docs/native-builds.md`](docs/native-builds.md) for the loop that actually works.
+
+## Licence
+
+Copyright © 2026 Saverio Tassinari. Licensed under the GNU General Public License,
+version 3 or later: see [`LICENSE`](LICENSE).
