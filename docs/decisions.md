@@ -111,6 +111,12 @@ Vitest in Node.
 iOS 27 without it. Enabled with `expo-build-properties` → `ios.enableSceneSupport`,
 which needs `expo` ≥ 57.0.23. Details in [`native-builds.md`](native-builds.md).
 
+**Store pages on GitHub Pages, from `site/`.** The privacy policy and support pages
+are static HTML, deployed by `.github/workflows/pages.yml`, which uploads `site/`
+alone so `docs/` is never published. They use the app's palette and its own fonts,
+self-hosted, so the pages make no third-party requests either. Contact is GitHub
+issues.
+
 ---
 
 ## Data

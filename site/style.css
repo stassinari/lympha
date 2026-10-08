@@ -1,0 +1,143 @@
+/* Colours are the app's, from src/design/palette.ts. */
+
+@font-face {
+  font-family: 'Nunito';
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/nunito-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-weight: 800;
+  font-display: swap;
+  src: url('fonts/nunito-800.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/figtree-600.woff2') format('woff2');
+}
+
+:root {
+  color-scheme: light dark;
+  --background: #fbf8f4;
+  --card: #ffffff;
+  --text: #241e1c;
+  --text-secondary: #7d6d66;
+  --divider: #ede4dc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #161211;
+    --card: #211c1a;
+    --text: #f4efeb;
+    --text-secondary: #9c8d85;
+    --divider: #2c2523;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font:
+    400 1.0625rem/1.55 'Nunito',
+    system-ui,
+    sans-serif;
+}
+
+.page {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  color: inherit;
+  text-decoration: none;
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: 0.015em;
+}
+
+.mark img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 22%;
+}
+
+h1,
+h2 {
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 2.5rem 0 1rem;
+}
+
+h2 {
+  font-size: 1.1875rem;
+  margin: 2rem 0 0.5rem;
+}
+
+p,
+ul {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--text-secondary);
+  text-underline-offset: 0.15em;
+}
+
+.updated {
+  color: var(--text-secondary);
+}
+
+.links {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  background: var(--card);
+  border-radius: 1rem;
+}
+
+.links li + li {
+  border-top: 1px solid var(--divider);
+}
+
+.links a {
+  display: block;
+  padding: 0.875rem 1rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divider);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+footer p {
+  margin: 0 0 0.5rem;
+}

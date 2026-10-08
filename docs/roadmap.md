@@ -18,9 +18,10 @@ The app is feature-complete and on TestFlight.
 - [ ] **Play Console app record and Android submit config.** `eas.json` has only
       an iOS submit profile. Android needs the app created in Play Console and a
       Google service-account key in `submit.production`.
-- [ ] **Privacy policy URL**, required by both stores. A static page stating that no
-      data leaves the device.
-- [ ] **Support URL**, required by App Store Connect.
+- [ ] **Privacy policy and support URLs.** Turn on Pages (Settings ▸ Pages ▸ Source:
+      GitHub Actions), then enter `https://stassinari.github.io/lympha/privacy/` in
+      both stores and `https://stassinari.github.io/lympha/support/` in App Store
+      Connect.
 - [ ] **Privacy declarations**: App Privacy ("Data Not Collected") and Play Data
       safety (none collected or shared).
 - [ ] **Age and content rating questionnaires** on both stores.
