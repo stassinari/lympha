@@ -39,14 +39,26 @@ In rough order of likelihood.
 - **Brand page.** A full-page brand selector with a fact sheet per brand, grown from
   Settings' Bottles section. Recipe changes far more often than brand, so the recipe
   picker stays the frequent path.
+- **Review item clicking**. Maybe add some nice animation at the end, and reset
+  after a set time?
+- **New "brands".** (Will need to rename Brands, as it's wrong for some of these).
+  - **Barista Hustle.** The `prepared` component shape is modelled; the numbers are
+    unverified. Once verified, BH and Lotus compare directly in ppm as CaCO₃.
+  - **R Pavlis.** Another possible non-drop recipe source, alongside Barista Hustle.
+  - **Third Wave Water.** Even though there is not much to do here, it might be nice
+    to give the user a way to have a small concentrate of it. Will probably require
+    saving the concentrate as a separate component.
+  - *Note*: all of the above stop being "drops" and start needing an extra *water*
+    component.
+- **Concentrate strength.** Take inspiration from Apax's calculator, with a
+  25%/50%/75%/100% slider (?) to select the desired strength.
+- **Promotional video?** Consider creating a short video to showcase the app's
+  features and usage. Claude can help with making it a consistent script.
+- **Showcase website.** Consider creating a simple website, maybe as a `/lympha` from
+  my personal domain.
 - **Non-zero starting water.** The change most likely to reshape the engine, so
   engine signatures must not assume zero-TDS input. Probably a property of the brew,
   not the recipe.
-- **Barista Hustle.** The `prepared` component shape is modelled; the numbers are
-  unverified. Once verified, BH and Lotus compare directly in ppm as CaCO₃.
-- **R Pavlis.** Another possible non-drop recipe source, alongside Barista Hustle.
-- **Third Wave Water.** Sachets are modelled as an indivisible dispenser; a
-  dissolved-sachet stock is the `prepared` shape. Weigh a sachet first.
 - **Apax limited editions** (TANAT, HYDRANGEA, NEMO AEROPRESS), once it is known how
   they combine with the standard range.
 - **Cross-brand comparison** in ppm as CaCO₃. Apax publishes no ion data, so it
