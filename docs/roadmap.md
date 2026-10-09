@@ -3,31 +3,32 @@
 Outstanding work. Finished items are deleted, and any decision they produce goes to
 [`decisions.md`](decisions.md).
 
-The app is feature-complete and on TestFlight.
+The app is feature-complete, on TestFlight and on Play internal testing.
 
 ---
 
 ## Before v1
 
-### Store submission
+### Google Play
 
-- [ ] **Google Play closed testing, if it applies.** Personal developer accounts
-      created after November 2023 need a closed test with at least 12 opted-in
-      testers for 14 consecutive days before a production release. Start it first;
-      nothing shortens it.
-- [ ] **Play Console app record and Android submit config.** `eas.json` has only
-      an iOS submit profile. Android needs the app created in Play Console and a
-      Google service-account key in `submit.production`.
-- [ ] **Privacy policy and support URLs.** Turn on Pages (Settings ▸ Pages ▸ Source:
-      GitHub Actions), then enter `https://stassinari.github.io/lympha/privacy/` in
-      both stores and `https://stassinari.github.io/lympha/support/` in App Store
-      Connect.
-- [ ] **Privacy declarations**: App Privacy ("Data Not Collected") and Play Data
-      safety (none collected or shared).
-- [ ] **Age and content rating questionnaires** on both stores.
-- [ ] **Screenshots** for each platform, and the Play feature graphic.
-- [ ] **Production build**: `eas build --profile production` per platform, check
-      on device, `eas submit`.
+The listing, App content declarations and store settings are complete; assets are in
+[`store/`](store/).
+
+- [ ] **Recruit at least 12 closed testers.** Personal developer accounts created
+      after November 2023 need 12 opted-in testers for 14 consecutive days before a
+      production release. Internal testers do not count.
+- [ ] **Closed test.** Create the closed track, promote the internal build to it,
+      send the changes for review, share the opt-in link.
+- [ ] **Production**, after the 14 days: apply for production access, then
+      promote a build.
+
+### App Store
+
+Version 1.0 (build 2) was submitted for review on 2026-10-09.
+
+- [ ] **Release** once approved. If App Review rejects the `lotus` or `apax`
+      keywords, remove them and resubmit; see *Store listing* in
+      [`decisions.md`](decisions.md).
 
 ---
 

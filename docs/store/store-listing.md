@@ -1,7 +1,7 @@
 # Store listing
 
 Copy for the App Store and Google Play. The reasons are in
-[`decisions.md`](decisions.md), under *Copy* ▸ *Store listing*. Paste as written:
+[`decisions.md`](../decisions.md), under *Copy* ▸ *Store listing*. Paste as written:
 apostrophes are typographic (’).
 
 ## Name (both stores, 30 max)

@@ -6,7 +6,7 @@ Rejected alternatives are listed so they are not proposed again.
 
 Vendor numbers live in [`water-schema-v0.md`](water-schema-v0.md) (Lotus, data model)
 and [`apax-lab-brief.md`](apax-lab-brief.md) (Apax). Store listing text lives in
-[`store-listing.md`](store-listing.md). Outstanding work lives in
+[`store/store-listing.md`](store/store-listing.md). Outstanding work lives in
 [`roadmap.md`](roadmap.md).
 
 ---
@@ -115,7 +115,13 @@ which needs `expo` ≥ 57.0.23. Details in [`native-builds.md`](native-builds.md
 are static HTML, deployed by `.github/workflows/pages.yml`, which uploads `site/`
 alone so `docs/` is never published. They use the app's palette and its own fonts,
 self-hosted, so the pages make no third-party requests either. Contact is GitHub
-issues.
+issues, except on Google Play, which requires a public email address:
+`hello@saverio.dev`.
+
+**Releases go through EAS: `eas build --profile production --auto-submit`.** The
+build number is held remotely by EAS and incremented per production build. Android
+submits to Play's internal track. The Play service-account key is stored in EAS,
+because the repository is public.
 
 ---
 
@@ -603,7 +609,7 @@ choice is made.
 
 ### Store listing
 
-The strings live in [`store-listing.md`](store-listing.md); the reasons are here.
+The strings live in [`store/store-listing.md`](store/store-listing.md); the reasons are here.
 
 **The listing is read by people who haven't opened the app.** So the description
 says what rounding does to a dose, with one worked number, which *Voice* rules out
@@ -664,3 +670,33 @@ sound like a person.
 **Non-drop recipes**, if added, should not need a new name or subtitle. The parts to revise
 would be the `drops` keyword and the description's "Works with" list. Keywords change with
 any new version.
+
+**Screenshots show uneven volumes, and those volumes are consecutive Fibonacci
+numbers**: 233, 377, 610 and 987 ml, in order, then the recipe list, which shows no
+volume. Uneven volumes are where rounding matters, so each one is an honest state of
+the engine; read in sequence, they are a quiet joke. Recipes were chosen per volume
+by running the engine, not staged:
+
+| Shot | Volume | Recipe | State |
+|---|---|---|---|
+| Home, light | 233 ml | Apax with KONFLUX, Heavily Fermented | On target |
+| Water | 377 ml | Lotus, Bright and Juicy | 18% off; 452 ml exact |
+| Rounding | 610 ml | Apax with KONFLUX, Washed | 9% over; 535 ml exact |
+| Home, dark | 987 ml | Lotus, Simple and Sweet | 2% over |
+| Recipe list, light | — | Lotus, Simple and Sweet ticked | — |
+
+- **Android: 1080 × 2160.** Play rejects a long side more than twice the short one,
+  which rules out a modern phone's native ratio.
+- **iOS: 1206 × 2622, one set**, for the Dynamic Island (medium) slot. App Store
+  Connect requires that slot and scales it for every other iPhone
+  ([specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)).
+  The shots are 1320 × 2868 iPhone 18 Pro Max captures scaled down uniformly; the two
+  sizes share an aspect ratio to within a pixel.
+- **The status bar shows the clock at 7:30 and a full battery.** iOS also shows full
+  Wi-Fi: `simctl status_bar` cannot hide the icon, and a greyed one looks broken.
+- **The Water screen shows 377 typed in, with no keyboard.** An untouched value shows
+  a selection band, which reads as odd out of context. The caret blinks, so the shot
+  is taken in its off phase.
+
+**Feature graphic: the (Ly) mark, the wordmark and "Water for Coffee"** on the icon's
+background. Play requires one; it carries nothing the name does not.

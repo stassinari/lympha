@@ -19,7 +19,7 @@ with either.
 | [`docs/decisions.md`](docs/decisions.md)             | Every product, design and engineering decision, with its reason. Check here before re-arguing one.       |
 | [`docs/water-schema-v0.md`](docs/water-schema-v0.md) | Data model and verified Lotus numbers. **Source of truth for anything numeric.**                         |
 | [`docs/apax-lab-brief.md`](docs/apax-lab-brief.md)   | Sources, units and anomalies behind `src/data/sources/apax-lab.json`, the only copy of the Apax numbers. |
-| [`docs/store-listing.md`](docs/store-listing.md)     | App Store and Google Play listing text.                                                                  |
+| [`docs/store/`](docs/store/)                         | App Store and Google Play listing text, screenshots and graphics.                                        |
 | [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**       |
 | [`site/`](site/)                                     | Privacy policy and support pages, published to GitHub Pages.                                             |
 | [`docs/designs/v1/`](docs/designs/v1/)               | The original design handoff: a picture of the intent, not a spec. Its numbers are wrong.                 |
