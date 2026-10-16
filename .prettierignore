@@ -8,3 +8,8 @@ docs/
 # Vendor research artefacts, shipped byte-identical to the documents they came
 # from. `data.test.ts` asserts that; reformatting them breaks the build.
 src/data/sources/
+
+# design-sync: the staged converter and its output are generated.
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/

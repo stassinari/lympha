@@ -1,0 +1,127 @@
+{
+  "projectId": "7813bd86-4dca-4d21-a736-f714441135c4",
+  "pkg": "lympha",
+  "globalName": "Lympha",
+  "shape": "package",
+  "buildCmd": "node .design-sync/web/build.mjs",
+  "entry": ".design-sync/.cache/web-pkg/dist/index.js",
+  "srcDir": "../../../src",
+  "extraFonts": ["../../web/fonts.css"],
+  "provider": {
+    "component": "LymphaProvider",
+    "props": {
+      "scheme": "light"
+    }
+  },
+  "componentSrcMap": {
+    "ThemeProvider": null,
+    "ThemedStatusBar": null,
+    "AnimatedAppText": null,
+    "OverlayLayer": null,
+    "Underlay": null,
+    "UnresolvableTargetError": null,
+    "UnsupportedScalingError": null,
+    "View": null,
+    "ScrollView": null,
+    "StyleSheet": null,
+    "Switch": null
+  },
+  "docsDir": "../docs",
+  "readmeHeader": ".design-sync/conventions.md",
+  "guidelinesGlob": ["../../../docs/decisions.md"],
+  "overrides": {
+    "AppHeader": {
+      "cardMode": "column"
+    },
+    "ComparisonTable": {
+      "cardMode": "column"
+    },
+    "DoseProgress": {
+      "cardMode": "column"
+    },
+    "DoseRow": {
+      "cardMode": "column"
+    },
+    "RecipeHeader": {
+      "cardMode": "column"
+    },
+    "RecipeRow": {
+      "cardMode": "column"
+    },
+    "RoundingLine": {
+      "cardMode": "column"
+    },
+    "ScreenHeader": {
+      "cardMode": "column"
+    },
+    "SettingsRow": {
+      "cardMode": "column"
+    },
+    "VolumeCard": {
+      "cardMode": "column"
+    },
+    "VolumeNudge": {
+      "cardMode": "column"
+    },
+    "BarRow": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "Chip": {
+      "cardMode": "column"
+    },
+    "Divider": {
+      "cardMode": "column"
+    },
+    "Icon": {
+      "cardMode": "column"
+    },
+    "InfoSheet": {
+      "cardMode": "column"
+    },
+    "Overlay": {
+      "cardMode": "column"
+    },
+    "Pill": {
+      "cardMode": "column"
+    },
+    "Screen": {
+      "cardMode": "column"
+    },
+    "Segmented": {
+      "cardMode": "column"
+    },
+    "Touchable": {
+      "cardMode": "column"
+    },
+    "LymphaProvider": {
+      "cardMode": "column"
+    },
+    "ActionText": {
+      "cardMode": "column"
+    },
+    "AppText": {
+      "cardMode": "column"
+    },
+    "Body": {
+      "cardMode": "column"
+    },
+    "BodyRegular": {
+      "cardMode": "column"
+    },
+    "Caption": {
+      "cardMode": "column"
+    },
+    "DoseValue": {
+      "cardMode": "column"
+    },
+    "ScreenTitle": {
+      "cardMode": "column"
+    },
+    "SectionHeader": {
+      "cardMode": "column"
+    }
+  }
+}

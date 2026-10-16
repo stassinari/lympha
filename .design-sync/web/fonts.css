@@ -1,0 +1,35 @@
+/*
+ * The faces the type scale names, under the family names React Native loads them
+ * as (`metrics.ts`), so react-native-web's `font-family` resolves to the same
+ * files the app ships.
+ */
+@font-face {
+  font-family: 'Nunito_400Regular';
+  src: url('../../node_modules/@expo-google-fonts/nunito/400Regular/Nunito_400Regular.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'Nunito_600SemiBold';
+  src: url('../../node_modules/@expo-google-fonts/nunito/600SemiBold/Nunito_600SemiBold.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'Nunito_700Bold';
+  src: url('../../node_modules/@expo-google-fonts/nunito/700Bold/Nunito_700Bold.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'Nunito_800ExtraBold';
+  src: url('../../node_modules/@expo-google-fonts/nunito/800ExtraBold/Nunito_800ExtraBold.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'Nunito_900Black';
+  src: url('../../node_modules/@expo-google-fonts/nunito/900Black/Nunito_900Black.ttf')
+    format('truetype');
+}
+@font-face {
+  font-family: 'Figtree_600SemiBold';
+  src: url('../../node_modules/@expo-google-fonts/figtree/600SemiBold/Figtree_600SemiBold.ttf')
+    format('truetype');
+}
