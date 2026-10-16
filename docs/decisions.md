@@ -107,9 +107,9 @@ expect, which a sheet drawn in React Native would only imitate.
 **The engine never imports React Native.** `src/engine` and `src/data` run under
 Vitest in Node.
 
-**UIScene lifecycle on iOS.** Xcode 27 builds of SDK 57's template trap at launch on
-iOS 27 without it. Enabled with `expo-build-properties` → `ios.enableSceneSupport`,
-which needs `expo` ≥ 57.0.23. Details in [`native-builds.md`](native-builds.md).
+**UIScene lifecycle on iOS.** Xcode 27 builds trap at launch on iOS 27 without it.
+Expo SDK 58 generates it by default; nothing in `app.json` configures it. Details in
+[`native-builds.md`](native-builds.md).
 
 **Store pages on GitHub Pages, from `site/`.** The privacy policy and support pages
 are static HTML, deployed by `.github/workflows/pages.yml`, which uploads `site/`

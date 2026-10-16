@@ -3,7 +3,7 @@
 ## Expo
 
 Expo HAS CHANGED. Read the exact versioned docs at
-https://docs.expo.dev/versions/v57.0.0/ before writing any code.
+https://docs.expo.dev/versions/v58.0.0/ before writing any code.
 
 ---
 
@@ -18,15 +18,16 @@ simulators, launching emulators, installing apps — these put windows on screen
 jarring without warning. One or two sentences of heads-up first: what will launch, what
 will appear, how to stop it.
 
-**Never start or stop Metro.** Saverio runs `npm start` himself. An agent-owned Metro holds
-port 8081, so his own `npm start` silently moves to 8082 and the simulators keep talking to
-the wrong bundler — a confusing failure that looks like stale code. If a dev server is
-needed, ask him to start it and wait.
+**Run the mechanical commands yourself.** Installs, prebuilds, native builds, Metro, cache
+clears, release builds — anything whose outcome is simply "it works" or "it doesn't" is the
+agent's to run, not a step to hand back. Report the result.
 
-Driving a server he already has running is fine: `curl localhost:8081/reload`, screenshots,
-`adb`/`simctl`. Reading his Metro output is not — it goes to his terminal, not a log an
-agent can tail, so ask him to paste anything needed. A missing per-platform "Bundled" line
-is the tell for a stale bundle; a cache clear (`npm start -- -c`) is his call too.
+**One Metro at a time.** Before starting Metro, check port 8081
+(`lsof -nP -iTCP:8081 -sTCP:LISTEN`). If one is listening, drive it
+(`curl localhost:8081/reload`) instead: a second Metro silently takes 8082 while the apps
+keep talking to the first, which looks like stale code. Start Metro in the background with
+its output going to a log file, so it can be read; a missing per-platform "Bundled" line is
+the tell for a stale bundle. On finishing, say whether it is still running and how to stop it.
 
 **Build the app; explain as you go.** Saverio is a seasoned web developer and new to React
 Native. He does not want to be blocked writing code or answering questions — but he does

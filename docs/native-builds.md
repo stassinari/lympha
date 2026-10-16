@@ -63,15 +63,19 @@ asset.
 
 ## Why `--no-bundler`, and why the app is black without Metro
 
-`--no-bundler` stops the Expo CLI starting its own Metro. Saverio runs `npm start` himself;
-an agent-owned Metro takes port 8081 and pushes his to 8082, after which the simulators talk
-to the wrong bundler and every change appears not to apply.
+`--no-bundler` stops the Expo CLI starting its own Metro, so a build never starts a second
+one beside the Metro already on port 8081. A second Metro takes 8082, after which the
+simulators talk to the wrong bundler and every change appears not to apply.
 
 The trade-off is that a Debug build contains **no JavaScript at all**. The Xcode build phase
 sets `SKIP_BUNDLING=1` for Debug and the app fetches its bundle from `localhost:8081` at
 launch — that is what makes Fast Refresh possible instead of a full recompile per keystroke.
 With no Metro running you get a redbox reading *"No script URL provided"* over a black
 screen. The build is fine; there is simply nothing to run.
+
+**Android 17 debug builds ask for "Nearby devices".** React Native's debug manifest declares
+`ACCESS_LOCAL_NETWORK` so the app can reach Metro over Wi-Fi from a physical device. Loopback
+through `adb reverse`, which an emulator uses, is exempt. Release builds do not declare it.
 
 For an app that needs nothing else on the machine, build Release — Metro runs once at build
 time and the bundle is embedded:
@@ -185,7 +189,7 @@ AVD on the same API 37 image.
 
 ## Toolchain
 
-**Expo SDK 57 requires Xcode 26.4 or later.** Older Xcode fails with 17 errors of the form
+**Expo requires Xcode 26.4 or later.** Older Xcode fails with 17 errors of the form
 `'weak' must be a mutable variable` from `expo-modules-jsi` and `expo-modules-core`, because
 `weak let` (SE-0481) is not implemented in the Swift shipped before 26.4. No pod
 configuration works around it — the compiler simply lacks the feature. Xcode 27.0 builds
@@ -193,16 +197,11 @@ cleanly (verified 2026-10-05, 0 warnings).
 
 **Xcode 27 builds crash on iOS 27 unless the app uses the UIScene lifecycle.** The crash is
 an immediate `EXC_BREAKPOINT` in `_UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`.
-SDK 57's template still generates an `AppDelegate` that creates its own `UIWindow`, so it
-needs Expo's opt-in, configured in `app.json`:
+Expo SDK 58's prebuild generates a `SceneDelegate.swift` and a `UIApplicationSceneManifest`
+pointing at it, with no configuration. An `ios/` directory prebuilt by
+an earlier SDK lacks both; delete it and prebuild again.
 
-```json
-["expo-build-properties", { "ios": { "enableSceneSupport": true } }]
-```
-
-This needs `expo` ≥ 57.0.23. Verify after prebuild that `Info.plist` has a
-`UIApplicationSceneManifest` pointing at `EXExpoAppSceneDelegate`. SDK 58 adopts scenes by
-default, so remove the option on upgrade.
+**Expo SDK 58 requires Node 22.13+, 24.3+ or 26+.** Odd-numbered releases are unsupported.
 
 Gradle needs **JDK 17** — React Native's Gradle plugin declares `jvmToolchain(17)`, and
 `java` on this machine otherwise resolves to Homebrew's JDK 26. Do not point `JAVA_HOME` at

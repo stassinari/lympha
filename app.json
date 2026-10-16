@@ -32,12 +32,6 @@
           "backgroundColor": "#FBF8F4",
           "dark": { "backgroundColor": "#161211" }
         }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "ios": { "enableSceneSupport": true }
-        }
       ]
     ],
     "owner": "saveriodev",

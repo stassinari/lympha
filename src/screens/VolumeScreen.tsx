@@ -13,6 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, Keyboard, Platform, TextInput, View } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   AppText,
@@ -148,7 +149,7 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
   /** The band's width is the one part metrics cannot supply, because it depends on
    *  how many digits are on screen. See the note on the selection band above. */
   const [valueWidth, setValueWidth] = useState(0);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
 
   const pendingMl = entry === null ? volumeMl : clampVolume(Number(entry) || 0);
   const display = entry === null ? String(volumeMl) : entry === '' ? '0' : entry;
@@ -338,7 +339,7 @@ const HiddenInput = ({
   value,
   onChange,
 }: {
-  ref: React.RefObject<TextInput | null>;
+  ref: React.RefObject<TextInputInstance | null>;
   value: string;
   onChange: (digits: string) => void;
 }) => (

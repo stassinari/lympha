@@ -73,7 +73,5 @@ In rough order of likelihood.
 
 ### Maintenance
 
-- **Expo SDK 58:** remove `ios.enableSceneSupport` from `app.json`. SDK 58 adopts the
-  UIScene lifecycle by default.
 - **Wordmark:** its size and tracking (16px, +0.015em) are unrefined. No test
   depends on either.
