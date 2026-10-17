@@ -124,13 +124,20 @@ submits to Play's internal track. The Play service-account key is stored in EAS,
 because the repository is public.
 
 **New design work starts in Claude Design, from the app's own components.** The
-private Claude Design project "Lympha" holds `src/design` and `src/components`,
-built for the browser with react-native-web, so a design is composed of the
-components the app ships and carries over as written. The sync and its build
+private Claude Design project "Lympha" holds `src/design`, `src/components` and
+`src/screens`, built for the browser with react-native-web, so a design is
+composed of the components the app ships and carries over as written. The sync and its build
 live in `.design-sync/`; its `NOTES.md` covers how to re-run it.
 
 - **The iOS look is the reference.** The web build reports iOS to `Platform`;
   Android's differences are mechanics this file already records.
+- **Screens are synced as code.** A screenshot of a screen can only be redrawn,
+  which reintroduces the drift this setup exists to avoid; a screen in code can
+  be shown live and its source copied into a design and changed.
+- **Each design has its own store.** The app's store is a singleton, which would
+  give every frame on a canvas the same brew. The web build swaps it for one per
+  `LymphaProvider`, seeded by its `state` prop, running the same actions
+  (`src/state/actions.ts`).
 - **Rejected: designing from the `docs/designs/v1` handoff.** It predates the
   vendor research and has drifted from the app.
 

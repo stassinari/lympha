@@ -13,6 +13,7 @@ import {
   Segmented,
   SettingsRow,
   space,
+  FLAG_CHOICES,
 } from 'lympha';
 
 export const Settings = () => (
@@ -52,7 +53,7 @@ export const Settings = () => (
             wide
             control={
               <View style={{ flexDirection: 'row', gap: space.snug }}>
-                {[0.05, 0.1, 0.15, 0.2].map((v) => (
+                {FLAG_CHOICES.map((v) => (
                   <Pill
                     key={v}
                     label={`${Math.round(v * 100)}%`}

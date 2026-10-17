@@ -19,7 +19,7 @@ import {
   useTheme,
 } from '@/design';
 import { availableUnits } from '@/engine';
-import type { ThemeMode } from '@/state';
+import type { ThemeMode } from '@/design';
 import { FLAG_CHOICES, useBrand, useStore } from '@/state';
 import { useState } from 'react';
 import { Platform, ScrollView, Switch, View } from 'react-native';

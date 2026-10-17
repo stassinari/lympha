@@ -1,9 +1,9 @@
 /**
  * Everything the Claude Design build exposes on `window.Lympha`.
  *
- * The design system and the app's components, plus the dose engine, the vendor
- * data and the formatters, so a design can compute real doses rather than invent
- * them, and React Native's layout primitives.
+ * The design system, the app's components and its screens, plus the dose engine,
+ * the vendor data and the formatters, so a design can compute real doses rather
+ * than invent them, and React Native's layout primitives.
  */
 
 export * from '../../src/design';
@@ -15,6 +15,15 @@ export * from '../../src/data';
 export * from '../../src/format/units';
 export * from '../../src/format/rounding';
 export * from '../../src/format/recipeList';
+// The state hooks read the enclosing `LymphaProvider`'s store (`./store.tsx`).
+export * from '../../src/state';
+export * from '../../src/screens/Root';
+export * from '../../src/screens/DoseScreen';
+export * from '../../src/screens/VolumeScreen';
+export * from '../../src/screens/RecipeScreen';
+export * from '../../src/screens/SettingsScreen';
+export * from '../../src/screens/UnitScreen';
+export * from '../../src/screens/DetailScreen';
 export * from './LymphaProvider';
 
 // Layout glue. A design composes the components with the same primitives the app

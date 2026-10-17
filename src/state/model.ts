@@ -19,9 +19,8 @@ import {
   unitGroups,
 } from '@/data';
 import type { DoseUnit } from '@/data/types';
+import type { ThemeMode } from '@/design';
 import type { UnitPreference } from '@/engine';
-
-export type ThemeMode = 'system' | 'light' | 'dark';
 
 export type PersistedState = {
   mode: ThemeMode;

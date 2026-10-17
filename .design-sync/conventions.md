@@ -38,6 +38,33 @@ const { LymphaProvider, Screen, ScreenHeader, ScrollView, space } = window.Lymph
 The dose screen is headed by `AppHeader` (wordmark and settings) instead of
 `ScreenHeader`.
 
+### Screens
+
+The app's screens are components too: `DoseScreen`, `VolumeScreen`,
+`RecipeScreen`, `SettingsScreen`, `UnitScreen`, `DetailScreen`, and `Root`, the
+whole app with its screens sliding over the dose screen. They read the app's
+state from `LymphaProvider`'s `state` prop; anything left out takes the
+first-launch default (Lotus, Light and Bright, 1000 ml). Each provider has its
+own state, so frames side by side can show different brews, and each is live:
+tapping a dose row ticks it.
+
+```jsx
+<LymphaProvider
+  scheme="dark"
+  insets={{ top: 59, bottom: 34 }}
+  state={{ brandId: 'apax-lab', volumeMl: 350, done: { 'apax-lab-tonik': true } }}
+  style={{ width: 390, height: 844 }}
+>
+  <DoseScreen onEditVolume={() => {}} onChangeRecipe={() => {}}
+    onOpenSettings={() => {}} onOpenDetails={() => {}} />
+</LymphaProvider>;
+```
+
+Show an existing screen as it is by rendering it. To change one, copy the
+source in its `.prompt.md` into the design and edit that copy; the state hooks
+it calls (`useStore`, `useBrand`, `useRecipe`, `useDose`, `useRoundingSummary`,
+`useExactVolume`) are on `window.Lympha` and read the same `state`.
+
 ### Styling
 
 React Native style objects, no CSS classes. Lay out with `View` (a flex column

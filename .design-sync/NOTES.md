@@ -9,13 +9,18 @@ Syncs `src/design` and `src/components` to the private Claude Design project
   bundles them for the browser through react-native-web into
   `.design-sync/.cache/web-pkg/`, which the converter then treats as an ordinary
   web React package. Substitutions are listed in its header.
+- `src/state/store.ts` resolves to `web/store.tsx`: a store per
+  `LymphaProvider`, seeded by its `state` prop and never persisted, built from
+  the same `src/state/actions.ts` as the app's.
 - `react-native` resolves to `web/react-native.ts`, which reports `Platform.OS`
   as `ios`: the iOS look is the reference for design work.
 - `web/docs.mjs` writes each component's doc (→ `.prompt.md`) from its source
-  comments, its type spec and its preview's exports. A preview change reaches
+  comments, its type spec and its preview's exports, and for a screen, its
+  whole source file. A preview change reaches
   the docs only on a full build (`buildCmd`, then `package-build.mjs`).
-- The bundle also exports the dose engine, the vendor data, the formatters and
-  RN's `View` / `ScrollView` / `StyleSheet` / `Switch`.
+- The bundle also exports the screens, the state hooks, the dose engine, the
+  vendor data, the formatters and RN's `View` / `ScrollView` / `StyleSheet` /
+  `Switch`.
 - react-native-web's stylesheet element is renamed to `lympha-stylesheet` in the
   build: its default id matches the render check's `[id^="r"]` root selector and,
   being empty markup, reads every card as unrendered.
@@ -35,6 +40,11 @@ Syncs `src/design` and `src/components` to the private Claude Design project
   page background. A dark cell wraps itself in
   `<LymphaProvider scheme="dark" style={{ padding: space.blocks }}>`.
 - Width a phone screen's content at 354 (390 less two 18pt insets).
+- A screen preview is a whole phone: `LymphaProvider` with
+  `insets={{ top: 59, bottom: 34 }}`, `style={{ width: 390, height: 844 }}` and
+  the brew in `state`. Its card declares `viewport: "438x892"` in `config.json`
+  (the phone plus the card's 24px padding); the 900×700 default crops the
+  bottom of the screen.
 - A pill or other `alignSelf: 'stretch'` control fills a column; put it in a
   `flexDirection: 'row'` view to show its natural width.
 - Review sheets are scaled to about three quarters.
@@ -44,8 +54,8 @@ Syncs `src/design` and `src/components` to the private Claude Design project
   `getBrand(id)?.accent.light`, not `!`.
 - `LymphaProvider` feeds `insets` straight into the safe-area contexts:
   `SafeAreaProvider` on the web measures the browser and overwrites them.
-- `FLAG_CHOICES` and the volume presets are not exported; the SettingsRow
-  preview restates `[0.05, 0.1, 0.15, 0.2]` and `[250, 350, 500, 1000]`.
+- The volume presets are not exported; the SettingsRow and Pill previews
+  restate `[250, 350, 500, 1000]`.
 - `DoseProgress` draws nothing at `done={0}`, so no preview cell uses it.
 
 ## Known render warns
@@ -61,8 +71,11 @@ Syncs `src/design` and `src/components` to the private Claude Design project
   `TurboModuleRegistry`, and renames react-native-web's stylesheet id. A new
   native module in `src/`, or a react-native-web or react-native-svg upgrade,
   can break the bundle or the render check.
-- **Restated values.** The SettingsRow preview restates the limit choices and
-  volume presets; a change to either in the app leaves it stale.
+- **Restated values.** The SettingsRow and Pill previews restate the volume
+  presets; a change to them in the app leaves both stale.
+- **Store shape.** `web/store.tsx` mirrors `src/state/store.ts`'s exports
+  (`useStore`, `useHydrated`, `Store`). A new export there, or a screen using
+  `useStore.getState()`, needs the same in the web store.
 - **Stand-ins.** `web/NativeSheet.tsx` imitates the iOS sheet; it is not the
   platform's own.
 - **Web text metrics.** Type renders through CSS, where line-height slack splits

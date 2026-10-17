@@ -24,7 +24,8 @@
     "View": null,
     "ScrollView": null,
     "StyleSheet": null,
-    "Switch": null
+    "Switch": null,
+    "StoreProvider": null
   },
   "docsDir": "../docs",
   "readmeHeader": ".design-sync/conventions.md",
@@ -122,6 +123,34 @@
     },
     "SectionHeader": {
       "cardMode": "column"
+    },
+    "Root": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "DoseScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "VolumeScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "RecipeScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "SettingsScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "UnitScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "DetailScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
     }
   }
 }

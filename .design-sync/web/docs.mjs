@@ -7,12 +7,14 @@
  *   type spec    the role's resolved values, from `typography.ts`
  *   examples     the component's preview, `.design-sync/previews/<Name>.tsx`,
  *                one example per named export, verbatim
+ *   source       a screen's whole file: a screen is used whole, so a design
+ *                that changes one copies its composition instead
  *   group        where the source lives
  *
  * Props are appended by the converter from the declarations.
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
@@ -82,7 +84,8 @@ export async function writeDocs({ root, out, build }) {
   const previews = join(root, '.design-sync/previews');
 
   const docs = new Map();
-  const add = (name, category, description) => docs.set(name, { category, description });
+  const add = (name, category, description, source) =>
+    docs.set(name, { category, description, source });
 
   for (const { category, dir } of GROUPS) {
     const index = readFileSync(join(root, dir, 'index.ts'), 'utf8');
@@ -140,10 +143,27 @@ export async function writeDocs({ root, out, build }) {
     [fileHeader(text), exportDoc(text, 'AppText')].filter(Boolean).join('\n\n'),
   );
 
+  for (const file of readdirSync(join(root, 'src/screens'))) {
+    if (!/^\w+\.tsx$/.test(file)) continue;
+    const rel = `src/screens/${file}`;
+    const source = readFileSync(join(root, rel), 'utf8');
+    const name = /^export function ([A-Z]\w*)/m.exec(source)?.[1];
+    if (!name) continue;
+    add(
+      name,
+      'Screens',
+      [fileHeader(source), exportDoc(source, name)].filter(Boolean).join('\n\n'),
+      {
+        rel,
+        text: source.trim(),
+      },
+    );
+  }
+
   const provider = readFileSync(join(root, '.design-sync/web/LymphaProvider.tsx'), 'utf8');
   add('LymphaProvider', 'Setup', exportDoc(provider, 'LymphaProvider'));
 
-  for (const [name, { category, description }] of docs) {
+  for (const [name, { category, description, source }] of docs) {
     const examples = previewExamples(join(previews, `${name}.tsx`));
     const body = [
       `---\ncategory: ${category}\n---\n`,
@@ -151,6 +171,14 @@ export async function writeDocs({ root, out, build }) {
       examples.length
         ? '## Examples\n\n' +
           examples.map((e) => `### ${e.name}\n\n\`\`\`jsx\n${e.body}\n\`\`\``).join('\n\n')
+        : '',
+      source
+        ? `## Source\n\nThe app's \`${source.rel}\`. To change the screen, copy this ` +
+          'composition into the design and edit it there, reading from `window.Lympha` ' +
+          'instead of the `@/` imports. Its state hooks read the enclosing ' +
+          "`LymphaProvider`'s `state`.\n\n```tsx\n" +
+          source.text +
+          '\n```'
         : '',
     ]
       .filter(Boolean)

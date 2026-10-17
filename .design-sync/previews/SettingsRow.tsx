@@ -6,6 +6,7 @@ import {
   Pill,
   componentsForBrand,
   space,
+  FLAG_CHOICES,
 } from 'lympha';
 
 export const Values = () => (
@@ -24,7 +25,7 @@ export const WideControl = () => (
       wide
       control={
         <View style={{ flexDirection: 'row', gap: space.snug }}>
-          {[0.05, 0.1, 0.15, 0.2].map((value) => (
+          {FLAG_CHOICES.map((value) => (
             <Pill
               key={value}
               label={`${Math.round(value * 100)}%`}

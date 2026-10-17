@@ -3,6 +3,8 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { SafeAreaFrameContext, SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '../../src/design';
 import type { ResolvedScheme } from '../../src/design';
+import { StoreProvider } from './store';
+import type { DesignState } from './store';
 
 export type LymphaProviderProps = {
   /** Light or dark. The app follows the device by default and is dark-first. */
@@ -13,6 +15,13 @@ export type LymphaProviderProps = {
    * `{ top: 59, bottom: 34 }`.
    */
   insets?: { top?: number; bottom?: number; left?: number; right?: number };
+  /**
+   * What the app remembers, for the screens to read: brand, recipe per brand,
+   * volume, units, rounding limit, poured bottles. Anything left out takes the
+   * app's first-launch default (Lotus, 1000 ml). Each provider has its own, so
+   * frames side by side can show different brews.
+   */
+  state?: DesignState;
   /** Paints the scheme's page background behind the children. On by default. */
   background?: boolean;
   style?: StyleProp<ViewStyle>;
@@ -22,7 +31,8 @@ export type LymphaProviderProps = {
 const FRAME = { x: 0, y: 0, width: 390, height: 844 };
 
 /**
- * The root every Lympha design renders inside: theme, safe area and page colour.
+ * The root every Lympha design renders inside: theme, safe area, the app's state
+ * and page colour.
  *
  * Every component reads its colours from the theme. Outside this provider they
  * fall back to dark, and `Screen` has no insets to read.
@@ -34,6 +44,7 @@ const FRAME = { x: 0, y: 0, width: 390, height: 844 };
 export function LymphaProvider({
   scheme = 'light',
   insets,
+  state,
   background = true,
   style,
   children,
@@ -42,9 +53,11 @@ export function LymphaProvider({
   return (
     <SafeAreaFrameContext.Provider value={FRAME}>
       <SafeAreaInsetsContext.Provider value={edges}>
-        <ThemeProvider mode={scheme}>
-          {background ? <Page style={style}>{children}</Page> : children}
-        </ThemeProvider>
+        <StoreProvider state={state}>
+          <ThemeProvider mode={scheme}>
+            {background ? <Page style={style}>{children}</Page> : children}
+          </ThemeProvider>
+        </StoreProvider>
       </SafeAreaInsetsContext.Provider>
     </SafeAreaFrameContext.Provider>
   );

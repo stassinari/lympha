@@ -14,6 +14,8 @@
  * React Native runs in the browser through react-native-web. The substitutions:
  *   react-native        → ./react-native.ts (react-native-web, reporting iOS)
  *   NativeSheet         → ./NativeSheet.tsx (the platform sheets are native code)
+ *   src/state/store     → ./store.tsx (a store per design, not one persisted
+ *                         singleton)
  *   expo-haptics,
  *   expo-status-bar,
  *   RN asset registry   → ./stubs.ts
@@ -124,6 +126,9 @@ const substitutions = {
         loader: 'js',
         resolveDir: dirname(args.path),
       }),
+    );
+    b.onResolve({ filter: /^\.\/store$/ }, (args) =>
+      args.importer.startsWith(join(SRC, 'state')) ? { path: join(WEB, 'store.tsx') } : undefined,
     );
     b.onResolve({ filter: /^@\// }, (args) =>
       b.resolve('./' + args.path.slice(2), { resolveDir: SRC, kind: args.kind }),
