@@ -56,7 +56,7 @@ describe('additionsFromTarget', () => {
   it('handles a component donating both hardness and alkalinity', () => {
     const hybrid: Component = {
       id: 'hybrid',
-      brand: 'test',
+      range: 'test',
       name: 'Hybrid',
       kind: 'product',
       doseUnit: 'drop',

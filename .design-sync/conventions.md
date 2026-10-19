@@ -40,8 +40,8 @@ The dose screen is headed by `AppHeader` (wordmark and settings) instead of
 
 ### Screens
 
-The app's screens are components too: `DoseScreen`, `VolumeScreen`,
-`RecipeScreen`, `SettingsScreen`, `UnitScreen`, `DetailScreen`, and `Root`, the
+The app's screens are components too: `DoseScreen`, `VolumeScreen`, `KitsScreen`,
+`FactSheetScreen`, `RecipeScreen`, `SettingsScreen`, `DetailScreen`, and `Root`, the
 whole app with its screens sliding over the dose screen. They read the app's
 state from `LymphaProvider`'s `state` prop; anything left out takes the
 first-launch default (Lotus, Light and Bright, 1000 ml). Each provider has its
@@ -52,7 +52,7 @@ tapping a dose row ticks it.
 <LymphaProvider
   scheme="dark"
   insets={{ top: 59, bottom: 34 }}
-  state={{ brandId: 'apax-lab', volumeMl: 350, done: { 'apax-lab-tonik': true } }}
+  state={{ rangeId: 'apax-lab', volumeMl: 350, done: { 'apax-lab-tonik': true } }}
   style={{ width: 390, height: 844 }}
 >
   <DoseScreen onEditVolume={() => {}} onChangeRecipe={() => {}}
@@ -62,7 +62,7 @@ tapping a dose row ticks it.
 
 Show an existing screen as it is by rendering it. To change one, copy the
 source in its `.prompt.md` into the design and edit that copy; the state hooks
-it calls (`useStore`, `useBrand`, `useRecipe`, `useDose`, `useRoundingSummary`,
+it calls (`useStore`, `useRange`, `useRecipe`, `useDose`, `useRoundingSummary`,
 `useExactVolume`) are on `window.Lympha` and read the same `state`.
 
 ### Styling
@@ -94,8 +94,8 @@ style override.
   (`BarRow`, `BarCluster`); never a fill, tint or text colour, never bordered.
   Resolve with `resolveBarColour(component.colour, scheme)`.
 - Colour never carries meaning alone: a name and a number are always present.
-- Links and active states use the brand accent:
-  `resolveAccent(getBrand(id).accent, scheme)`.
+- Links and active states use the range accent:
+  `resolveAccent(getRange(id).accent, scheme)`.
 - Status colours (`ok`, `warning`, `error`) belong to no bottle; problems have
   more presence than the clear state.
 - Six icons, through `Icon`: `settings`, `chevronDown`, `chevronRight`, `info`,
@@ -122,5 +122,5 @@ const dose = computeDose(getRecipe('lotus-raos-recipe'), 1000, componentMap);
 // roundingSummary(dose, 0.1) → { status, text } for RoundingLine
 ```
 
-Brands: `brands`, `getBrand`. Recipes: `recipes`, `recipesForBrand(brandId)`.
+Ranges: `ranges`, `getRange`. Recipes: `recipes`, `recipesForRange(rangeId)`.
 Each component's `.prompt.md` explains why it is built the way it is; keep to it.

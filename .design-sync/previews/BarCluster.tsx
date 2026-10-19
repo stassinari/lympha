@@ -4,7 +4,7 @@ import {
   Caption,
   LymphaProvider,
   componentMap,
-  componentsForBrand,
+  componentsForRange,
   computeDose,
   getRecipe,
   space,
@@ -27,10 +27,10 @@ export const Sizes = () => (
   </View>
 );
 
-export const Brands = () => (
+export const Ranges = () => (
   <View style={{ gap: space.blocks }}>
     {['lotus', 'apax-lab', 'apax-lab-original'].map((id) => (
-      <BarCluster key={id} colours={componentsForBrand(id).map((c) => c.colour)} />
+      <BarCluster key={id} colours={componentsForRange(id).map((c) => c.colour)} />
     ))}
   </View>
 );
@@ -52,7 +52,7 @@ export const RecipeLengths = () => (
 export const Dark = () => (
   <LymphaProvider scheme="dark" style={{ padding: space.blocks, gap: space.blocks }}>
     {['lotus', 'apax-lab', 'apax-lab-original'].map((id) => (
-      <BarCluster key={id} colours={componentsForBrand(id).map((c) => c.colour)} />
+      <BarCluster key={id} colours={componentsForRange(id).map((c) => c.colour)} />
     ))}
   </LymphaProvider>
 );

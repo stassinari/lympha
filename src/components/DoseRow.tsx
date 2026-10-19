@@ -66,7 +66,7 @@ const UNIT_OVERLAY_WIDTH = 200;
 
 export type DoseRowProps = {
   line: DoseLine;
-  /** Marked off as poured. Changing volume, brand or recipe clears these. */
+  /** Marked off as poured. Anything that changes the dose clears these. */
   done?: boolean;
   onPress?: () => void;
 };

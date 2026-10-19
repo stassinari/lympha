@@ -4,7 +4,7 @@ import {
   LymphaProvider,
   componentMap,
   computeDose,
-  getBrand,
+  getRange,
   getRecipe,
   roundingSummary,
   space,
@@ -17,7 +17,7 @@ export const Close = () => (
         computeDose(getRecipe('lotus-light-and-bright'), 500, componentMap),
         0.1,
       )}
-      brandAccent={getBrand('lotus')?.accent}
+      rangeAccent={getRange('lotus')?.accent}
       onDetails={() => {}}
     />
   </View>
@@ -30,7 +30,7 @@ export const OffTarget = () => (
         computeDose(getRecipe('lotus-light-and-bright'), 350, componentMap),
         0.1,
       )}
-      brandAccent={getBrand('lotus')?.accent}
+      rangeAccent={getRange('lotus')?.accent}
       onDetails={() => {}}
     />
   </View>
@@ -40,7 +40,7 @@ export const MissingBottle = () => (
   <View style={{ width: 354 }}>
     <RoundingLine
       summary={roundingSummary(computeDose(getRecipe('lotus-raos-recipe'), 250, componentMap), 0.1)}
-      brandAccent={getBrand('lotus')?.accent}
+      rangeAccent={getRange('lotus')?.accent}
       onDetails={() => {}}
     />
   </View>
@@ -53,7 +53,7 @@ export const Dark = () => (
         computeDose(getRecipe('lotus-light-and-bright'), 350, componentMap),
         0.1,
       )}
-      brandAccent={getBrand('lotus')?.accent}
+      rangeAccent={getRange('lotus')?.accent}
       onDetails={() => {}}
     />
   </LymphaProvider>

@@ -92,7 +92,7 @@ export type Preparation = {
 
 export type Component = {
   id: string;
-  brand: string;
+  range: string;
   name: string;
   /** The schema calls this `type`; `kind` here to keep it clearly a discriminant. */
   kind: 'product' | 'prepared';
@@ -100,7 +100,7 @@ export type Component = {
   dispensers: Dispenser[];
   ions?: Ions;
   colour?: BottleColour;
-  /** Display order within its brand, as the vendor lists them. */
+  /** Display order within its range, as the vendor lists them. */
   order?: number;
   preparation?: Preparation;
   /** Set when the numbers are not verified against a primary source. Such a
@@ -108,36 +108,53 @@ export type Component = {
   unverified?: true;
 };
 
-export type Brand = {
+/**
+ * What the user owns and chooses between: Lotus, Apax Lab. Not called a brand,
+ * because recipe sources such as Barista Hustle are not one.
+ *
+ * A kit holds one or more ranges. Settings that belong to the bottles rather
+ * than to a recipe list — the unit they are measured in, their strength — are
+ * kept per kit, so Apax's two ranges, the same jars on the same scale, share
+ * them.
+ */
+export type Kit = {
   id: string;
   name: string;
-  /** Short form for chips and tight spaces. */
+  /** One line, under the name in the kit list. */
+  description: string;
+  /** The fact sheet's paragraph. */
+  about: string;
+  site: { label: string; url: string };
+  /** In the order the fact sheet offers them. */
+  rangeIds: string[];
+  /** Whether the kit offers a strength setting. See `docs/apax-lab-brief.md`. */
+  strength: boolean;
+};
+
+/** One set of bottles and its recipe list. */
+export type Range = {
+  id: string;
+  kit: string;
+  name: string;
+  /** Short form for the dose screen's header and other tight spaces. */
   shortName: string;
   /** How a screen reader should say `shortName`, where reading it aloud would
-   *  mangle it: "Apax [K]" reads its brackets. */
+   *  mangle it: "Apax Lab [K]" reads its brackets. */
   spokenShortName?: string;
+  /** The range's name on its kit's fact sheet, where a kit has more than one. */
+  rangeLabel?: string;
   /** Disambiguates two ranges from the same vendor, e.g. "Pre-KONFLUX range". */
   subtitle?: string;
   source: Source;
   /**
-   * Shown to the user on the brand itself. Distinct from `source.notes`, which
+   * Shown to the user on the range itself. Distinct from `source.notes`, which
    * is provenance for us. Used where the user needs to know something about the
    * data — for instance that the original Apax range comes from the calculator
    * and differs from the card in the box.
    */
   displayNote?: string;
-  /** Which range to prefer when one vendor ships more than one. */
+  /** Which range to prefer when a kit has more than one. */
   isDefault?: boolean;
-  /**
-   * Brands that share a concentrate-unit preference, defaulting to the brand
-   * itself.
-   *
-   * Apax's two ranges are separate brands because their recipes are not derivable
-   * from one another — but they are the same bottles, dosed on the same scale.
-   * Choosing grams for one and drops for the other would be choosing between two
-   * readings of the same jar.
-   */
-  unitGroup?: string;
   /** Text-safe brand colour for links and active states. Deliberately separate
    *  from bottle colours: a bar colour may be too light to use as text. */
   accent: { light: string; dark: string };
@@ -180,7 +197,7 @@ export type TargetEntry = {
 
 export type Recipe = {
   id: string;
-  brand: string;
+  range: string;
   name: string;
   referenceVolumeMl: number;
   /** Which way the vendor thinks. Documentation, not behaviour — it matters when

@@ -1,9 +1,9 @@
 /**
  * One line of settings: a label, an optional explanation, and a control.
  *
- * The control is passed in rather than enumerated, because the four sections use
- * a switch, a pill row, a chevron and a plain value, and a component that knew
- * about all of them would be longer than the screen.
+ * The control is passed in rather than enumerated, because its callers use a
+ * switch, a pill row, a bar cluster and a chevron, and a component that knew about
+ * all of them would be longer than the screen.
  */
 
 import { View } from 'react-native';
@@ -13,11 +13,9 @@ import { Caption, Card, CardTitle, Icon, space, useTheme } from '@/design';
  * The chevron is the tell that a row pushes a screen, and it is drawn from
  * `onPress` alone so it can never disagree with what the row does.
  *
- * Water and the single-dispenser brands show a value and no chevron, which looks
- * like an inconsistency next to Apax and is not one: those rows have nothing to
- * choose — millilitres is the only unit for water, and Lotus ships a dropper and
- * no scale — so they are statements rather than pickers, and they are not tap
- * targets at all. A chevron on them would promise a screen that does not exist.
+ * A row without `onPress`, such as a kit's bottles on its fact sheet, is a
+ * statement rather than a picker and is not a tap target at all. A chevron on it
+ * would promise a screen that does not exist.
  */
 const CHEVRON = 20;
 

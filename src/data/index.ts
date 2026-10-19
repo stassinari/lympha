@@ -10,21 +10,25 @@
  * user-authored; today it would only be ceremony.
  */
 
-import { apaxBrands, apaxComponents, apaxRecipes } from './apax';
-import { lotusBrand, lotusComponents, lotusRecipes } from './lotus';
-import type { Brand, Component, Recipe, RecipeGroup } from './types';
+import { apaxRanges, apaxComponents, apaxRecipes } from './apax';
+import { apaxKit, lotusKit } from './kits';
+import { lotusRange, lotusComponents, lotusRecipes } from './lotus';
+import type { Component, Kit, Range, Recipe, RecipeGroup } from './types';
 
 export * from './types';
 
-export const brands: Brand[] = [lotusBrand, ...apaxBrands];
+export const kits: Kit[] = [lotusKit, apaxKit];
+export const ranges: Range[] = [lotusRange, ...apaxRanges];
 export const components: Component[] = [...lotusComponents, ...apaxComponents];
 export const recipes: Recipe[] = [...lotusRecipes, ...apaxRecipes];
 
-const brandIndex = new Map(brands.map((b) => [b.id, b]));
+const kitIndex = new Map(kits.map((k) => [k.id, k]));
+const rangeIndex = new Map(ranges.map((r) => [r.id, r]));
 const componentIndex = new Map(components.map((c) => [c.id, c]));
 const recipeIndex = new Map(recipes.map((r) => [r.id, r]));
 
-export const getBrand = (id: string): Brand | undefined => brandIndex.get(id);
+export const getKit = (id: string): Kit | undefined => kitIndex.get(id);
+export const getRange = (id: string): Range | undefined => rangeIndex.get(id);
 export const getComponent = (id: string): Component | undefined => componentIndex.get(id);
 export const getRecipe = (id: string): Recipe | undefined => recipeIndex.get(id);
 
@@ -32,16 +36,16 @@ export const getRecipe = (id: string): Recipe | undefined => recipeIndex.get(id)
  *  the registry itself so it stays testable against fixtures. */
 export const componentMap: ReadonlyMap<string, Component> = componentIndex;
 
-export const recipesForBrand = (brandId: string): Recipe[] =>
-  recipes.filter((r) => r.brand === brandId);
+export const recipesForRange = (rangeId: string): Recipe[] =>
+  recipes.filter((r) => r.range === rangeId);
 
-/** Recipes for a brand, in the vendor's own grouping. Apax's current range has
+/** Recipes for a range, in the vendor's own grouping. Apax's current range has
  *  fifteen, which is too many to read as one flat list. */
-export function groupedRecipesForBrand(
-  brandId: string,
+export function groupedRecipesForRange(
+  rangeId: string,
 ): { group?: RecipeGroup; recipes: Recipe[] }[] {
   const groups: { group?: RecipeGroup; recipes: Recipe[] }[] = [];
-  for (const recipe of recipesForBrand(brandId)) {
+  for (const recipe of recipesForRange(rangeId)) {
     const last = groups[groups.length - 1];
     if (last && last.group === recipe.group) last.recipes.push(recipe);
     else groups.push({ group: recipe.group, recipes: [recipe] });
@@ -49,28 +53,11 @@ export function groupedRecipesForBrand(
   return groups;
 }
 
-export const componentsForBrand = (brandId: string): Component[] =>
-  components.filter((c) => c.brand === brandId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+export const componentsForRange = (rangeId: string): Component[] =>
+  components.filter((c) => c.range === rangeId).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-/** Brands sharing one concentrate-unit preference. */
-export const unitGroupOf = (brandId: string): string => getBrand(brandId)?.unitGroup ?? brandId;
-
-/**
- * One entry per unit preference the user can actually set, rather than one per
- * brand — Apax's two ranges are the same jars and share a setting.
- */
-export function unitGroups(): { id: string; label: string; brandIds: string[] }[] {
-  const groups = new Map<string, { id: string; label: string; brandIds: string[] }>();
-  for (const brand of brands) {
-    const id = unitGroupOf(brand.id);
-    const existing = groups.get(id);
-    if (existing) existing.brandIds.push(brand.id);
-    // The first brand in a group names it: the base range, so "Apax Lab" rather
-    // than "Apax Lab with KONFLUX".
-    else groups.set(id, { id, label: brand.name, brandIds: [brand.id] });
-  }
-  return [...groups.values()];
-}
+/** The kit a range belongs to. Every range names one; `data.test.ts` holds it to that. */
+export const kitOf = (rangeId: string): Kit => kitIndex.get(getRange(rangeId)?.kit ?? '')!;
 
 /** The dispenser a component uses unless the user has chosen otherwise. */
 export function defaultDispenser(component: Component) {

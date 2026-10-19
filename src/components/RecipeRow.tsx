@@ -1,8 +1,8 @@
 /**
  * One recipe in the picker.
  *
- * Mark, then name, then the selection check — the same order as the brand chips
- * above it and the recipe card on Home, both of which lead with the cluster. It
+ * Mark, then name, then the selection check — the same order as the recipe card on
+ * Home and the kit rows, all of which lead with the cluster. It
  * reads as "what this recipe uses" in the position where the eye already expects
  * to find that answer.
  *

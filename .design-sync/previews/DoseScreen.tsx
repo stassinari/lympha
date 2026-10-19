@@ -4,6 +4,7 @@ export const Light = () => (
   <LymphaProvider insets={{ top: 59, bottom: 34 }} style={{ width: 390, height: 844 }}>
     <DoseScreen
       onEditVolume={() => {}}
+      onOpenKits={() => {}}
       onChangeRecipe={() => {}}
       onOpenSettings={() => {}}
       onOpenDetails={() => {}}
@@ -19,6 +20,7 @@ export const Dark = () => (
   >
     <DoseScreen
       onEditVolume={() => {}}
+      onOpenKits={() => {}}
       onChangeRecipe={() => {}}
       onOpenSettings={() => {}}
       onOpenDetails={() => {}}
@@ -30,11 +32,12 @@ export const Pouring = () => (
   <LymphaProvider
     scheme="dark"
     insets={{ top: 59, bottom: 34 }}
-    state={{ brandId: 'apax-lab', done: { 'apax-lab-tonik': true, 'apax-lab-jamm': true } }}
+    state={{ rangeId: 'apax-lab', done: { 'apax-lab-tonik': true, 'apax-lab-jamm': true } }}
     style={{ width: 390, height: 844 }}
   >
     <DoseScreen
       onEditVolume={() => {}}
+      onOpenKits={() => {}}
       onChangeRecipe={() => {}}
       onOpenSettings={() => {}}
       onOpenDetails={() => {}}
@@ -50,6 +53,7 @@ export const OverLimit = () => (
   >
     <DoseScreen
       onEditVolume={() => {}}
+      onOpenKits={() => {}}
       onChangeRecipe={() => {}}
       onOpenSettings={() => {}}
       onOpenDetails={() => {}}
@@ -66,6 +70,7 @@ export const CannotMake = () => (
   >
     <DoseScreen
       onEditVolume={() => {}}
+      onOpenKits={() => {}}
       onChangeRecipe={() => {}}
       onOpenSettings={() => {}}
       onOpenDetails={() => {}}

@@ -210,7 +210,7 @@ describe('the header band', () => {
    * wordmark stays additive to `AppHeader` and reaches neither `HEADER_BAND` nor
    * the content start line.
    */
-  it('has room for a ~24pt brand mark beside the wordmark', () => {
+  it('has room for a ~24pt range mark beside the wordmark', () => {
     expect(HEADER_BAND - 24).toBeGreaterThanOrEqual(2 * 16);
   });
 

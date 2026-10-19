@@ -34,7 +34,7 @@ Syncs `src/design` and `src/components` to the private Claude Design project
   no TypeScript `!`. Each export is copied verbatim into the doc as an example
   for the design agent.
 - Numbers come from the engine and vendor data (`computeDose`, `getRecipe`,
-  `componentMap`, `roundingSummary`, `recipeSubtitle`, `getBrand`), never
+  `componentMap`, `roundingSummary`, `recipeSubtitle`, `getRange`), never
   invented.
 - The configured provider is `LymphaProvider scheme="light"`, which paints the
   page background. A dark cell wraps itself in
@@ -50,8 +50,8 @@ Syncs `src/design` and `src/components` to the private Claude Design project
 - Review sheets are scaled to about three quarters.
 - Run Prettier on a preview before capturing it: grades are keyed to the
   source, so formatting afterwards clears them.
-- Brand ids for `getBrand`: `lotus`, `apax-lab`, `apax-lab-original`. Use
-  `getBrand(id)?.accent.light`, not `!`.
+- Range ids for `getRange`: `lotus`, `apax-lab`, `apax-lab-original`. Use
+  `getRange(id)?.accent.light`, not `!`.
 - `LymphaProvider` feeds `insets` straight into the safe-area contexts:
   `SafeAreaProvider` on the web measures the browser and overwrites them.
 - The volume presets are not exported; the SettingsRow and Pill previews

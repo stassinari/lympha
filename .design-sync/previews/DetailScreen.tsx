@@ -20,7 +20,7 @@ export const OverLimitDark = () => (
 export const Apax = () => (
   <LymphaProvider
     insets={{ top: 59, bottom: 34 }}
-    state={{ brandId: 'apax-lab', volumeMl: 350, recipeIds: { 'apax-lab': 'apax-lab-washed' } }}
+    state={{ rangeId: 'apax-lab', volumeMl: 350, recipeIds: { 'apax-lab': 'apax-lab-washed' } }}
     style={{ width: 390, height: 844 }}
   >
     <DetailScreen onClose={() => {}} />

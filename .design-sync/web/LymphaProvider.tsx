@@ -16,7 +16,7 @@ export type LymphaProviderProps = {
    */
   insets?: { top?: number; bottom?: number; left?: number; right?: number };
   /**
-   * What the app remembers, for the screens to read: brand, recipe per brand,
+   * What the app remembers, for the screens to read: range, recipe per range,
    * volume, units, rounding limit, poured bottles. Anything left out takes the
    * app's first-launch default (Lotus, 1000 ml). Each provider has its own, so
    * frames side by side can show different brews.

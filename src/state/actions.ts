@@ -7,8 +7,8 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { unitGroupOf } from '@/data';
-import { DEFAULTS } from './model';
+import { kitOf, recipesForRange } from '@/data';
+import { DEFAULTS, clampStrength, rangeForKit } from './model';
 import type { PersistedState } from './model';
 import type { ThemeMode } from '@/design';
 import type { UnitPreference } from '@/engine';
@@ -20,10 +20,24 @@ export type Ephemeral = {
 
 type Actions = {
   setVolume: (ml: number) => void;
-  setBrand: (brandId: string) => void;
-  setRecipe: (brandId: string, recipeId: string) => void;
-  /** Keyed by unit group, so brands sharing bottles stay in step. */
-  setUnitPreference: (brandOrGroupId: string, preference: UnitPreference) => void;
+  setRange: (rangeId: string) => void;
+  /**
+   * Puts a kit in use, on the range its fact sheet last chose. True when that range
+   * has never been used: its first recipe is set, and Recipe should open so the
+   * choice is seen. False, and nothing changes, for the kit already in use.
+   */
+  chooseKit: (kitId: string) => boolean;
+  /**
+   * Chooses the range a kit uses. On the kit in use this switches range, with the
+   * same first-recipe rule and return value as `chooseKit`; on any other kit it is
+   * stored for when that kit is chosen, and returns false.
+   */
+  chooseRange: (kitId: string, rangeId: string) => boolean;
+  /** Whole percent, clamped to 25–100. Snapping to steps is the control's job. */
+  setStrength: (kitId: string, pct: number) => void;
+  setRecipe: (rangeId: string, recipeId: string) => void;
+  /** Keyed by kit, so ranges sharing bottles stay in step. */
+  setUnitPreference: (kitId: string, preference: UnitPreference) => void;
   setMode: (mode: ThemeMode) => void;
   setSuggest: (suggest: boolean) => void;
   setDefaultVolume: (ml: number | null) => void;
@@ -34,7 +48,25 @@ type Actions = {
 
 export type Store = PersistedState & Ephemeral & Actions;
 
-export const storeState: StateCreator<Store> = (set) => ({
+/**
+ * The state change that puts `rangeId` in use, and whether it had to pick a recipe
+ * because the range has never been used.
+ */
+function switchTo(s: Store, rangeId: string): { patch: Partial<Store>; pickedRecipe: boolean } {
+  const first = recipesForRange(rangeId)[0];
+  const pickedRecipe = !s.recipeIds[rangeId] && first !== undefined;
+  return {
+    pickedRecipe,
+    patch: {
+      rangeId,
+      kitRanges: { ...s.kitRanges, [kitOf(rangeId).id]: rangeId },
+      ...(pickedRecipe ? { recipeIds: { ...s.recipeIds, [rangeId]: first.id } } : {}),
+      done: {},
+    },
+  };
+}
+
+export const storeState: StateCreator<Store> = (set, get) => ({
   ...DEFAULTS,
   done: {},
 
@@ -42,12 +74,32 @@ export const storeState: StateCreator<Store> = (set) => ({
   // where you had got to. Clearing it silently is right: a half-ticked list
   // against a dose that has moved is worse than no list.
   setVolume: (ml) => set({ volumeMl: ml, done: {} }),
-  setBrand: (brandId) => set({ brandId, done: {} }),
-  setRecipe: (brandId, recipeId) =>
-    set((s) => ({ recipeIds: { ...s.recipeIds, [brandId]: recipeId }, done: {} })),
-  setUnitPreference: (brandOrGroupId, preference) =>
+  setRange: (rangeId) => set((s) => switchTo(s, rangeId).patch),
+  chooseKit: (kitId) => {
+    const s = get();
+    if (kitOf(s.rangeId).id === kitId) return false;
+    const { patch, pickedRecipe } = switchTo(s, rangeForKit(s, kitId));
+    set(patch);
+    return pickedRecipe;
+  },
+  chooseRange: (kitId, rangeId) => {
+    const s = get();
+    if (kitOf(s.rangeId).id !== kitId) {
+      set({ kitRanges: { ...s.kitRanges, [kitId]: rangeId } });
+      return false;
+    }
+    if (s.rangeId === rangeId) return false;
+    const { patch, pickedRecipe } = switchTo(s, rangeId);
+    set(patch);
+    return pickedRecipe;
+  },
+  setStrength: (kitId, pct) =>
+    set((s) => ({ strength: { ...s.strength, [kitId]: clampStrength(pct) }, done: {} })),
+  setRecipe: (rangeId, recipeId) =>
+    set((s) => ({ recipeIds: { ...s.recipeIds, [rangeId]: recipeId }, done: {} })),
+  setUnitPreference: (kitId, preference) =>
     set((s) => ({
-      units: { ...s.units, [unitGroupOf(brandOrGroupId)]: preference },
+      units: { ...s.units, [kitId]: preference },
       done: {},
     })),
 

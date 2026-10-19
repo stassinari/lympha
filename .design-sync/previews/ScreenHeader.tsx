@@ -1,4 +1,4 @@
-import { View, ScreenHeader, LymphaProvider, getBrand, resolveAccent, space } from 'lympha';
+import { View, ScreenHeader, LymphaProvider, getRange, resolveAccent, space } from 'lympha';
 
 export const Settings = () => (
   <View style={{ width: 354 }}>
@@ -17,7 +17,7 @@ export const ApaxAccent = () => (
     <ScreenHeader
       title="Water"
       inset={0}
-      accent={resolveAccent(getBrand('apax-lab')?.accent, 'light')}
+      accent={resolveAccent(getRange('apax-lab')?.accent, 'light')}
       onClose={() => {}}
     />
   </View>

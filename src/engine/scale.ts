@@ -10,7 +10,11 @@ import type { Addition, Recipe } from '@/data/types';
 
 export class UnsupportedScalingError extends Error {}
 
-export function scaleAdditions(recipe: Recipe, targetVolumeMl: number): Addition[] {
+/**
+ * `strength` is a share of every amount, for lighter water at the same volume:
+ * the recipe keeps its ratio. See *Strength* in `docs/decisions.md`.
+ */
+export function scaleAdditions(recipe: Recipe, targetVolumeMl: number, strength = 1): Addition[] {
   if (recipe.scaling !== 'linear') {
     throw new UnsupportedScalingError(`Recipe "${recipe.id}" uses unsupported scaling`);
   }
@@ -18,6 +22,6 @@ export function scaleAdditions(recipe: Recipe, targetVolumeMl: number): Addition
     throw new RangeError(`Volume must be positive, got ${targetVolumeMl}`);
   }
 
-  const factor = targetVolumeMl / recipe.referenceVolumeMl;
+  const factor = (targetVolumeMl / recipe.referenceVolumeMl) * strength;
   return recipe.additions.map((a) => ({ component: a.component, amount: a.amount * factor }));
 }

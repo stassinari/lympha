@@ -16,17 +16,19 @@ import { OverlayLayer, Underlay, useAndroidBack, useOverlayTransition } from '@/
 import type { OverlayDirection } from '@/design';
 import { DetailScreen } from './DetailScreen';
 import { DoseScreen } from './DoseScreen';
+import { KitsScreen } from './KitsScreen';
 import { RecipeScreen } from './RecipeScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { VolumeScreen } from './VolumeScreen';
 
-export type OverlayName = 'volume' | 'recipe' | 'settings' | 'detail';
+export type OverlayName = 'volume' | 'kits' | 'recipe' | 'settings' | 'detail';
 
-/** Each screen enters from its trigger: the recipe card and the settings glyph are
- *  both at the top, Edit is mid-screen on the right, and Details is the footer.
- *  The direction is not decoration — it is what tells you which thing you
+/** Each screen enters from its trigger: the kit label, the recipe card and the
+ *  settings glyph are all at the top, Edit is mid-screen on the right, and Details
+ *  is the footer. The direction is not decoration — it is what tells you which thing you
  *  touched, so it follows the control. */
 const DIRECTION: Record<OverlayName, OverlayDirection> = {
+  kits: 'top',
   recipe: 'top',
   volume: 'right',
   settings: 'top',
@@ -53,6 +55,7 @@ export function Root() {
       <Underlay progress={progress} from={from} hidden={overlay !== null}>
         <DoseScreen
           onEditVolume={() => setOverlay('volume')}
+          onOpenKits={() => setOverlay('kits')}
           onChangeRecipe={() => setOverlay('recipe')}
           onOpenSettings={() => setOverlay('settings')}
           onOpenDetails={() => setOverlay('detail')}
@@ -62,6 +65,7 @@ export function Root() {
       {mounted && active ? (
         <OverlayLayer progress={progress} from={from} modal={overlay !== null}>
           {active === 'volume' ? <VolumeScreen onClose={close} /> : null}
+          {active === 'kits' ? <KitsScreen onClose={close} /> : null}
           {active === 'recipe' ? <RecipeScreen onClose={close} /> : null}
           {active === 'settings' ? <SettingsScreen onClose={close} /> : null}
           {active === 'detail' ? <DetailScreen onClose={close} /> : null}

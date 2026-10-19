@@ -14,11 +14,11 @@ import { resolveAccent, useReduceMotion, useTheme } from '@/design';
 export function DoseProgress({
   done,
   total,
-  brandAccent,
+  rangeAccent,
 }: {
   done: number;
   total: number;
-  brandAccent: { light: string; dark: string };
+  rangeAccent: { light: string; dark: string };
 }) {
   const { colour, scheme } = useTheme();
   const reduced = useReduceMotion();
@@ -58,7 +58,7 @@ export function DoseProgress({
         style={{
           width: width.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
           height: '100%',
-          backgroundColor: resolveAccent(brandAccent, scheme),
+          backgroundColor: resolveAccent(rangeAccent, scheme),
         }}
       />
     </View>

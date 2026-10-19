@@ -52,6 +52,17 @@ against the calculator's 5:2:1, with the same recipe shape and the same 4.0 tota
 The card's values look back-calculated from drops per 200 ml cup, and it has no
 Martin Wölfl row.
 
+## Strength
+
+The current calculator has a **Concentrate Strength** slider at 25, 50, 75 and 100%
+(seen 2026-10-19). Its caption: *"Scales all concentrates while preserving the recipe
+ratio. Increasing concentration intensifies the target flavor profile, while
+decreasing it creates a lighter, more subtle expression."* So strength multiplies
+every dose by the same factor; the water is unchanged. Whether the archived
+three-bottle calculator offered it is not recorded. Lympha offers strength on both
+ranges, since the multiplication is the same for any recipe; see *Strength* in
+[`decisions.md`](decisions.md).
+
 ## Limited editions
 
 TANAT, HYDRANGEA and NEMO AEROPRESS are not modelled. It is unconfirmed whether they

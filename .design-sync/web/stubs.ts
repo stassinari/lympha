@@ -6,6 +6,7 @@
 // expo-haptics
 export const ImpactFeedbackStyle = { Light: 'light', Medium: 'medium', Heavy: 'heavy' } as const;
 export async function impactAsync(): Promise<void> {}
+export async function selectionAsync(): Promise<void> {}
 
 // expo-status-bar
 export function StatusBar(): null {

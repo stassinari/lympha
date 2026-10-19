@@ -67,15 +67,15 @@ const CLEAR_MARK_OPACITY = 0.8;
 
 export type RoundingLineProps = {
   summary: RoundingSummary;
-  brandAccent: { light: string; dark: string };
+  rangeAccent: { light: string; dark: string };
   onDetails: () => void;
 };
 
-export function RoundingLine({ summary, brandAccent, onDetails }: RoundingLineProps) {
+export function RoundingLine({ summary, rangeAccent, onDetails }: RoundingLineProps) {
   const { colour, scheme } = useTheme();
   if (!summary) return null;
 
-  const accent = resolveAccent(brandAccent, scheme);
+  const accent = resolveAccent(rangeAccent, scheme);
 
   return (
     <Touchable

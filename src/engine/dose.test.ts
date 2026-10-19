@@ -194,6 +194,58 @@ describe('profiles', () => {
   });
 });
 
+describe('strength', () => {
+  it('leaves the water alone: the volume is what is in the kettle', () => {
+    const d = computeDose(recipe('apax-lab-washed'), 1000, componentMap, { strength: 0.75 });
+    expect(d.volumeMl).toBe(1000);
+  });
+
+  it('scales every bottle, so the recipe keeps its ratio', () => {
+    const weaker = computeDose(recipe('apax-lab-washed'), 1000, componentMap, {
+      unitPreference: 'g',
+      strength: 0.75,
+    });
+    const full = computeDose(recipe('apax-lab-washed'), 750, componentMap, { unitPreference: 'g' });
+    expect(weaker.lines.map((l) => l.exact)).toEqual(full.lines.map((l) => l.exact));
+  });
+
+  it('scales the target with the doses, so lighter water is still on target', () => {
+    const half = computeDose(recipe('lotus-simple-and-sweet'), 2000, componentMap, {
+      strength: 0.5,
+    }).profile!;
+    expect(half.target).toEqual({ hardness: 45, alkalinity: 20 });
+    // The same drops as a litre at full strength, in twice the water.
+    expect(half.delivered.hardness).toBeCloseTo(88.39 / 2, 2);
+    expect(half.hardnessError).toBeCloseTo(
+      dose('lotus-simple-and-sweet', 1000).profile!.hardnessError,
+      9,
+    );
+  });
+
+  it('keeps the exact-volume search on whole steps of real water', () => {
+    for (const strength of [0.25, 0.39, 0.5, 0.73, 0.75]) {
+      for (const volumeMl of [250, 500, 1000, 1500]) {
+        const found = findExactVolume(recipe('lotus-raos-recipe'), componentMap, volumeMl, {
+          strength,
+        });
+        if (found !== null)
+          expect(Math.abs(found - volumeMl) % 25, `${strength} at ${volumeMl}`).toBe(0);
+      }
+    }
+  });
+
+  it('is judged exact at the strength asked for', () => {
+    // Half strength in twice the water is the same drops as full strength: 1000 ml
+    // is exact for Rao's, so 2000 ml is exact at 50%.
+    const found = findExactVolume(recipe('lotus-raos-recipe'), componentMap, 2200, {
+      strength: 0.5,
+    });
+    expect(found).toBe(2000);
+    const d = computeDose(recipe('lotus-raos-recipe'), found!, componentMap, { strength: 0.5 });
+    expect(landsExactly(d)).toBe(true);
+  });
+});
+
 describe('the exact volume search', () => {
   it('finds an exact volume, and it really is exact', () => {
     const raos = recipe('lotus-raos-recipe');

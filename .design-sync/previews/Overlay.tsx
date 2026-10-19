@@ -10,13 +10,13 @@ import {
   RecipeRow,
   Screen,
   ScreenHeader,
-  brands,
+  ranges,
   componentMap,
-  componentsForBrand,
+  componentsForRange,
   computeDose,
   getRecipe,
   recipeSubtitle,
-  recipesForBrand,
+  recipesForRange,
   space,
 } from 'lympha';
 
@@ -26,7 +26,6 @@ export const RecipePicker = () => (
       <Screen>
         <RecipeHeader
           recipeName={getRecipe('lotus-raos-recipe').name}
-          brandName="Lotus"
           bottleColours={computeDose(getRecipe('lotus-raos-recipe'), 1000, componentMap).lines.map(
             (l) => l.component.colour,
           )}
@@ -44,14 +43,14 @@ export const RecipePicker = () => (
               paddingTop: space.belowHeader,
             }}
           >
-            {brands.map((b) => (
+            {ranges.map((b) => (
               <Chip
                 key={b.id}
                 label={b.shortName}
                 selected={b.id === 'lotus'}
                 onPress={() => {}}
                 leading={
-                  <BarCluster size="chip" colours={componentsForBrand(b.id).map((c) => c.colour)} />
+                  <BarCluster size="chip" colours={componentsForRange(b.id).map((c) => c.colour)} />
                 }
               />
             ))}
@@ -59,7 +58,7 @@ export const RecipePicker = () => (
           <View
             style={{ paddingHorizontal: space.screenH, paddingTop: space.blocks, gap: space.rows }}
           >
-            {recipesForBrand('lotus')
+            {recipesForRange('lotus')
               .slice(0, 4)
               .map((recipe) => {
                 const dose = computeDose(recipe, 1000, componentMap);

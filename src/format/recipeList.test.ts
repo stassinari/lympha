@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { componentMap, getRecipe, recipesForBrand } from '@/data';
+import { componentMap, getRecipe, recipesForRange } from '@/data';
 import { computeDose } from '@/engine';
 import { groupLabel, recipeSubtitle } from './recipeList';
 
@@ -54,7 +54,7 @@ describe('recipeSubtitle', () => {
     // The invariant, rather than a list of ids that goes stale: a row draws the
     // eye if and only if the recipe cannot be made at this volume.
     for (const volumeMl of [200, 250, 350, 500, 1000]) {
-      for (const recipe of recipesForBrand('lotus')) {
+      for (const recipe of recipesForRange('lotus')) {
         const dose = computeDose(recipe, volumeMl, componentMap);
         const warned = recipeSubtitle(recipe, dose)?.tone === 'error';
         expect(warned, `${recipe.id} at ${volumeMl}`).toBe(dose.zeroed.length > 0);

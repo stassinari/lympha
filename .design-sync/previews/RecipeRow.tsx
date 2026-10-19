@@ -5,13 +5,13 @@ import {
   componentMap,
   computeDose,
   recipeSubtitle,
-  recipesForBrand,
+  recipesForRange,
   space,
 } from 'lympha';
 
 export const LotusList = () => (
   <View style={{ width: 354, gap: space.rows }}>
-    {recipesForBrand('lotus')
+    {recipesForRange('lotus')
       .slice(0, 4)
       .map((recipe) => (
         <RecipeRow
@@ -30,7 +30,7 @@ export const LotusList = () => (
 
 export const MissingAtCup = () => (
   <View style={{ width: 354, gap: space.rows }}>
-    {recipesForBrand('lotus')
+    {recipesForRange('lotus')
       .slice(4)
       .map((recipe) => (
         <RecipeRow
@@ -49,7 +49,7 @@ export const MissingAtCup = () => (
 
 export const Apax = () => (
   <View style={{ width: 354, gap: space.rows }}>
-    {recipesForBrand('apax-lab')
+    {recipesForRange('apax-lab')
       .slice(0, 3)
       .map((recipe, i) => (
         <RecipeRow
@@ -68,7 +68,7 @@ export const Apax = () => (
 
 export const Dark = () => (
   <LymphaProvider scheme="dark" style={{ padding: space.blocks, width: 382, gap: space.rows }}>
-    {recipesForBrand('lotus')
+    {recipesForRange('lotus')
       .slice(4)
       .map((recipe) => (
         <RecipeRow

@@ -4,7 +4,7 @@ import {
   LymphaProvider,
   BarCluster,
   Pill,
-  componentsForBrand,
+  componentsForRange,
   space,
   FLAG_CHOICES,
 } from 'lympha';
@@ -65,10 +65,10 @@ export const Bottles = () => (
       <SettingsRow
         key={id}
         label={id === 'lotus' ? 'Lotus Coffee Products' : 'Apax Lab with KONFLUX'}
-        detail={componentsForBrand(id)
+        detail={componentsForRange(id)
           .map((c) => c.name)
           .join(' · ')}
-        control={<BarCluster colours={componentsForBrand(id).map((c) => c.colour)} />}
+        control={<BarCluster colours={componentsForRange(id).map((c) => c.colour)} />}
       />
     ))}
   </View>
@@ -80,10 +80,10 @@ export const Dark = () => (
     <SettingsRow label="Apax Lab" value="Automatic" onPress={() => {}} />
     <SettingsRow
       label="Lotus Coffee Products"
-      detail={componentsForBrand('lotus')
+      detail={componentsForRange('lotus')
         .map((c) => c.name)
         .join(' · ')}
-      control={<BarCluster colours={componentsForBrand('lotus').map((c) => c.colour)} />}
+      control={<BarCluster colours={componentsForRange('lotus').map((c) => c.colour)} />}
     />
   </LymphaProvider>
 );

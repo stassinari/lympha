@@ -33,9 +33,11 @@ export const useStore = create<Store>()(
     partialize: (s): PersistedState => ({
       mode: s.mode,
       volumeMl: s.volumeMl,
-      brandId: s.brandId,
+      rangeId: s.rangeId,
       recipeIds: s.recipeIds,
+      kitRanges: s.kitRanges,
       units: s.units,
+      strength: s.strength,
       suggest: s.suggest,
       defaultVolumeMl: s.defaultVolumeMl,
       flagAbove: s.flagAbove,

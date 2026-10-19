@@ -1,10 +1,10 @@
 /**
  * A full-screen layer that enters from the direction of the control that opened it.
  *
- * The governing motion rule in the handoff: the brand-and-recipe screen drops from
- * the top because its trigger is the header, the volume screen pushes in from the
- * right because Edit sits mid-screen, settings rises from the bottom. The screen
- * appears to come from the thing you touched.
+ * The governing motion rule: Kits and Recipe drop from the top because their
+ * triggers are at the top, the volume screen pushes in from the right because Edit
+ * sits mid-screen, the Rounding screen rises from the footer. The screen appears to
+ * come from the thing you touched.
  *
  * Two ways in. `Overlay` runs its own transition, which suits a nested layer with
  * nothing behind it worth moving. A screen that covers another uses

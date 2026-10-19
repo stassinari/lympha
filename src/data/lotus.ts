@@ -9,9 +9,9 @@
  */
 
 import { additionsFromTarget } from '@/engine/resolve';
-import type { Brand, Component, Recipe, TargetEntry } from './types';
+import type { Range, Component, Recipe, TargetEntry } from './types';
 
-const BRAND_ID = 'lotus';
+const RANGE_ID = 'lotus';
 
 /**
  * Lotus's published formula, read from their calculator's page script:
@@ -39,8 +39,9 @@ export const lotusConstants = {
   ALKALINITY_PER_DROP_PER_LITRE,
 };
 
-export const lotusBrand: Brand = {
-  id: BRAND_ID,
+export const lotusRange: Range = {
+  id: RANGE_ID,
+  kit: 'lotus',
   name: 'Lotus Coffee Products',
   shortName: 'Lotus',
   source: {
@@ -69,7 +70,7 @@ const roundDropper = {
 export const lotusComponents: Component[] = [
   {
     id: 'lotus-magnesium',
-    brand: BRAND_ID,
+    range: RANGE_ID,
     name: 'Magnesium',
     kind: 'product',
     doseUnit: 'drop',
@@ -82,7 +83,7 @@ export const lotusComponents: Component[] = [
   },
   {
     id: 'lotus-calcium',
-    brand: BRAND_ID,
+    range: RANGE_ID,
     name: 'Calcium',
     kind: 'product',
     doseUnit: 'drop',
@@ -95,7 +96,7 @@ export const lotusComponents: Component[] = [
   },
   {
     id: 'lotus-sodium',
-    brand: BRAND_ID,
+    range: RANGE_ID,
     name: 'Sodium',
     kind: 'product',
     doseUnit: 'drop',
@@ -111,7 +112,7 @@ export const lotusComponents: Component[] = [
   },
   {
     id: 'lotus-potassium',
-    brand: BRAND_ID,
+    range: RANGE_ID,
     name: 'Potassium',
     kind: 'product',
     doseUnit: 'drop',
@@ -233,7 +234,7 @@ const byId = new Map(lotusComponents.map((c) => [c.id, c]));
 
 export const lotusRecipes: Recipe[] = SPECS.map((spec) => ({
   id: spec.id,
-  brand: BRAND_ID,
+  range: RANGE_ID,
   name: spec.name,
   referenceVolumeMl: REFERENCE_VOLUME_ML,
   statedAs: 'target',

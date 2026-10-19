@@ -22,7 +22,8 @@ export * from '../../src/screens/DoseScreen';
 export * from '../../src/screens/VolumeScreen';
 export * from '../../src/screens/RecipeScreen';
 export * from '../../src/screens/SettingsScreen';
-export * from '../../src/screens/UnitScreen';
+export * from '../../src/screens/KitsScreen';
+export * from '../../src/screens/FactSheetScreen';
 export * from '../../src/screens/DetailScreen';
 export * from './LymphaProvider';
 

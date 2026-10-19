@@ -144,10 +144,6 @@
       "cardMode": "column",
       "viewport": "438x892"
     },
-    "UnitScreen": {
-      "cardMode": "column",
-      "viewport": "438x892"
-    },
     "DetailScreen": {
       "cardMode": "column",
       "viewport": "438x892"

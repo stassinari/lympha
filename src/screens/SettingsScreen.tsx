@@ -1,29 +1,16 @@
 /**
- * Appearance, units, brewing defaults, bottles.
+ * Appearance and brewing defaults. A kit's own settings — its range, strength and
+ * units — are on its fact sheet. Water is always millilitres, so it has no row.
  *
  * Deliberately short: anything longer is a sign the main screen is under-decided,
  * and nothing here is something you would visit before coffee.
  */
 
 import { ScreenHeader, SettingsRow } from '@/components';
-import { brands, componentsForBrand, unitGroups } from '@/data';
-import {
-  BarCluster,
-  Overlay,
-  Pill,
-  Screen,
-  SectionHeader,
-  Segmented,
-  resolveAccent,
-  space,
-  useTheme,
-} from '@/design';
-import { availableUnits } from '@/engine';
+import { Pill, Screen, SectionHeader, Segmented, resolveAccent, space, useTheme } from '@/design';
 import type { ThemeMode } from '@/design';
-import { FLAG_CHOICES, useBrand, useStore } from '@/state';
-import { useState } from 'react';
+import { FLAG_CHOICES, useRange, useStore } from '@/state';
 import { Platform, ScrollView, Switch, View } from 'react-native';
-import { UnitScreen } from './UnitScreen';
 
 const APPEARANCE: readonly { value: ThemeMode; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -33,14 +20,12 @@ const APPEARANCE: readonly { value: ThemeMode; label: string }[] = [
 
 const DEFAULT_VOLUMES = [250, 350, 500, 1000];
 
-const UNIT_NAME: Record<string, string> = { auto: 'Automatic', drop: 'Drops', g: 'Grams' };
-
 export type SettingsScreenProps = { onClose: () => void };
 
 export function SettingsScreen({ onClose }: SettingsScreenProps) {
   const { colour, scheme } = useTheme();
-  const brand = useBrand();
-  const accent = resolveAccent(brand.accent, scheme);
+  const range = useRange();
+  const accent = resolveAccent(range.accent, scheme);
 
   const mode = useStore((s) => s.mode);
   const setMode = useStore((s) => s.setMode);
@@ -50,9 +35,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
   const setFlagAbove = useStore((s) => s.setFlagAbove);
   const defaultVolumeMl = useStore((s) => s.defaultVolumeMl);
   const setDefaultVolume = useStore((s) => s.setDefaultVolume);
-  const units = useStore((s) => s.units);
-
-  const [unitBrandId, setUnitBrandId] = useState<string | null>(null);
 
   return (
     <Screen horizontalPadding={0}>
@@ -70,34 +52,6 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
       >
         <SectionHeader tone="secondary">Appearance</SectionHeader>
         <Segmented options={APPEARANCE} value={mode} onChange={setMode} />
-
-        <SectionHeader tone="secondary" style={{ marginTop: space.blocks }}>
-          Units
-        </SectionHeader>
-        <SettingsRow label="Water" value="Millilitres" />
-        {unitGroups().map((group) => {
-          // One row per group, not per brand: Apax's two ranges are the same jars
-          // on the same scale, so they share a setting.
-          const first = group.brandIds[0]!;
-          const choices = availableUnits(componentsForBrand(first));
-          const preference = units[group.id] ?? 'auto';
-          return choices.length > 1 ? (
-            <SettingsRow
-              key={group.id}
-              label={group.label}
-              value={UNIT_NAME[preference] ?? preference}
-              onPress={() => setUnitBrandId(first)}
-            />
-          ) : (
-            // A brand with one dispenser has nothing to choose: Lotus ships a
-            // dropper and no scale, so offering grams would offer a wrong answer.
-            <SettingsRow
-              key={group.id}
-              label={group.label}
-              value={UNIT_NAME[choices[0] ?? ''] ?? '—'}
-            />
-          );
-        })}
 
         <SectionHeader tone="secondary" style={{ marginTop: space.blocks }}>
           Brewing
@@ -173,31 +127,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             />
           }
         />
-
-        <SectionHeader tone="secondary" style={{ marginTop: space.blocks }}>
-          Bottles
-        </SectionHeader>
-        {brands.map((b) => (
-          <SettingsRow
-            key={b.id}
-            label={b.name}
-            detail={componentsForBrand(b.id)
-              .map((c) => c.name)
-              .join(' · ')}
-            control={<BarCluster colours={componentsForBrand(b.id).map((c) => c.colour)} />}
-          />
-        ))}
       </ScrollView>
-
-      <Overlay
-        visible={unitBrandId !== null}
-        from="right"
-        onRequestClose={() => setUnitBrandId(null)}
-      >
-        {unitBrandId ? (
-          <UnitScreen brandId={unitBrandId} onClose={() => setUnitBrandId(null)} />
-        ) : null}
-      </Overlay>
     </Screen>
   );
 }

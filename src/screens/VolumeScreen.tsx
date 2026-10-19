@@ -8,11 +8,11 @@
  * grid adds maintenance and loses haptics, key repeat and accessibility for
  * nothing. Getting the system keyboard
  * without a visible text field means an offscreen `TextInput` holding focus while
- * the value is drawn at display size — see `HiddenInput` below.
+ * the value is drawn at display size — see `HiddenInput`.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Dimensions, Keyboard, Platform, TextInput, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, View } from 'react-native';
 import type { TextInputInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -26,15 +26,15 @@ import {
   useTypeMetrics,
   useTheme,
 } from '@/design';
-import { ScreenHeader } from '@/components';
+import { HiddenInput, ScreenHeader } from '@/components';
 import { VolumeNudge, shouldNudge } from '@/components/VolumeNudge';
 import { componentMap } from '@/data';
 import { computeDose, findExactVolume } from '@/engine';
 import {
   VOLUME_MAX_ML,
   VOLUME_MIN_ML,
-  unitPreferenceFor,
-  useBrand,
+  useDoseOptions,
+  useRange,
   useRecipe,
   useStore,
 } from '@/state';
@@ -130,9 +130,9 @@ export type VolumeScreenProps = { onClose: () => void };
 export function VolumeScreen({ onClose }: VolumeScreenProps) {
   const { scheme } = useTheme();
   const insets = useSafeAreaInsets();
-  const brand = useBrand();
+  const range = useRange();
   const recipe = useRecipe();
-  const accent = resolveAccent(brand.accent, scheme);
+  const accent = resolveAccent(range.accent, scheme);
   const keyboardOverlap = useKeyboardOverlap();
   const hero = useTypeMetrics('hero');
 
@@ -140,7 +140,7 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
   const setVolume = useStore((s) => s.setVolume);
   const suggest = useStore((s) => s.suggest);
   const flagAbove = useStore((s) => s.flagAbove);
-  const preference = useStore((s) => unitPreferenceFor(s, s.brandId));
+  const options = useDoseOptions();
 
   /** Null while showing the committed volume; a string once the user types. The
    *  first keystroke starts a fresh number rather than appending to the old one. */
@@ -181,15 +181,12 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
   // "350" is not a volume anyone is asking about.
   const previewable = entry === null || Number(entry) >= VOLUME_MIN_ML;
   const dose = useMemo(
-    () => computeDose(recipe, pendingMl, componentMap, { unitPreference: preference }),
-    [recipe, pendingMl, preference],
+    () => computeDose(recipe, pendingMl, componentMap, options),
+    [recipe, pendingMl, options],
   );
   const exactVolumeMl = useMemo(
-    () =>
-      suggest
-        ? findExactVolume(recipe, componentMap, pendingMl, { unitPreference: preference })
-        : null,
-    [recipe, pendingMl, suggest, preference],
+    () => (suggest ? findExactVolume(recipe, componentMap, pendingMl, options) : null),
+    [recipe, pendingMl, suggest, options],
   );
 
   /**
@@ -289,6 +286,7 @@ export function VolumeScreen({ onClose }: VolumeScreenProps) {
       <HiddenInput
         ref={inputRef}
         value={entry ?? ''}
+        maxDigits={MAX_DIGITS}
         onChange={(digits) => {
           setEntry(digits);
           setDismissed(null);
@@ -326,32 +324,3 @@ function useKeyboardOverlap(): number {
 
   return overlap;
 }
-
-/**
- * The offscreen field that summons the system keypad.
- *
- * It has to be laid out and focusable, so it cannot be `display: none` or zero
- * sized on both platforms — it is positioned off the edge instead, at one point
- * square. `caretHidden` stops a second cursor appearing next to the drawn one.
- */
-const HiddenInput = ({
-  ref,
-  value,
-  onChange,
-}: {
-  ref: React.RefObject<TextInputInstance | null>;
-  value: string;
-  onChange: (digits: string) => void;
-}) => (
-  <TextInput
-    ref={ref}
-    value={value}
-    onChangeText={(text) => onChange(text.replace(/[^0-9]/g, '').slice(0, MAX_DIGITS))}
-    keyboardType="number-pad"
-    autoFocus
-    caretHidden
-    accessibilityElementsHidden
-    importantForAccessibility="no-hide-descendants"
-    style={{ position: 'absolute', left: -1000, width: 1, height: 1, opacity: 0 }}
-  />
-);
