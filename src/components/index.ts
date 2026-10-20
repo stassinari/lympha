@@ -4,6 +4,7 @@ export * from './DoseProgress';
 export * from './DoseRow';
 export * from './HiddenInput';
 export * from './MeasureSection';
+export * from './NumberField';
 export * from './RecipeHeader';
 export * from './RecipeRow';
 export * from './RoundingLine';

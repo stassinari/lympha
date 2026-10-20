@@ -7,7 +7,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { kitOf, recipesForRange } from '@/data';
+import { getRange, kitOf, recipesForRange } from '@/data';
 import { DEFAULTS, clampStrength, rangeForKit } from './model';
 import type { PersistedState } from './model';
 import type { ThemeMode } from '@/design';
@@ -22,22 +22,21 @@ type Actions = {
   setVolume: (ml: number) => void;
   setRange: (rangeId: string) => void;
   /**
-   * Puts a kit in use, on the range its fact sheet last chose. True when that range
-   * has never been used: its first recipe is set, and Recipe should open so the
-   * choice is seen. False, and nothing changes, for the kit already in use.
+   * Puts a kit in use, on the range it last used. True when that range has never
+   * been used: its first recipe is set, and Recipe should open so the choice is
+   * seen. False, and nothing changes, for the kit already in use.
+   *
+   * Every setting below puts its kit in use the same way and returns the same:
+   * changing a kit's setting is choosing to brew with it.
    */
   chooseKit: (kitId: string) => boolean;
-  /**
-   * Chooses the range a kit uses. On the kit in use this switches range, with the
-   * same first-recipe rule and return value as `chooseKit`; on any other kit it is
-   * stored for when that kit is chosen, and returns false.
-   */
+  /** Puts `rangeId` in use. A range from another kit is ignored. */
   chooseRange: (kitId: string, rangeId: string) => boolean;
   /** Whole percent, clamped to 25–100. Snapping to steps is the control's job. */
-  setStrength: (kitId: string, pct: number) => void;
+  setStrength: (kitId: string, pct: number) => boolean;
   setRecipe: (rangeId: string, recipeId: string) => void;
   /** Keyed by kit, so ranges sharing bottles stay in step. */
-  setUnitPreference: (kitId: string, preference: UnitPreference) => void;
+  setUnitPreference: (kitId: string, preference: UnitPreference) => boolean;
   setMode: (mode: ThemeMode) => void;
   setSuggest: (suggest: boolean) => void;
   setDefaultVolume: (ml: number | null) => void;
@@ -84,24 +83,23 @@ export const storeState: StateCreator<Store> = (set, get) => ({
   },
   chooseRange: (kitId, rangeId) => {
     const s = get();
-    if (kitOf(s.rangeId).id !== kitId) {
-      set({ kitRanges: { ...s.kitRanges, [kitId]: rangeId } });
-      return false;
-    }
-    if (s.rangeId === rangeId) return false;
+    if (getRange(rangeId)?.kit !== kitId || s.rangeId === rangeId) return false;
     const { patch, pickedRecipe } = switchTo(s, rangeId);
     set(patch);
     return pickedRecipe;
   },
-  setStrength: (kitId, pct) =>
-    set((s) => ({ strength: { ...s.strength, [kitId]: clampStrength(pct) }, done: {} })),
+  setStrength: (kitId, pct) => {
+    const pickedRecipe = get().chooseKit(kitId);
+    set((s) => ({ strength: { ...s.strength, [kitId]: clampStrength(pct) }, done: {} }));
+    return pickedRecipe;
+  },
   setRecipe: (rangeId, recipeId) =>
     set((s) => ({ recipeIds: { ...s.recipeIds, [rangeId]: recipeId }, done: {} })),
-  setUnitPreference: (kitId, preference) =>
-    set((s) => ({
-      units: { ...s.units, [kitId]: preference },
-      done: {},
-    })),
+  setUnitPreference: (kitId, preference) => {
+    const pickedRecipe = get().chooseKit(kitId);
+    set((s) => ({ units: { ...s.units, [kitId]: preference }, done: {} }));
+    return pickedRecipe;
+  },
 
   // Presentation and thresholds leave the pour alone.
   setMode: (mode) => set({ mode }),

@@ -7,7 +7,7 @@
  *
  * Line heights are chosen against `minLineHeightRatio`, which is a hard floor,
  * not a preference. The display roles sit as close to that floor as Nunito
- * allows; the tightness `docs/designs/v1` draws with `line-height: 0.88` comes
+ * allows; the tightness the v1 design draws with `line-height: 0.88` comes
  * from container padding, using `inkInsets`.
  *
  * Every role is Nunito except `wordmark`, and a role's font is what decides which

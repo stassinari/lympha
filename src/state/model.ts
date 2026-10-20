@@ -35,9 +35,8 @@ export type PersistedState = {
    */
   recipeIds: Record<string, string>;
   /**
-   * The range each kit uses, which is what choosing the kit picks. A setting on a
-   * kit's fact sheet applies before the kit is in use. The in-use kit's entry is
-   * always `rangeId`.
+   * The range each kit last used, which choosing the kit returns to. The in-use
+   * kit's entry is always `rangeId`.
    */
   kitRanges: Record<string, string>;
   /**

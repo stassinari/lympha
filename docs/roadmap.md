@@ -77,6 +77,13 @@ In rough order of likelihood.
 - **Strength on other kits.** The engine and the store take it for any kit; Lotus's
   water figures already scale with it. Offering it is a data flag (`Kit.strength`).
 
+### Small nits
+
+- The colour of *Sodium* for Lotus is a shade of pink. That reads wrong, because the
+  GH minerals (calcium and magnesium) are red-tinted, while the KH are blue-green.
+  The fix is not trivial, because, like *Calcium*, *Sodium* is the "inverse" of
+  *Potassium*.
+
 ### Maintenance
 
 - **Wordmark:** its size and tracking (16px, +0.015em) are unrefined. No test

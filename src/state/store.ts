@@ -8,6 +8,7 @@
  */
 
 import { useSyncExternalStore } from 'react';
+import { DevSettings } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -51,6 +52,17 @@ export const useStore = create<Store>()(
     },
   }),
 );
+
+/**
+ * Development builds only: "Reset stored state" in the dev menu (⌘D on the iOS
+ * simulator, ⌘M or a shake on Android) clears what is persisted and reloads, so the
+ * app starts as a fresh install does. Release builds never register it.
+ */
+if (__DEV__) {
+  DevSettings.addMenuItem('Reset stored state', () => {
+    void Promise.resolve(useStore.persist.clearStorage()).then(() => DevSettings.reload());
+  });
+}
 
 /**
  * Whether the store has finished reading from disk.

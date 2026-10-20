@@ -12,7 +12,7 @@
 import { useRef, useState } from 'react';
 import { Keyboard, Linking, Platform, ScrollView, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
-import { MeasureSection, SettingsRow, StrengthCard, offersUnitChoice } from '@/components';
+import { MeasureSection, StrengthCard, offersUnitChoice } from '@/components';
 import { componentsForRange, getKit, getRange } from '@/data';
 import {
   ActionText,
@@ -67,9 +67,12 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
   const chooseKit = useStore((s) => s.chooseKit);
   const chooseRange = useStore((s) => s.chooseRange);
   const setStrength = useStore((s) => s.setStrength);
-  // Whether the range last chosen here had its first recipe set, unseen. Done then
-  // shows Recipe rather than going home on a recipe nobody chose.
+  const setUnitPreference = useStore((s) => s.setUnitPreference);
+  // Whether a change here put a range in use with its first recipe set, unseen.
+  // Done then shows Recipe rather than going home on a recipe nobody chose. A
+  // range change decides it afresh; strength and units only ever add to it.
   const [pickedRecipe, setPickedRecipe] = useState(false);
+  const addPicked = (picked: boolean) => setPickedRecipe((p) => p || picked);
   const [dragging, setDragging] = useState(false);
   const scroller = useRef<ScrollViewInstance>(null);
   // Where the Strength section starts in the scroller's content.
@@ -144,34 +147,33 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
           <ActionText style={{ color: accent }}>{kit.site.label}</ActionText>
         </Touchable>
 
+        {/* One section for both kits: a kit with ranges offers its sets of bottles
+            as a choice, a kit with one states it. */}
+        <SectionHeader tone="secondary" style={{ marginTop: space.snug }}>
+          Bottles
+        </SectionHeader>
         {kit.rangeIds.length > 1 ? (
-          <>
-            <SectionHeader tone="secondary" style={{ marginTop: space.snug }}>
-              Range
-            </SectionHeader>
-            <View accessibilityRole="radiogroup" style={{ gap: space.rows }}>
-              {kit.rangeIds.map((id) => (
-                <RangeCard
-                  key={id}
-                  rangeId={id}
-                  selected={id === shown}
-                  onPress={() => id !== shown && setPickedRecipe(chooseRange(kitId, id))}
-                />
-              ))}
-            </View>
-          </>
+          <View accessibilityRole="radiogroup" style={{ gap: space.rows }}>
+            {kit.rangeIds.map((id) => (
+              <BottlesCard
+                key={id}
+                rangeId={id}
+                selected={id === shown}
+                onPress={() => id !== shown && setPickedRecipe(chooseRange(kitId, id))}
+              />
+            ))}
+          </View>
         ) : (
-          <>
-            <SectionHeader tone="secondary" style={{ marginTop: space.snug }}>
-              Bottles
-            </SectionHeader>
-            <SettingsRow
-              label={`${componentsForRange(shown).length} bottles`}
-              detail={bottleNames(shown)}
-              control={<BarCluster colours={palette(shown)} />}
-            />
-          </>
+          <BottlesCard rangeId={shown} />
         )}
+        {kit.rangeIds
+          .map((id) => getRange(id)?.displayNote)
+          .filter(Boolean)
+          .map((note) => (
+            <Caption key={note} tone="secondary" style={{ paddingHorizontal: 4 }}>
+              {note}
+            </Caption>
+          ))}
 
         {kit.strength ? (
           <View
@@ -183,9 +185,8 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
             </SectionHeader>
             <StrengthCard
               value={strength}
-              onChange={(pct) => setStrength(kitId, pct)}
+              onChange={(pct) => addPicked(setStrength(kitId, pct))}
               accent={accent}
-              stepsOf={kit.name}
               // The value is typed on the system keypad, which would otherwise cover
               // it: the section is brought to the top of the scroller, above it.
               onStartTyping={() =>
@@ -199,7 +200,12 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
           </View>
         ) : null}
 
-        {offersUnitChoice(shown) ? <MeasureSection rangeId={shown} /> : null}
+        {offersUnitChoice(shown) ? (
+          <MeasureSection
+            rangeId={shown}
+            onChoose={(unit) => addPicked(setUnitPreference(kitId, unit))}
+          />
+        ) : null}
       </ScrollView>
 
       <View style={{ paddingHorizontal: space.screenH, paddingTop: space.snug }}>
@@ -217,23 +223,27 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
   );
 }
 
-function RangeCard({
+/**
+ * One set of bottles. A choice where the kit has more than one, with the selection
+ * check; otherwise a statement, with no target and no check column.
+ */
+function BottlesCard({
   rangeId,
-  selected,
+  selected = false,
   onPress,
 }: {
   rangeId: string;
-  selected: boolean;
-  onPress: () => void;
+  selected?: boolean;
+  onPress?: () => void;
 }) {
   const { colour } = useTheme();
   const range = getRange(rangeId)!;
-  const label = range.rangeLabel ?? range.name;
+  const label = range.rangeLabel ?? `${componentsForRange(rangeId).length} bottles`;
   return (
     <Card
       selected={selected}
       onPress={onPress}
-      accessibilityRole="radio"
+      accessibilityRole={onPress ? 'radio' : undefined}
       accessibilityLabel={`${label}. ${bottleNames(rangeId)}`}
       paddingVertical={14}
       paddingHorizontal={16}
@@ -246,9 +256,11 @@ function RangeCard({
             {bottleNames(rangeId)}
           </Caption>
         </View>
-        <View style={{ width: 20 }}>
-          {selected ? <Icon name="check" size={20} colour={colour.text} /> : null}
-        </View>
+        {onPress ? (
+          <View style={{ width: 20 }}>
+            {selected ? <Icon name="check" size={20} colour={colour.text} /> : null}
+          </View>
+        ) : null}
       </View>
     </Card>
   );

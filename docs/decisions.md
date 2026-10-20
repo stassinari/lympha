@@ -39,8 +39,16 @@ so the recipe stays one tap away.
 - **Switching to a kit never used** sets its first recipe and opens Recipe with it
   ticked (three taps). There is never a state without a recipe, so nothing needs
   validating, and the default is seen rather than silent.
-- **A kit's settings apply as they change**, on its fact sheet, including for a kit
-  not in use: they take effect when it is chosen.
+- **Changing a setting on a kit's fact sheet puts that kit in use**: its range,
+  strength or units. Opening a sheet changes nothing, so a kit can be read about
+  freely. The footer turns to "Done" as the switch happens, and a range never used
+  gets its first recipe and opens Recipe on Done, as above. *Revised 2026-10-19:*
+  settings on a kit not in use were stored for when it was chosen. The sheet then had
+  two states, settings that applied and settings that waited, and nothing on screen
+  said which.
+- **Recipe names the range its list belongs to**, in the body role and primary tone,
+  with the strength in the secondary tone below 100%: the context every subtitle is
+  costed in.
 - **The fact sheet's footer is "Use {kit}" or "Done"**, never a disabled "In use"
   button. Its header carries only the way back. The footer leaves room for a second
   button, for a kit that needs setting up.
@@ -111,14 +119,15 @@ leaving it closes them too.
 - **Units and strength are per kit.** Lotus in drops alongside Apax in grams is a
   legitimate pairing. Both Apax ranges are the same jars on the same scale, so they
   share both settings.
-- **The range each kit uses is remembered**, so "Use Apax Lab" picks the range last
-  chosen on its fact sheet.
+- **The range each kit last used is remembered**, so "Use Apax Lab" returns to it.
 - **Water volume is global.** It belongs to the kettle, not the kit.
 - **Stored state from builds up to 1.0** names the range `brandId`; `repair` reads
   it. Unit preferences were keyed by unit group, whose ids are the kit ids, so they
   carry over unchanged.
 - **Default volume** is "Last used", or a pinned value for someone who always brews
   the same amount.
+- **Development builds** add "Reset stored state" to the dev menu, so a simulator can
+  start as a fresh install without reinstalling.
 
 **Bottom sheets are the platform's own**, through `@expo/ui`: SwiftUI's `.sheet` on
 iOS, Material 3's `ModalBottomSheet` on Android (`NativeSheet`). Each brings the drag
@@ -172,7 +181,7 @@ live in `.design-sync/`; its `NOTES.md` covers how to re-run it.
   give every frame on a canvas the same brew. The web build swaps it for one per
   `LymphaProvider`, seeded by its `state` prop, running the same actions
   (`src/state/actions.ts`).
-- **Rejected: designing from the `docs/designs/v1` handoff.** It predates the
+- **Rejected: designing from the v1 design handoff.** It predates the
   vendor research and has drifted from the app.
 
 ---
@@ -220,9 +229,12 @@ the default because it is the base set. The IDs keep the research's names: they 
 persisted state. On-screen names are under *Copy*.
 
 **On Apax Lab's fact sheet the ranges are two radio cards**, KONFLUX first, each
-listing its bottles. A KONFLUX owner may still choose the three-bottle range.
-*Revised 2026-10-19:* the ranges were chips on the Recipe screen, three-bottle
-first. Choosing a range belongs to the kit, not to the recipe list.
+listing its bottles. A KONFLUX owner may still choose the three-bottle range. Both
+kits head the section "Bottles", and Lotus's single set is the same card without a
+target or a check, so the two sheets read as the same thing: a kit with ranges offers
+its sets of bottles as a choice, a kit with one states it. *Revised 2026-10-19:* the
+ranges were chips on the Recipe screen, three-bottle first. Choosing a range belongs
+to the kit, not to the recipe list.
 
 **Apax recipes are grouped**: process, roast, brew method, varietal, barista.
 Fifteen is too many for a flat list. The grouping is ours, made with the recipe
@@ -270,7 +282,9 @@ default 100. Apax Lab's own calculator offers it at 25, 50, 75 and 100%
 (`apax-lab-brief.md`); Lympha allows any whole percent between, because strength is a
 multiplier rather than vendor data, so 73% invents no Apax number. A drag sticks to
 Apax's steps within 2%, with a selection haptic as it lands on one; the exact value
-is typed. Per kit, so both Apax ranges share it; Apax only for now. Shown on the
+is typed, in the same field as water. The value sits on the card with no key
+surface: a faint one read as a mistake, and the slider is the way in, typing the
+way to precision. Per kit, so both Apax ranges share it; Apax only for now. Shown on the
 dose screen and Recipe only below 100%. Decided 2026-10-19.
 
 - **Strength multiplies the recipe's amounts, never the volume.** Scaling the
@@ -350,7 +364,8 @@ disappearing, so the list keeps its shape:
 62% puts the 13.5px alternative-dose caption at 4.36:1 in light mode, just under AA
 (decided 2026-10-05: it reads fine on device).
 
-**Volume entry uses the system numeric keypad**, via an offscreen `TextInput`.
+**Numbers are typed on the system numeric keypad**, via an offscreen `TextInput`, in
+one field (`NumberField`) for every number the app takes: water and strength.
 
 - **Rejected: a custom keypad grid.** More to maintain, and it loses haptics, key
   repeat and accessibility.
@@ -611,14 +626,18 @@ Recipe screen: "Apax Lab" and "Apax Lab with KONFLUX". On the fact sheet the car
 are "KONFLUX range" and "Three-bottle range". "Original" is retired: it implies the
 KONFLUX range superseded it. The note *"From Apax Lab’s last three-bottle
 calculator, so a few amounts differ slightly from the card that comes with the
-set."* sits under the Recipe screen's caption for that range only. *Revised
+set."* sits on the Apax Lab fact sheet, under the bottle cards: it is about the
+range's data, not about choosing a recipe. *Revised
 2026-10-19:* the short names were `Apax` and `Apax [K]`, sized for chips. In the
 header the vendor's full name fits, and is what is printed on the bottle.
 
 **Kits screen copy** is a first draft, awaiting a copy pass: each kit's one-line
-description and fact-sheet paragraph (`src/data/kits.ts`), the strength note ("Full
-strength", "One of Apax Lab’s steps", "Between Apax Lab’s steps") and the line under
-the strength card.
+description and fact-sheet paragraph (`src/data/kits.ts`), the range cards' names
+("KONFLUX range", "Three-bottle range"), and the line under the strength card. That
+line can say that the marks are Apax Lab's own steps; it should not suggest values
+between them round worse, because they do not: rounding depends on where each
+bottle's amount falls against a whole drop, which no strength makes better or worse
+in general.
 
 **One Apax Lab unit setting** for both ranges: same bottles, same scale. It is on
 the Apax Lab fact sheet.

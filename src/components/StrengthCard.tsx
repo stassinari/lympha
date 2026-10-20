@@ -2,27 +2,15 @@
  * Strength: a share of every amount in the recipe, for lighter water.
  *
  * Any whole percent from 25 to 100. A drag sticks to the vendor's steps, with a
- * selection tick as it lands on one; the exact value is typed on the key, which
- * summons the system keypad like the Water screen does.
- *
- * Built for reuse: the vendor whose steps these are is a prop, not a constant.
+ * selection tick as it lands on one; the exact value is typed, in the same field
+ * as the Water screen's.
  */
 
 import * as Haptics from 'expo-haptics';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { Keyboard, View } from 'react-native';
-import type { AccessibilityActionEvent, LayoutChangeEvent, TextInputInstance } from 'react-native';
-import {
-  Caption,
-  Card,
-  DoseValue,
-  Touchable,
-  UnitLabel,
-  radius,
-  space,
-  useTheme,
-  useTypeMetrics,
-} from '@/design';
+import { View } from 'react-native';
+import type { AccessibilityActionEvent, LayoutChangeEvent } from 'react-native';
+import { Caption, Card, UnitLabel, space, useTheme, useTypeMetrics } from '@/design';
 import {
   STRENGTH_MAX,
   STRENGTH_MIN,
@@ -32,7 +20,7 @@ import {
   parseStrength,
   snapStrength,
 } from '@/engine/strength';
-import { HiddenInput } from './HiddenInput';
+import { NumberField } from './NumberField';
 
 /** Half the thumb: its centre stops this far in from each end of the rail. */
 const INSET = 14;
@@ -46,8 +34,6 @@ export type StrengthCardProps = {
   onChange: (pct: number) => void;
   /** Text-safe accent, resolved for the scheme. */
   accent: string;
-  /** Whose steps the marks are, for the note: "Apax Lab". */
-  stepsOf: string;
   /** Called as typing starts, so the screen can bring the card above the keyboard. */
   onStartTyping?: () => void;
   /**
@@ -62,14 +48,12 @@ export function StrengthCard({
   value,
   onChange,
   accent,
-  stepsOf,
   onStartTyping,
   onDragChange,
 }: StrengthCardProps) {
   const { colour } = useTheme();
   const [width, setWidth] = useState(0);
-  const [draft, setDraft] = useState<string | null>(null);
-  const inputRef = useRef<TextInputInstance>(null);
+  const [entry, setEntry] = useState<string | null>(null);
   const caption = useTypeMetrics('caption');
   // The track's left edge on screen, for the length of a drag.
   const trackLeft = useRef(0);
@@ -97,28 +81,17 @@ export function StrengthCard({
   };
 
   const commit = () => {
-    const typed = draft === null ? null : parseStrength(draft);
+    const typed = entry === null ? null : parseStrength(entry);
     if (typed !== null) set(typed);
-    setDraft(null);
+    setEntry(null);
   };
 
-  // Blur alone is not enough: Android hides the keypad on its ✓ key and on Back
-  // without blurring the field, which would leave the card mid-edit.
-  const onKeyboardHide = useEffectEvent(commit);
-  const editing = draft !== null;
-  useEffect(() => {
-    if (!editing) return;
-    const subscription = Keyboard.addListener('keyboardDidHide', onKeyboardHide);
-    return () => subscription.remove();
-  }, [editing]);
-
-  // Nor are blur and the keypad: a control outside the card, such as the screen's
-  // footer, can close the screen with the field still focused. What was typed is
-  // kept rather than lost with the card.
+  // A control outside the card, such as the screen's footer, can close the screen
+  // with the field still focused. What was typed is kept rather than lost with it.
   const pending = useRef<string | null>(null);
   useEffect(() => {
-    pending.current = draft;
-  }, [draft]);
+    pending.current = entry;
+  }, [entry]);
   const commitPending = useEffectEvent(() => {
     const typed = pending.current === null ? null : parseStrength(pending.current);
     if (typed !== null && typed !== last.current) onChange(typed);
@@ -130,48 +103,25 @@ export function StrengthCard({
     if (event.nativeEvent.actionName === 'decrement') set(nextStrengthStep(value, -1));
   };
 
-  const note =
-    value === 100
-      ? 'Full strength'
-      : isStrengthStep(value)
-        ? `One of ${stepsOf}’s steps`
-        : `Between ${stepsOf}’s steps`;
-
   const thumbX = xFor(value);
 
   return (
     <Card paddingVertical={space.cardV} paddingHorizontal={space.cardH}>
       <View style={{ gap: space.blocks }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.blocks }}>
-          {/* The page colour on the card is what makes this read as a key. */}
-          <Touchable
-            radius={radius.key}
-            onPress={() => {
-              setDraft('');
-              onStartTyping?.();
-            }}
-            accessibilityLabel={`Strength, ${value} percent`}
-            accessibilityHint="Types an exact strength"
-            style={{
-              backgroundColor: colour.background,
-              minHeight: 44,
-              minWidth: 76,
-              paddingHorizontal: 12,
-              flexDirection: 'row',
-              alignItems: 'baseline',
-              justifyContent: 'flex-end',
-              gap: 3,
-            }}
-          >
-            <DoseValue style={draft === null ? undefined : { color: accent }}>
-              {draft === null || draft === '' ? String(value) : draft}
-            </DoseValue>
-            <UnitLabel tone="secondary">%</UnitLabel>
-          </Touchable>
-          <Caption tone="secondary" style={{ flex: 1, textAlign: 'right' }}>
-            {note}
-          </Caption>
-        </View>
+        <NumberField
+          role="doseValue"
+          value={value}
+          entry={entry}
+          onEntryChange={setEntry}
+          onStartEditing={onStartTyping}
+          onEndEditing={commit}
+          maxDigits={3}
+          accent={accent}
+          unit={<UnitLabel tone="secondary">%</UnitLabel>}
+          squared
+          accessibilityLabel={`Strength, ${value} percent`}
+          accessibilityHint="Types an exact strength"
+        />
 
         <View style={{ gap: space.snug }}>
           {/* Children ignore touches, so the grant is in the track's own coordinates.
@@ -285,16 +235,6 @@ export function StrengthCard({
           </View>
         </View>
       </View>
-
-      {draft === null ? null : (
-        <HiddenInput
-          ref={inputRef}
-          value={draft}
-          onChange={setDraft}
-          maxDigits={3}
-          onBlur={commit}
-        />
-      )}
     </Card>
   );
 }

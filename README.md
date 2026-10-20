@@ -22,7 +22,6 @@ with either.
 | [`docs/store/`](docs/store/)                         | App Store and Google Play listing text, screenshots and graphics.                                        |
 | [`docs/native-builds.md`](docs/native-builds.md)     | Native builds, app icons and simulator selection. **Read before changing anything in `app.json`.**       |
 | [`site/`](site/)                                     | Privacy policy and support pages, published to GitHub Pages.                                             |
-| [`docs/designs/v1/`](docs/designs/v1/)               | The original design handoff: a picture of the intent, not a spec. Its numbers are wrong.                 |
 
 ## Running it
 

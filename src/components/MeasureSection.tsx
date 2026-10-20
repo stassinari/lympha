@@ -14,7 +14,7 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { Caption, Card, CardTitle, SectionHeader, space } from '@/design';
-import { componentMap, componentsForRange, getRecipe, kitOf, recipesForRange } from '@/data';
+import { componentMap, componentsForRange, getRecipe, recipesForRange } from '@/data';
 import { availableUnits, computeDose } from '@/engine';
 import type { DoseLine, UnitPreference } from '@/engine';
 import { ON_TARGET } from '@/format/rounding';
@@ -32,14 +32,16 @@ const UNIT_NAME: Record<string, string> = {
 export const offersUnitChoice = (rangeId: string) =>
   availableUnits(componentsForRange(rangeId)).length > 1;
 
-export type MeasureSectionProps = { rangeId: string };
+export type MeasureSectionProps = {
+  rangeId: string;
+  /** The screen applies the choice, since applying it can change what else it shows. */
+  onChoose: (unit: UnitPreference) => void;
+};
 
-export function MeasureSection({ rangeId }: MeasureSectionProps) {
+export function MeasureSection({ rangeId, onChoose }: MeasureSectionProps) {
   const volumeMl = useStore((s) => s.volumeMl);
   const rememberedId = useStore((s) => s.recipeIds[rangeId]);
   const { unitPreference, strength } = useDoseOptions(rangeId);
-  const setUnitPreference = useStore((s) => s.setUnitPreference);
-  const kitId = kitOf(rangeId).id;
 
   /**
    * Previewed against a recipe from *this* range, not the one currently in use.
@@ -84,7 +86,7 @@ export function MeasureSection({ rangeId }: MeasureSectionProps) {
             key={option.key}
             paddingVertical={14}
             paddingHorizontal={16}
-            onPress={() => setUnitPreference(kitId, option.key)}
+            onPress={() => onChoose(option.key)}
             accessibilityRole="radio"
             accessibilityLabel={`${option.label}. ${option.preview}`}
             selected={option.key === unitPreference}

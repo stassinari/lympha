@@ -11,7 +11,7 @@
 
 import { RecipeRow, ScreenHeader } from '@/components';
 import { componentMap, groupedRecipesForRange } from '@/data';
-import { Caption, Screen, SectionHeader, space } from '@/design';
+import { Body, Screen, SectionHeader, space } from '@/design';
 import { computeDose } from '@/engine';
 import { groupLabel, recipeSubtitle } from '@/format/recipeList';
 import { useDoseOptions, useRange, useRecipe, useStore, useStrength } from '@/state';
@@ -51,12 +51,11 @@ export function RecipeScreen({ onClose }: RecipeScreenProps) {
     <Screen horizontalPadding={0}>
       <ScreenHeader title="Recipe" onClose={onClose} />
 
-      <View style={{ paddingTop: space.belowHeader, paddingHorizontal: space.screenH, gap: 2 }}>
-        <Caption tone="secondary">
-          {strength === 100 ? range.name : `${range.name} · ${strength}% strength`}
-        </Caption>
-        {range.displayNote ? <Caption tone="secondary">{range.displayNote}</Caption> : null}
-      </View>
+      {/* The context the list is costed in: which bottles, at what strength. */}
+      <Body style={{ paddingTop: space.belowHeader, paddingHorizontal: space.screenH }}>
+        {range.name}
+        {strength === 100 ? null : <Body tone="secondary">{` · ${strength}% strength`}</Body>}
+      </Body>
 
       <ScrollView
         showsVerticalScrollIndicator={false}

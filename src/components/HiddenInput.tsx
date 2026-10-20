@@ -19,16 +19,27 @@ export type HiddenInputProps = {
   onChange: (digits: string) => void;
   maxDigits: number;
   onBlur?: () => void;
+  onFocus?: () => void;
+  autoFocus?: boolean;
 };
 
-export const HiddenInput = ({ ref, value, onChange, maxDigits, onBlur }: HiddenInputProps) => (
+export const HiddenInput = ({
+  ref,
+  value,
+  onChange,
+  maxDigits,
+  onBlur,
+  onFocus,
+  autoFocus = false,
+}: HiddenInputProps) => (
   <TextInput
     ref={ref}
     value={value}
     onChangeText={(text) => onChange(text.replace(/[^0-9]/g, '').slice(0, maxDigits))}
     onBlur={onBlur}
+    onFocus={onFocus}
     keyboardType="number-pad"
-    autoFocus
+    autoFocus={autoFocus}
     caretHidden
     accessibilityElementsHidden
     importantForAccessibility="no-hide-descendants"

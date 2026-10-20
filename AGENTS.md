@@ -69,11 +69,15 @@ becomes decisions and is deleted.
 
 **Translate design intent into React Native; never transliterate CSS values.**
 
-The `docs/designs/v1` handoff is HTML with inline styles. It is a picture of the intended
-result, not a specification of how to achieve it. Its numbers encode _web_ mechanics —
+A design handoff from Claude Design is HTML with inline styles. It is a picture of the
+intended result, not a specification of how to achieve it. Its numbers encode _web_ mechanics —
 `line-height` below 1 to kill CSS leading, `em` letter-spacing, `overflow: hidden` for
 clipping, cascade-dependent inheritance. Copying those numbers into `StyleSheet` produces
 a worse result than the design, not a faithful one.
+
+Handoffs are exported into `docs/designs/`, which git ignores. A handoff is read while
+implementing it; once acted on, its decisions live in `docs/decisions.md` and the handoff
+is not consulted again, since it drifts from the app.
 
 The job is: read what the design is trying to look like, then build that with the idioms
 RN actually has. If Flutter were the target this wouldn't be a question — the same applies
