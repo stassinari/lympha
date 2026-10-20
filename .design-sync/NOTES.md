@@ -57,6 +57,10 @@ Syncs `src/design` and `src/components` to the private Claude Design project
 - The volume presets are not exported; the SettingsRow and Pill previews
   restate `[250, 350, 500, 1000]`.
 - `DoseProgress` draws nothing at `done={0}`, so no preview cell uses it.
+- `NumberField` holds focus in its own state, so only the resting value can be
+  previewed: the selection band and caret appear only on a tap. No preview uses
+  `autoFocus`, which would steal focus from the canvas.
+- `HiddenInput` draws nothing and is mapped out of the cards in `config.json`.
 
 ## Known render warns
 

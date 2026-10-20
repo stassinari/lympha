@@ -169,6 +169,11 @@ App Review. The Play service-account key is stored in EAS, because the repositor
 is public.
 
 - **Features merge to `main` from branches**; store builds come only from `main`.
+- **A feature brings its design-sync previews with it**: a new component or screen
+  has one in `.design-sync/previews/` before it merges. The Claude Design project is
+  re-synced from `main` after any merge that changes `src/design`, `src/components`
+  or `src/screens`, so new design work starts from what ships. The sync is
+  independent of releases.
 - **Every store build is tagged** `v<version>`, so the code behind any binary can
   be found. A fix to a released version branches from its tag.
 - **The version in `app.json` is semver-ish**: a feature bumps the minor, a fix the

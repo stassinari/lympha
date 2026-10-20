@@ -25,7 +25,8 @@
     "ScrollView": null,
     "StyleSheet": null,
     "Switch": null,
-    "StoreProvider": null
+    "StoreProvider": null,
+    "HiddenInput": null
   },
   "docsDir": "../docs",
   "readmeHeader": ".design-sync/conventions.md",
@@ -59,6 +60,15 @@
       "cardMode": "column"
     },
     "VolumeCard": {
+      "cardMode": "column"
+    },
+    "MeasureSection": {
+      "cardMode": "column"
+    },
+    "NumberField": {
+      "cardMode": "column"
+    },
+    "StrengthCard": {
       "cardMode": "column"
     },
     "VolumeNudge": {
@@ -141,6 +151,14 @@
       "viewport": "438x892"
     },
     "SettingsScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "KitsScreen": {
+      "cardMode": "column",
+      "viewport": "438x892"
+    },
+    "FactSheetScreen": {
       "cardMode": "column",
       "viewport": "438x892"
     },
