@@ -143,7 +143,7 @@ export function StrengthCard({
           accent={accent}
           unit={<UnitLabel tone="secondary">%</UnitLabel>}
           accessibilityLabel={`Strength, ${value} percent`}
-          accessibilityHint="Types an exact strength"
+          accessibilityHint="Edits the strength"
         />
 
         {/* The rail and its labels are one target, together over 44pt tall, and a tap

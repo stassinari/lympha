@@ -140,7 +140,7 @@ function KitRow({
           onPress={onInfo}
           hitSlop={11}
           accessibilityLabel={`About ${kit.name}`}
-          accessibilityHint="Opens the fact sheet"
+          accessibilityHint="Opens the kit’s details"
         >
           <Icon name="info" size={22} colour={colour.textSecondary} />
         </Touchable>

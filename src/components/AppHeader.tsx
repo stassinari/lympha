@@ -82,8 +82,8 @@ export function AppHeader({
     >
       <Touchable
         onPress={onOpenKits}
-        accessibilityLabel={`Kits, ${spokenLabel}${reduced ? `, ${strength}% strength` : ''}`}
-        accessibilityHint="Opens the kits"
+        accessibilityLabel={`Kit, ${spokenLabel}${reduced ? `, ${strength}% strength` : ''}`}
+        accessibilityHint="Changes the kit"
         style={{
           flexShrink: 1,
           minHeight: 44,

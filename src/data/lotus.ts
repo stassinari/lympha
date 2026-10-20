@@ -1,5 +1,5 @@
 /**
- * Lotus Coffee Products.
+ * Lotus Water, by Lotus Coffee Products.
  *
  * Target-first: the vendor's calculator takes a profile in ppm as CaCO₃ and
  * computes drops. Four bottles, split into a hardness pair (magnesium and
@@ -42,8 +42,8 @@ export const lotusConstants = {
 export const lotusRange: Range = {
   id: RANGE_ID,
   kit: 'lotus',
-  name: 'Lotus Coffee Products',
-  shortName: 'Lotus',
+  name: 'Lotus Water',
+  shortName: 'Lotus Water',
   source: {
     url: 'https://lotuscoffeeproducts.com/pages/product-instructions',
     verifiedOn: '2026-08-22',

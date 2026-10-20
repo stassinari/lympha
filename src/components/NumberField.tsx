@@ -201,7 +201,7 @@ export function NumberField({
       // The selection is a visual cue, so it is said out loud too — otherwise the
       // one group of users who cannot see it is also the group most likely to
       // assume they have to clear the field first.
-      accessibilityHint={selected ? 'Typing replaces the current amount' : accessibilityHint}
+      accessibilityHint={selected ? 'Typing replaces the current value' : accessibilityHint}
       accessibilityState={{ selected }}
       style={{
         flexDirection: 'row',

@@ -137,7 +137,9 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
         }}
       >
         <ScreenTitle>{kit.name}</ScreenTitle>
-        <Body>{kit.about}</Body>
+        {kit.about.map((paragraph) => (
+          <Body key={paragraph}>{paragraph}</Body>
+        ))}
         <Touchable
           onPress={() => void Linking.openURL(kit.site.url)}
           accessibilityRole="link"
@@ -195,7 +197,7 @@ export function FactSheetScreen({ kitId, onBack, onClose, onShowRecipe }: FactSh
               onDragChange={setDragging}
             />
             <Caption tone="secondary" style={{ paddingHorizontal: 4 }}>
-              {`A share of every published amount, for lighter water. ${kit.name}’s own steps are marked.`}
+              Less of every bottle, in proportion, for lighter water.
             </Caption>
           </View>
         ) : null}

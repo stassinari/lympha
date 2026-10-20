@@ -122,8 +122,8 @@ export type Kit = {
   name: string;
   /** One line, under the name in the kit list. */
   description: string;
-  /** The fact sheet's paragraph. */
-  about: string;
+  /** The fact sheet's paragraphs. */
+  about: string[];
   site: { label: string; url: string };
   /** In the order the fact sheet offers them. */
   rangeIds: string[];

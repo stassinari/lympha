@@ -128,16 +128,16 @@ const DISPLAY: Record<
   'apax-lab-original': {
     name: 'Apax Lab',
     shortName: 'Apax Lab',
-    rangeLabel: 'Three-bottle range',
+    rangeLabel: 'Without KONFLUX',
     displayNote:
-      'From Apax Lab’s last three-bottle calculator, so a few amounts differ slightly from the card that comes with the set.',
+      'Apax Lab’s website lists recipes with KONFLUX only. The recipes without it are from its earlier calculator, so a few amounts differ slightly from the card in the box.',
     isDefault: true,
   },
   'apax-lab': {
     name: 'Apax Lab with KONFLUX',
     shortName: 'Apax Lab [K]',
     spokenShortName: 'Apax Lab with KONFLUX',
-    rangeLabel: 'KONFLUX range',
+    rangeLabel: 'With KONFLUX',
   },
 };
 

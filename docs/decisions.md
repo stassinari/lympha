@@ -590,8 +590,8 @@ These words, with these meanings, everywhere.
 
 | Term | Meaning | Users see it as |
 | --- | --- | --- |
-| Kit | What the user owns and chooses between: Lotus Coffee Products, Apax Lab. Holds one or more ranges. | Kits screen, the dose screen's header |
-| Range | One set of bottles from a kit, with its own recipe list. Never described as old, new or original. | `Apax Lab`, `Apax Lab [K]`; "KONFLUX range" on the fact sheet |
+| Kit | What the user owns and chooses between: Lotus Water, Apax Lab. Holds one or more ranges. | Kits screen, the dose screen's header |
+| Range | One set of bottles from a kit, with its own recipe list. Never described as old, new or original. | `Apax Lab`, `Apax Lab [K]`; "With KONFLUX" on the fact sheet |
 | Bottle | One thing you add from, in any kit. | Dose rows, "3 bottles missing" |
 | Strength | A share of every amount in the recipe, in whole percent. Never a share of the water. | `· 75%` in the header, the fact sheet |
 | Recipe | A named, fixed list of amounts per litre, from a vendor or an author. | Recipe card, Recipe screen |
@@ -625,25 +625,67 @@ Identifiers and comments use the glossary's terms (`target`, `exactVolume`,
 
 ### Contested strings
 
+**Lotus's kit is "Lotus Water"**, the product's name, everywhere a kit or range is
+named, header included. Lotus Coffee Products is the company: it is named only where
+a company is meant, such as the store listing's not-affiliated line. Lotus's own
+recipes are attributed to "Lotus".
+
 **Apax ranges are `Apax Lab` and `Apax Lab [K]`.** `[K]` is Apax's own shorthand for
 the KONFLUX addition, so the brackets stay square. Screen readers hear "Apax Lab with
 KONFLUX" (`spokenShortName`), because brackets are read aloud. Long names, on the
-Recipe screen: "Apax Lab" and "Apax Lab with KONFLUX". On the fact sheet the cards
-are "KONFLUX range" and "Three-bottle range". "Original" is retired: it implies the
-KONFLUX range superseded it. The note *"From Apax Lab’s last three-bottle
-calculator, so a few amounts differ slightly from the card that comes with the
-set."* sits on the Apax Lab fact sheet, under the bottle cards: it is about the
-range's data, not about choosing a recipe. *Revised
-2026-10-19:* the short names were `Apax` and `Apax [K]`, sized for chips. In the
-header the vendor's full name fits, and is what is printed on the bottle.
+Recipe screen: "Apax Lab" and "Apax Lab with KONFLUX". *Revised 2026-10-19:* the
+short names were `Apax` and `Apax [K]`, sized for chips. In the header the vendor's
+full name fits, and is what is printed on the bottle.
 
-**Kits screen copy** is a first draft, awaiting a copy pass: each kit's one-line
-description and fact-sheet paragraph (`src/data/kits.ts`), the range cards' names
-("KONFLUX range", "Three-bottle range"), and the line under the strength card. That
-line can say that the marks are Apax Lab's own steps; it should not suggest values
-between them round worse, because they do not: rounding depends on where each
-bottle's amount falls against a whole drop, which no strength makes better or worse
-in general.
+**On the fact sheet the Apax cards are "With KONFLUX" and "Without KONFLUX".** The
+title names the one bottle that tells the ranges apart, so nobody has to compare the
+bottle lists beneath to find it. "Without" says what is in the box, not how old the
+range is.
+
+- **Rejected: "KONFLUX range" and "Three-bottle range".** One is named by what it
+  adds, the other by a count, which makes the three-bottle range read as the lesser.
+- **Rejected: "Original".** It implies the KONFLUX range superseded it.
+
+**The note under the Apax cards**: *"Apax Lab’s website lists recipes with KONFLUX
+only. The recipes without it are from its earlier calculator, so a few amounts differ
+slightly from the card in the box."* Apax Lab still sells the three bottles as a set,
+and sells KONFLUX separately, yet its website lists only recipes that use KONFLUX
+(as of 2026-10-20). A three-bottle owner finds no recipes there, and a card in the
+box that differs from the app; the note accounts for both. If the website lists
+three-bottle recipes again, its first sentence is false.
+
+**Kit descriptions say what kind of kit it is**: "Single-mineral drops", "Blended
+concentrates". Not how it is measured: Apax Lab offers drops or grams, chosen under
+*Measure in* on the same sheet.
+
+**The fact-sheet paragraphs** (`src/data/kits.ts`) describe the bottles, and for Apax
+Lab how its recipes are grouped.
+
+- **"A blend of minerals"**, never "a blend" alone: in coffee a blend is beans.
+- **The grouping is a place to start, not a rule**, and the paragraph says so as an
+  invitation: *"Start from the pairing, or see what a recipe does with other
+  beans."* Any recipe works with any beans.
+- **Lotus's opens with one short line**, *"Each bottle holds one mineral, and every
+  recipe is a different balance of them."*, so the detail that follows is optional
+  reading.
+- **Lotus's second paragraph names its two pairs**, hardness and alkalinity, and what each
+  does to the cup, with GH and KH in brackets: the terms Lotus and test kits use.
+  Finer claims, such as magnesium tasting brighter than calcium, are left out: they
+  are disputed, and Lotus doesn't make them. It doesn't mention drops: Lotus ships a
+  dropper and nothing else.
+
+**The line under the strength card** is *"Less of every bottle, in proportion, for
+lighter water."* "In proportion" is the fact that matters: the recipe's balance
+holds. It must not suggest values between the marked steps round worse, because they
+do not: rounding depends on where each bottle's amount falls against a whole drop,
+which no strength makes better or worse in general.
+
+**The header is "Kit, {name}" to a screen reader**, singular, with the hint "Changes
+the kit". The button shows one kit, and it matches the recipe card beside it:
+"Recipe, {recipe}", "Changes the recipe".
+
+**"Typing replaces the current value"** is shared by Water and Strength, so it says
+"value": a strength is not an amount.
 
 **One Apax Lab unit setting** for both ranges: same bottles, same scale. It is on
 the Apax Lab fact sheet.

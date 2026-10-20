@@ -95,6 +95,14 @@ A few pixels of difference from the HTML is fine; a fragile implementation is no
 
 ---
 
+## Copy
+
+Every user-facing string, screen-reader labels and hints included, follows *Copy* in
+`docs/decisions.md`: *Voice* for tone, *Glossary* for what each word means, *Contested
+strings* for wording already decided. Read them before writing or changing a string.
+
+---
+
 ## React Native specifics that shape the design system
 
 These are known platform facts, not things to rediscover:
