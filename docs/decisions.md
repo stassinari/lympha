@@ -19,8 +19,41 @@ own a scale and a TDS meter, and at that moment have no interest in chemistry. T
 app is a task surface, measured in seconds to the answer. It does not persuade,
 teach or onboard.
 
-**Opens to the answer.** The last brand, recipe and volume survive a cold start, so
+**Opens to the answer.** The last kit, recipe and volume survive a cold start, so
 repeating yesterday's brew needs near-zero input.
+
+**Kits, not brands.** What the user owns and chooses between is a *kit*: Lotus, Apax
+Lab. "Brand" would be false for what comes next: Barista Hustle and R Pavlis are
+recipe sources, and Lympha drops are Lympha's own. So it names nothing on screen or
+in identifiers, beyond the research source's own keys (`apax-lab.json`) and the
+`brandId` that builds up to 1.0 stored. A kit holds one or more ranges (Apax Lab:
+KONFLUX and three-bottle). Decided 2026-10-19.
+
+**Two selectors on the dose screen: kit above recipe.** The kit is the parent of the
+recipe, so it gets its own route rather than going through Recipe, and it sits in the
+chrome while the recipe is the card below. Recipe changes far more often than kit,
+so the recipe stays one tap away.
+
+- **Switching to a kit used before** goes straight home on its remembered recipe
+  (two taps).
+- **Switching to a kit never used** sets its first recipe and opens Recipe with it
+  ticked (three taps). There is never a state without a recipe, so nothing needs
+  validating, and the default is seen rather than silent.
+- **Changing a setting on a kit's fact sheet puts that kit in use**: its range,
+  strength or units. Opening a sheet changes nothing, so a kit can be read about
+  freely. The footer turns to "Done" as the switch happens, and a range never used
+  gets its first recipe and opens Recipe on Done, as above. *Revised 2026-10-19:*
+  settings on a kit not in use were stored for when it was chosen. The sheet then had
+  two states, settings that applied and settings that waited, and nothing on screen
+  said which.
+- **Recipe names the range its list belongs to**, in the body role and primary tone,
+  with the strength in the secondary tone below 100%: the context every subtitle is
+  costed in.
+- **The fact sheet's footer is "Use {kit}" or "Done"**, never a disabled "In use"
+  button. Its header carries only the way back. The footer leaves room for a second
+  button, for a kit that needs setting up.
+- **"More kits · Coming soon"** ends the kit list. More are coming, and the row says
+  so without being a target.
 
 **Visible rounding is a point of difference, not the point.** Drops are integers and
 doses are not. Vendor calculators round to keep things simple and report the ideal:
@@ -57,7 +90,8 @@ publish its source under the same terms. The GPL does not forbid selling a copy.
 
 These describe what the app is not *yet*, not a ban. *Revised 2026-10-07:* the list
 read as never; a feature that earns its place can use any of these patterns. The
-first is the ⓘ on the Rounding screen, which explains the limit on request.
+first is the ⓘ on the Rounding screen, which explains the limit on request. The
+strength slider is another (see *Strength*).
 
 ---
 
@@ -72,19 +106,28 @@ work or push), and the dose engine is plain TypeScript.
 - **Rejected: PWA.** Fails 6am cold start, haptics, iOS offline install and store
   presence.
 
-**One screen with three overlays, not a navigator.** Each secondary screen is a
+**One screen with overlays, not a navigator.** Each secondary screen is a
 full-bleed overlay over the Dose screen, which moves in sympathy as the overlay
 enters. Layered `Animated` views make that trivial; a navigator makes it awkward.
-Android back is wired by hand (`BackHandler` in `Overlay`).
+Android back is wired by hand (`BackHandler` in `Overlay`). A screen that pushes its
+own children (Kits: a fact sheet, or Recipe) hosts them in a nested `Overlay`, so
+leaving it closes them too.
 
 **Zustand, persisted to AsyncStorage.** A small store with no provider.
 
-- **Recipe is per brand.** Switching brand and back restores the recipe you had.
-- **Concentrate units are per brand.** Lotus in drops alongside Apax in grams is a
-  legitimate pairing. Both Apax ranges share one setting.
-- **Water volume is global.** It belongs to the kettle, not the brand.
+- **Recipe is per range.** Switching range and back restores the recipe you had.
+- **Units and strength are per kit.** Lotus in drops alongside Apax in grams is a
+  legitimate pairing. Both Apax ranges are the same jars on the same scale, so they
+  share both settings.
+- **The range each kit last used is remembered**, so "Use Apax Lab" returns to it.
+- **Water volume is global.** It belongs to the kettle, not the kit.
+- **Stored state from builds up to 1.0** names the range `brandId`; `repair` reads
+  it. Unit preferences were keyed by unit group, whose ids are the kit ids, so they
+  carry over unchanged.
 - **Default volume** is "Last used", or a pinned value for someone who always brews
   the same amount.
+- **Development builds** add "Reset stored state" to the dev menu, so a simulator can
+  start as a fresh install without reinstalling.
 
 **Bottom sheets are the platform's own**, through `@expo/ui`: SwiftUI's `.sheet` on
 iOS, Material 3's `ModalBottomSheet` on Android (`NativeSheet`). Each brings the drag
@@ -118,20 +161,48 @@ self-hosted, so the pages make no third-party requests either. Contact is GitHub
 issues, except on Google Play, which requires a public email address:
 `hello@saverio.dev`.
 
-**Releases go through EAS: `eas build --profile production --auto-submit`.** The
-build number is held remotely by EAS and incremented per production build. Android
-submits to Play's internal track. The Play service-account key is stored in EAS,
-because the repository is public.
+**Releases are cut by hand from `main`: `npm run release`.** It runs `check`, then
+an EAS production build of both platforms with auto-submit. Builds are started
+deliberately rather than by CI, so no push spends build credits. Android submits to
+Play's internal track; iOS uploads to TestFlight, which never touches a version in
+App Review. The Play service-account key is stored in EAS, because the repository
+is public.
+
+- **Features merge to `main` from branches**; store builds come only from `main`.
+- **A feature brings its design-sync previews with it**: a new component or screen
+  has one in `.design-sync/previews/` before it merges. The Claude Design project is
+  re-synced from `main` after any merge that changes `src/design`, `src/components`
+  or `src/screens`, so new design work starts from what ships. The sync is
+  independent of releases.
+- **Every store build is tagged** `v<version>`, so the code behind any binary can
+  be found. A fix to a released version branches from its tag.
+- **The version in `app.json` is semver-ish**: a feature bumps the minor, a fix the
+  patch. Apple closes a version to uploads once it is released, so new work always
+  takes a new version.
+- **The build number is held remotely by EAS** and incremented per production build,
+  across versions.
+- **Release notes are the GitHub release on the tag**, written for users under
+  *Copy*. They are pasted into the stores' What's New and TestFlight's What to Test.
+  Internal history is git.
+- **No EAS Update.** Over-the-air JS would make "what does this binary run?" a
+  question; a store build per release keeps it answered by the tag.
 
 **New design work starts in Claude Design, from the app's own components.** The
-private Claude Design project "Lympha" holds `src/design` and `src/components`,
-built for the browser with react-native-web, so a design is composed of the
-components the app ships and carries over as written. The sync and its build
+private Claude Design project "Lympha" holds `src/design`, `src/components` and
+`src/screens`, built for the browser with react-native-web, so a design is
+composed of the components the app ships and carries over as written. The sync and its build
 live in `.design-sync/`; its `NOTES.md` covers how to re-run it.
 
 - **The iOS look is the reference.** The web build reports iOS to `Platform`;
   Android's differences are mechanics this file already records.
-- **Rejected: designing from the `docs/designs/v1` handoff.** It predates the
+- **Screens are synced as code.** A screenshot of a screen can only be redrawn,
+  which reintroduces the drift this setup exists to avoid; a screen in code can
+  be shown live and its source copied into a design and changed.
+- **Each design has its own store.** The app's store is a singleton, which would
+  give every frame on a canvas the same brew. The web build swaps it for one per
+  `LymphaProvider`, seeded by its `state` prop, running the same actions
+  (`src/state/actions.ts`).
+- **Rejected: designing from the v1 design handoff.** It predates the
   vendor research and has drifted from the app.
 
 ---
@@ -164,7 +235,7 @@ it:
 | Detail shows hardness, alkalinity, TDS | TDS is not derivable; Apax publishes no ions | See *Rounding screen*. |
 | Exact-volume search up to 900 ml away | — | 25% of the requested volume. See *Exact volume*. |
 
-**Apax is two brands, not one brand with a KONFLUX toggle.** `apax-lab-original` is
+**Apax is two ranges, not one range with a KONFLUX toggle.** `apax-lab-original` is
 the three-bottle range (TONIK, JAMM, LYLAC; 8 recipes, the default); `apax-lab` is
 the four-bottle range with KONFLUX (15 recipes). A toggle would imply the KONFLUX
 range is the three-bottle range plus KONFLUX, which is false:
@@ -175,9 +246,16 @@ range is the three-bottle range plus KONFLUX, which is false:
 - Six KONFLUX-range recipes have no three-bottle equivalent.
 
 *Revised 2026-10-07:* the KONFLUX range was the default. The three-bottle range is
-the default and comes first because it is the base set, and the chip that adds
-KONFLUX reads as an addition to it. The IDs keep the research's names: they key
+the default because it is the base set. The IDs keep the research's names: they key
 persisted state. On-screen names are under *Copy*.
+
+**On Apax Lab's fact sheet the ranges are two radio cards**, KONFLUX first, each
+listing its bottles. A KONFLUX owner may still choose the three-bottle range. Both
+kits head the section "Bottles", and Lotus's single set is the same card without a
+target or a check, so the two sheets read as the same thing: a kit with ranges offers
+its sets of bottles as a choice, a kit with one states it. *Revised 2026-10-19:* the
+ranges were chips on the Recipe screen, three-bottle first. Choosing a range belongs
+to the kit, not to the recipe list.
 
 **Apax recipes are grouped**: process, roast, brew method, varietal, barista.
 Fifteen is too many for a flat list. The grouping is ours, made with the recipe
@@ -212,10 +290,35 @@ so bar count equals bottle count.
 **Rounding messaging appears only where rounding exists.** When the dispenser allows
 partial doses (grams), the rounding line and the nudge are hidden.
 
-**Units follow magnitude, with a per-brand override.** Apax at 1 L is about 60
+**Units follow magnitude, with a per-kit override.** Apax at 1 L is about 60
 drops, where grams are saner; at 200 ml it is about 12, where drops are fine. The
-override offers drops or grams, each previewing the same dose. Millilitres would
-duplicate grams.
+override offers drops or grams, each previewing the same dose at the kit's strength.
+Millilitres would duplicate grams. It is set on the kit's fact sheet (Apax only;
+Lotus ships a dropper and no scale). *Revised 2026-10-19:* it was Settings ▸ Units.
+A unit belongs to the bottles, and Water is always millilitres, so Settings had
+nothing left to say about units.
+
+**Strength: a share of every amount in the recipe**, 25–100% in whole percent,
+default 100. Apax Lab's own calculator offers it at 25, 50, 75 and 100%
+(`apax-lab-brief.md`); Lympha allows any whole percent between, because strength is a
+multiplier rather than vendor data, so 73% invents no Apax number. A drag sticks to
+Apax's steps within 2%, with a selection haptic as it lands on one; the exact value
+is typed, in the same field as water. The value sits on the card with no key
+surface: a faint one read as a mistake, and the slider is the way in, typing the
+way to precision. The rail and its step labels are one touch target, so the track
+can be as tall as its thumb and sit close to the number, and a tap on a label lands
+on its step. Per kit, so both Apax ranges share it; Apax only for now. Shown on the
+dose screen and Recipe only below 100%. Decided 2026-10-19.
+
+- **Strength multiplies the recipe's amounts, never the volume.** Scaling the
+  volume gives the same doses but breaks everything else that reads it: the
+  screen would show 750 ml for a litre, the water figures would divide 75% of the
+  minerals by 75% of the water and read full strength, and exact-volume
+  suggestions would land off the 25 ml grid (400 ml at 39% is 1025.6 ml). The
+  volume stays the real water, the target scales with the doses so lighter water
+  still reads as on target, and the exact-volume search steps through real water.
+- **A slider earns its place here** (see *Anti-references*): the value is a
+  continuous share with marked steps, and the steps are what the vendor offers.
 
 **Rounding bands.** Every rounding message and colour comes from one band
 (`band()` in `src/format/rounding.ts`), measured on the headline figure:
@@ -256,8 +359,8 @@ family as a dose.
 
 - A hero card with the headline figure, naming what it quotes. A percentage only
   where there is something to measure: On target and Missing show words.
-- Target, you get and off by for every bottle, which works for every brand.
-- Hardness and alkalinity only where the brand publishes ion data, in a table above
+- Target, you get and off by for every bottle, which works for every kit.
+- Hardness and alkalinity only where the vendor publishes ion data, in a table above
   the bottles, so the table the headline quotes sits directly under it.
 - No TDS.
 - **"Off by" carries the emphasis**, bold and in the band's colour; the two amounts
@@ -273,7 +376,7 @@ family as a dose.
   test asserts it.
 
 **Marking a bottle as added.** Tapping a dose row toggles it, with a light haptic.
-Changing volume, brand or recipe clears all marks. A done row recedes rather than
+Changing volume, kit, range, recipe or strength clears all marks. A done row recedes rather than
 disappearing, so the list keeps its shape:
 
 - Its surface takes the sunken chip tone.
@@ -284,10 +387,15 @@ disappearing, so the list keeps its shape:
 62% puts the 13.5px alternative-dose caption at 4.36:1 in light mode, just under AA
 (decided 2026-10-05: it reads fine on device).
 
-**Volume entry uses the system numeric keypad**, via an offscreen `TextInput`.
+**Numbers are typed on the system numeric keypad**, via an offscreen `TextInput`, in
+one field (`NumberField`) for every number the app takes: water and strength.
 
 - **Rejected: a custom keypad grid.** More to maintain, and it loses haptics, key
   repeat and accessibility.
+- **At rest, a dotted underline** in the secondary tone, just under the digits, says
+  the value can be typed. It gives way to the band once focused. Drawn as dots, not
+  a text decoration: Android draws every decoration style solid, and the font, not
+  the app, decides where a decoration sits. Decided 2026-10-20.
 - **The first keystroke replaces the value.** An untouched value sits in a
   selection band with no caret; the caret appears with the first keystroke.
 - **Screen readers** hear "Selected. Type to replace the volume".
@@ -344,10 +452,14 @@ any status colour matches a bottle or brand colour.
 **Problems have more presence than non-problems.** The clear state is muted; caution
 is not.
 
-**Header: the wordmark alone.** "Lympha" in Figtree 600, 16px, +0.015em, secondary
-tone: the only text not in Nunito. 16px is far enough from the 24pt page titles to
-read as a different kind of thing. **Rejected: a `(Ly)` mark beside the wordmark**
-(2026-10-05). The header band has room for a ~24pt glyph without moving anything.
+**Header: the kit in use, in the wordmark's face.** The range's short name in
+Figtree 600, 16px, +0.015em, primary tone, with `· 75%` in the secondary tone below
+full strength, and a small caret. It is the only text not in Nunito. 16px is far
+enough from the 24pt page titles to read as chrome rather than content. One line:
+the name truncates first, the strength never. *Revised 2026-10-19:* the header was
+the "Lympha" wordmark alone. The kit is the parent of the recipe, so it takes the
+chrome, and the app's name is already announced on launch. **Rejected: a `(Ly)`
+mark beside the wordmark** (2026-10-05).
 
 **Top-right is app chrome; bottom-right acts on this brew.** Settings is a gear at the
 top right of the dose screen, matching every overlay's top-right action. The footer
@@ -413,16 +525,18 @@ around them. The same name carries the same weight wherever it appears.
 
 | Screen | Control | Enters from |
 | --- | --- | --- |
-| Brand + recipe | Header card, top | Top |
+| Kits | Kit name, top left | Top |
+| Recipe | Recipe card, top | Top |
 | Volume | "Edit", mid-screen right | Right |
 | Settings | Gear, top right | Top |
+| Fact sheet, or Recipe pushed by Kits | A kit row or its ⓘ | Right |
 
 **Timings:**
 
 - Transitions take 380–400ms on `cubic-bezier(.22, 1, .36, 1)`. The dose screen
   shifts 14–16px on the same axis and scales to 0.97.
 - A recomputed value pulses for 150ms.
-- Bar colours morph over 350ms on a brand or recipe change.
+- Bar colours morph over 350ms on a kit, range or recipe change.
 - The nudge animates its height.
 
 ---
@@ -432,17 +546,20 @@ around them. The same name carries the same weight wherever it appears.
 **Phosphor, behind one wrapper** (`src/design/primitives/Icon.tsx`). Nothing else
 imports the library.
 
-**Five usages, six glyphs, and no more without a design decision.** The design is
-text-forward, so every glyph competes with the type and the bar marks.
+**Six glyphs, and no more without a design decision.** The design is text-forward,
+so every glyph competes with the type and the bar marks.
 
 | Usage | Glyph |
 | --- | --- |
 | Settings | `GearSix`: the screen is preferences. Sliders suggest adjusting values. |
-| Recipe selector | `CaretDown` |
+| Kit and recipe selectors | `CaretDown`, 16pt beside the kit name |
+| A kit's fact sheet, from the kit list | `Info`, in the secondary tone: Lotus's accent is a red that reads as an error |
+| Back, on a pushed screen | `CaretRight` turned round; on iOS the fact sheet's also names "Kits" |
 | Settings rows that open a screen | `CaretRight` |
 | Footer, Off to Missing | `Info`. `WarningCircle` would shout over gentle copy. |
 | Footer, clear | `CheckCircle`: the same silhouette as `Info`, so the states swap without the row shifting. |
 | Selected recipe | `Check`, left of the title. The bar marks own the right edge. |
+| Selected kit or range | `Check`, right of the title, before the ⓘ |
 
 **Weights: chrome is `bold`, status is `fill`, nothing is `duotone`.**
 
@@ -494,11 +611,12 @@ These words, with these meanings, everywhere.
 
 | Term | Meaning | Users see it as |
 | --- | --- | --- |
-| Brand | The maker: Lotus Coffee Products, Apax Lab. | Brand chips, Settings |
-| Range | One set of bottles from a brand. Never described as old, new or original. | `Apax`, `Apax [K]` |
-| Bottle | One concentrate you add from, for every brand. | Dose rows, "3 bottles missing" |
-| Recipe | A named, fixed list of amounts per litre, from a brand or an author. | Recipe card, Recipe screen |
-| Author | The person or brand behind a recipe. Internal. | The name under each Lotus recipe |
+| Kit | What the user owns and chooses between: Lotus Water, Apax Lab. Holds one or more ranges. | Kits screen, the dose screen's header |
+| Range | One set of bottles from a kit, with its own recipe list. Never described as old, new or original. | `Apax Lab`, `Apax Lab [K]`; "With KONFLUX" on the fact sheet |
+| Bottle | One thing you add from, in any kit. | Dose rows, "3 bottles missing" |
+| Strength | A share of every amount in the recipe, in whole percent. Never a share of the water. | `· 75%` in the header, the fact sheet |
+| Recipe | A named, fixed list of amounts per litre, from a vendor or an author. | Recipe card, Recipe screen |
+| Author | The person or vendor behind a recipe. Internal. | The name under each Lotus recipe |
 | Water | How much distilled water is being made, in ml. | Volume card, Water screen |
 | Target | The amount a recipe calls for at this volume, per bottle and, for Lotus, for hardness and alkalinity. Never rounded. | "14% over target", Target column |
 | Dose | What is actually added: the target rounded to whole drops, or to 0.01 g. Internal. | The amounts in the dose rows |
@@ -528,17 +646,70 @@ Identifiers and comments use the glossary's terms (`target`, `exactVolume`,
 
 ### Contested strings
 
-**Apax ranges are `Apax` and `Apax [K]`.** The three-bottle range is plain `Apax`
-and comes first; `[K]` is Apax's own shorthand for the KONFLUX addition, so the
-brackets stay square. Screen readers hear "Apax with KONFLUX" (`spokenShortName`),
-because brackets are read aloud. Long names, in Settings ▸ Bottles: "Apax Lab" and
-"Apax Lab with KONFLUX". "Original" is retired: it implies the KONFLUX range
-superseded it. The note *"From Apax Lab’s last three-bottle calculator, so a few
-amounts differ slightly from the card that comes with the set."* sits under the
-`Apax` chip only.
+**Lotus's kit is "Lotus Water"**, the product's name, everywhere a kit or range is
+named, header included. Lotus Coffee Products is the company: it is named only where
+a company is meant, such as the store listing's not-affiliated line. Lotus's own
+recipes are attributed to "Lotus".
 
-**One Apax Lab unit setting and screen** for both ranges: same bottles, same scale.
-The unit screen is titled "Apax Lab".
+**Apax ranges are `Apax Lab` and `Apax Lab [K]`.** `[K]` is Apax's own shorthand for
+the KONFLUX addition, so the brackets stay square. Screen readers hear "Apax Lab with
+KONFLUX" (`spokenShortName`), because brackets are read aloud. Long names, on the
+Recipe screen: "Apax Lab" and "Apax Lab with KONFLUX". *Revised 2026-10-19:* the
+short names were `Apax` and `Apax [K]`, sized for chips. In the header the vendor's
+full name fits, and is what is printed on the bottle.
+
+**On the fact sheet the Apax cards are "With KONFLUX" and "Without KONFLUX".** The
+title names the one bottle that tells the ranges apart, so nobody has to compare the
+bottle lists beneath to find it. "Without" says what is in the box, not how old the
+range is.
+
+- **Rejected: "KONFLUX range" and "Three-bottle range".** One is named by what it
+  adds, the other by a count, which makes the three-bottle range read as the lesser.
+- **Rejected: "Original".** It implies the KONFLUX range superseded it.
+
+**The note under the Apax cards**: *"Apax Lab’s website lists recipes with KONFLUX
+only. The recipes without it are from its earlier calculator, so a few amounts differ
+slightly from the card in the box."* Apax Lab still sells the three bottles as a set,
+and sells KONFLUX separately, yet its website lists only recipes that use KONFLUX
+(as of 2026-10-20). A three-bottle owner finds no recipes there, and a card in the
+box that differs from the app; the note accounts for both. If the website lists
+three-bottle recipes again, its first sentence is false.
+
+**Kit descriptions say what kind of kit it is**: "Single-mineral drops", "Blended
+concentrates". Not how it is measured: Apax Lab offers drops or grams, chosen under
+*Measure in* on the same sheet.
+
+**The fact-sheet paragraphs** (`src/data/kits.ts`) describe the bottles, and for Apax
+Lab how its recipes are grouped.
+
+- **"A blend of minerals"**, never "a blend" alone: in coffee a blend is beans.
+- **The grouping is a place to start, not a rule**, and the paragraph says so as an
+  invitation: *"Start from the pairing, or see what a recipe does with other
+  beans."* Any recipe works with any beans.
+- **Lotus's opens with one short line**, *"Each bottle holds one mineral, and every
+  recipe is a different balance of them."*, so the detail that follows is optional
+  reading.
+- **Lotus's second paragraph names its two pairs**, hardness and alkalinity, and what each
+  does to the cup, with GH and KH in brackets: the terms Lotus and test kits use.
+  Finer claims, such as magnesium tasting brighter than calcium, are left out: they
+  are disputed, and Lotus doesn't make them. It doesn't mention drops: Lotus ships a
+  dropper and nothing else.
+
+**The line under the strength card** is *"Less of every bottle, in proportion, for
+lighter water."* "In proportion" is the fact that matters: the recipe's balance
+holds. It must not suggest values between the marked steps round worse, because they
+do not: rounding depends on where each bottle's amount falls against a whole drop,
+which no strength makes better or worse in general.
+
+**The header is "Kit, {name}" to a screen reader**, singular, with the hint "Changes
+the kit". The button shows one kit, and it matches the recipe card beside it:
+"Recipe, {recipe}", "Changes the recipe".
+
+**"Typing replaces the current value"** is shared by Water and Strength, so it says
+"value": a strength is not an amount.
+
+**One Apax Lab unit setting** for both ranges: same bottles, same scale. It is on
+the Apax Lab fact sheet.
 
 **"By barista"** heads the barista recipes, last in the list.
 
@@ -574,7 +745,7 @@ them it is the subject, then `{n}%` with `{under|over} target` beside it.
   target"*, then the sentence, then the ⓘ.
 
 **Every band has a headline sentence**, because the card always needs a body. On
-target is *"That’s as close as drops get."* for both brands, since on target is
+target is *"That’s as close as drops get."* for both kits, since on target is
 not exact. Missing, one bottle: *"It rounds to zero drops at this volume, so none
 goes in."*, since the headline names it. Several: *"{A}, {B} and {C} round to zero
 drops at this volume."* Far off states the consequence: *"…enough that the water no longer
@@ -589,7 +760,7 @@ with a bottle missing. The bottles are read from the ion data, not hard-coded.
 
 **The limit ⓘ** on the Rounding card appears only in Close and Off, the bands
 whose sentence names the limit. It opens a short sheet titled
-`{t}% limit`. It says what the limit applies to, which differs by brand:
+`{t}% limit`. It says what the limit applies to, which differs by kit:
 
 - Lotus: *"Hardness and alkalinity can each be up to {t}% off target before Lympha
   surfaces it. You can change this in Settings, under Rounding limit."*
@@ -598,25 +769,24 @@ whose sentence names the limit. It opens a short sheet titled
 
 It names the setting by its label, so the two must stay in sync. The setting is
 **"Rounding limit"**, *"How far off target is still close enough."*, which names
-neither water nor bottles so it is true for both brands.
+neither water nor bottles so it is true for both kits.
 
 **The suggestion card is plain**, since it appears mid-task in a narrow card: a
 title, then at most the band's sentence and either "{ml} ml is exact." or "No exact
 volume nearby."
 
-**The drops preview on the unit screen** carries its bottle's miss (`3 drops of
+**The drops preview under Measure in** carries its bottle's miss (`3 drops of
 TONIK for 350 ml, 14% over`), so the cost of choosing drops is visible where the
 choice is made.
 
 **Removed, and not to be re-added:**
 
-- The unit screen's "Drops are the least precise" callout: advice on how to work.
+- The units section's "Drops are the least precise" callout: advice on how to work.
 - Apax's "lists what's in each bottle but not how much" note on the Rounding
   screen: a message about what the app can't do.
 - The suggestion card's "Too little to measure in drops.": it repeated the title.
 - A caption under the volume presets. The `ml` beside the value suffices, and each
   preset is announced as "250 millilitres".
-- A footnote at the end of the Bottles list about brands not yet supported.
 
 ### Store listing
 

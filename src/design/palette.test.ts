@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import app from '../../app.json';
-import { brands, components } from '@/data';
+import { ranges, components } from '@/data';
 import { dark, light } from './palette';
 
 /** WCAG 2.x relative luminance of a `#RRGGBB` colour. */
@@ -74,10 +74,10 @@ describe('clear-state mark', () => {
    * A state colour that is also a bottle's colour reads as that bottle. Brand
    * accents count too: one colours the "Details" link right beside the check.
    */
-  it.each(schemes)('is no bottle or brand colour in %s', (scheme, tokens) => {
+  it.each(schemes)('is no bottle or range colour in %s', (scheme, tokens) => {
     const taken = [
       ...components.flatMap((c) => (c.colour ? [c.colour[scheme]] : [])),
-      ...brands.map((b) => b.accent[scheme]),
+      ...ranges.map((b) => b.accent[scheme]),
     ].map((c) => c.toUpperCase());
     expect(taken).not.toContain(tokens.ok.toUpperCase());
   });
@@ -101,10 +101,10 @@ describe('off-target colours', () => {
     expect(contrast(tokens.error, tokens.card)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it.each(schemes)('are no bottle or brand colour in %s', (scheme, tokens) => {
+  it.each(schemes)('are no bottle or range colour in %s', (scheme, tokens) => {
     const taken = [
       ...components.flatMap((c) => (c.colour ? [c.colour[scheme]] : [])),
-      ...brands.map((b) => b.accent[scheme]),
+      ...ranges.map((b) => b.accent[scheme]),
     ].map((c) => c.toUpperCase());
     expect(taken).not.toContain(tokens.warning.toUpperCase());
     expect(taken).not.toContain(tokens.error.toUpperCase());

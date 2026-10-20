@@ -4,12 +4,14 @@ import {
   VOLUME_MAX_ML,
   VOLUME_MIN_ML,
   defaultsAreValid,
+  rangeForKit,
   recipeIdFor,
   repair,
+  strengthFor,
   unitPreferenceFor,
 } from './model';
 import type { PersistedState } from './model';
-import { brands, unitGroupOf } from '@/data';
+import { kitOf, ranges } from '@/data';
 
 const state = (patch: Partial<PersistedState> = {}): PersistedState => ({ ...DEFAULTS, ...patch });
 
@@ -19,12 +21,12 @@ describe('defaults', () => {
   });
 
   it('open on a recipe rather than an empty screen', () => {
-    expect(recipeIdFor(DEFAULTS, DEFAULTS.brandId)).toBeDefined();
+    expect(recipeIdFor(DEFAULTS, DEFAULTS.rangeId)).toBeDefined();
   });
 });
 
 describe('recipeIdFor', () => {
-  it('remembers a recipe per brand rather than globally', () => {
+  it('remembers a recipe per range rather than globally', () => {
     // Switching to Apax and back should land where you left Lotus.
     const s = state({
       recipeIds: { lotus: 'lotus-ultra-light', 'apax-lab': 'apax-lab-espresso' },
@@ -33,11 +35,11 @@ describe('recipeIdFor', () => {
     expect(recipeIdFor(s, 'apax-lab')).toBe('apax-lab-espresso');
   });
 
-  it("falls back to the vendor's first recipe for a brand never used", () => {
+  it("falls back to the vendor's first recipe for a range never used", () => {
     expect(recipeIdFor(state(), 'apax-lab-original')).toBe('apax-lab-original-standard-cupping');
   });
 
-  it('ignores a remembered recipe that belongs to a different brand', () => {
+  it('ignores a remembered recipe that belongs to a different range', () => {
     const s = state({ recipeIds: { lotus: 'apax-lab-washed' } });
     expect(recipeIdFor(s, 'lotus')).toBe('lotus-light-and-bright');
   });
@@ -48,18 +50,18 @@ describe('unitPreferenceFor', () => {
     expect(unitPreferenceFor(state(), 'apax-lab')).toBe('auto');
   });
 
-  it('is per brand, because one global switch would be wrong for one of them', () => {
+  it('is per range, because one global switch would be wrong for one of them', () => {
     const s = state({ units: { lotus: 'drop', apax: 'g' } });
     expect(unitPreferenceFor(s, 'lotus')).toBe('drop');
     expect(unitPreferenceFor(s, 'apax-lab')).toBe('g');
   });
 
-  it('round-trips with the key the store writes, for every brand', () => {
-    // The store writes `units[unitGroupOf(brandId)]`. Reading any other key makes
+  it('round-trips with the key the store writes, for every range', () => {
+    // The store writes `units[kitOf(rangeId).id]`. Reading any other key makes
     // every option but the default look unselected, though the change was made.
-    for (const brand of brands) {
-      const written = { ...DEFAULTS, units: { [unitGroupOf(brand.id)]: 'drop' as const } };
-      expect(unitPreferenceFor(written, brand.id), brand.id).toBe('drop');
+    for (const range of ranges) {
+      const written = { ...DEFAULTS, units: { [kitOf(range.id).id]: 'drop' as const } };
+      expect(unitPreferenceFor(written, range.id), range.id).toBe('drop');
     }
   });
 
@@ -88,6 +90,13 @@ describe('defaultVolumeMl', () => {
 });
 
 describe('repair', () => {
+  it('reads the range from the key earlier builds wrote', () => {
+    expect(repair({ brandId: 'apax-lab' }).rangeId).toBe('apax-lab');
+    expect(repair({ rangeId: 'apax-lab-original', brandId: 'lotus' }).rangeId).toBe(
+      'apax-lab-original',
+    );
+  });
+
   it('accepts nothing at all', () => {
     expect(repair(undefined)).toEqual(DEFAULTS);
     expect(repair(null)).toEqual(DEFAULTS);
@@ -99,9 +108,11 @@ describe('repair', () => {
     const s = state({
       mode: 'dark',
       volumeMl: 350,
-      brandId: 'apax-lab',
+      rangeId: 'apax-lab',
       recipeIds: { 'apax-lab': 'apax-lab-natural' },
+      kitRanges: { lotus: 'lotus', apax: 'apax-lab' },
       units: { apax: 'drop' },
+      strength: { apax: 60 },
       suggest: false,
       flagAbove: 0.05,
     });
@@ -116,29 +127,29 @@ describe('repair', () => {
     expect(recipeIdFor(repaired, 'lotus')).toBeDefined();
   });
 
-  it('drops a recipe id that no longer belongs to its brand', () => {
+  it('drops a recipe id that no longer belongs to its range', () => {
     expect(repair(state({ recipeIds: { lotus: 'apax-lab-washed' } })).recipeIds).toEqual({});
   });
 
-  it('drops entries for a brand that no longer ships', () => {
+  it('drops entries for a range that no longer ships', () => {
     expect(
       repair({ ...DEFAULTS, recipeIds: { 'apax-lab-v0': 'x' }, units: { 'apax-lab-v0': 'g' } }),
     ).toMatchObject({ recipeIds: {}, units: {} });
   });
 
-  it('falls back when the remembered brand is gone', () => {
-    expect(repair(state({ brandId: 'blossom' })).brandId).toBe(DEFAULTS.brandId);
+  it('falls back when the remembered range is gone', () => {
+    expect(repair(state({ rangeId: 'blossom' })).rangeId).toBe(DEFAULTS.rangeId);
   });
 
-  it('rejects a unit the brand cannot be dosed in', () => {
+  it('rejects a unit the range cannot be dosed in', () => {
     // Lotus ships one dropper and no scale; grams is not an option for it.
     expect(repair(state({ units: { lotus: 'g' } })).units).toEqual({});
     expect(repair(state({ units: { lotus: 'drop' } })).units).toEqual({ lotus: 'drop' });
     expect(repair(state({ units: { apax: 'g' } })).units).toEqual({ apax: 'g' });
   });
 
-  it('drops a unit stored under a brand rather than a unit group', () => {
-    // Keys are unit groups. A brand id is not one, so its entry is discarded
+  it('drops a unit stored under a range rather than a kit', () => {
+    // Keys are kit ids. A range id is not one, so its entry is discarded
     // rather than half-applied to one Apax range.
     expect(repair(state({ units: { 'apax-lab': 'g' } })).units).toEqual({});
   });
@@ -167,7 +178,61 @@ describe('repair', () => {
   });
 
   it('is idempotent', () => {
-    const once = repair({ brandId: 'nope', volumeMl: -1, units: { lotus: 'g' } });
+    const once = repair({ rangeId: 'nope', volumeMl: -1, units: { lotus: 'g' } });
     expect(repair(once)).toEqual(once);
+  });
+});
+
+describe('kits in stored state', () => {
+  it('remember the range of the kit in use, including from the key earlier builds wrote', () => {
+    expect(repair({ brandId: 'apax-lab' }).kitRanges).toEqual({ apax: 'apax-lab' });
+    expect(
+      repair({ rangeId: 'apax-lab', kitRanges: { apax: 'apax-lab-original' } }).kitRanges,
+    ).toEqual({ apax: 'apax-lab' });
+  });
+
+  it('drop a range stored under a kit it does not belong to', () => {
+    expect(repair({ kitRanges: { apax: 'lotus', lotus: 'apax-lab' } }).kitRanges).toEqual({
+      lotus: 'lotus',
+    });
+  });
+
+  it('answer with the default range for a kit never chosen', () => {
+    expect(rangeForKit(state(), 'apax')).toBe('apax-lab-original');
+    expect(rangeForKit(state({ kitRanges: { apax: 'apax-lab' } }), 'apax')).toBe('apax-lab');
+  });
+});
+
+describe('strength in stored state', () => {
+  it('is kept only for kits that offer it', () => {
+    expect(repair({ strength: { lotus: 50, apax: 75 } }).strength).toEqual({ apax: 75 });
+  });
+
+  it('is a whole percent from 25 to 100', () => {
+    expect(repair({ strength: { apax: 73.6 } }).strength).toEqual({ apax: 74 });
+    expect(repair({ strength: { apax: 300 } }).strength).toEqual({ apax: 100 });
+    expect(repair({ strength: { apax: 5 } }).strength).toEqual({ apax: 25 });
+    expect(repair({ strength: { apax: 'half' } }).strength).toEqual({});
+  });
+
+  it('is full for a kit without it, whatever is stored', () => {
+    expect(strengthFor(state({ strength: { lotus: 50 } }), 'lotus')).toBe(100);
+    expect(strengthFor(state(), 'apax')).toBe(100);
+    expect(strengthFor(state({ strength: { apax: 60 } }), 'apax')).toBe(60);
+  });
+});
+
+describe('kit ranges from builds before kits', () => {
+  it('come from the one range of a kit with a remembered recipe', () => {
+    const s = repair({ brandId: 'lotus', recipeIds: { 'apax-lab': 'apax-lab-washed' } });
+    expect(rangeForKit(s, 'apax')).toBe('apax-lab');
+  });
+
+  it('stay the default where history does not say which', () => {
+    const s = repair({
+      brandId: 'lotus',
+      recipeIds: { 'apax-lab': 'apax-lab-washed', 'apax-lab-original': 'apax-lab-original-washed' },
+    });
+    expect(rangeForKit(s, 'apax')).toBe('apax-lab-original');
   });
 });

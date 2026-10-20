@@ -410,7 +410,7 @@ export function opticalGap(
  *
  * `desired` is the gap you want to see between the card edge and the visible
  * marks; the text box already contributes `insets`, so the padding is whatever is
- * left. This is the effect `docs/designs/v1` gets by crushing its line heights;
+ * left. This is the effect the v1 design gets by crushing its line heights;
  * done here it needs no negative margins and no per-screen fudge factors.
  *
  * Clamped at zero: at the tightest legal line height a display numeral's natural

@@ -4,7 +4,7 @@
  * Three things, in order of how much they change your morning: how far off you
  * are and on what, what the water comes out like, and which bottles get it there.
  *
- * Not a fixed Hardness / Alkalinity / TDS table, as `docs/designs/v1` draws: TDS
+ * Not a fixed Hardness / Alkalinity / TDS table, as the v1 design draws: TDS
  * is not derivable from anything either vendor publishes, and Apax publishes no ion
  * quantities at all, so the per-bottle table is the universal one and the
  * chemistry appears only where it can be computed. Showing zeroes for Apax would

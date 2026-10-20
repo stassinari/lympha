@@ -32,7 +32,7 @@ import {
   useTheme,
   useTypeMetrics,
 } from '@/design';
-import { useBrand } from '@/state';
+import { useRange } from '@/state';
 
 /**
  * Android's back affordance: the trailing chevron turned through half a turn.
@@ -59,7 +59,7 @@ const HIT_SLOP = 14;
 export type ScreenHeaderProps = {
   title: string;
   onClose: () => void;
-  /** Overrides the current brand's accent, for a screen about a different brand. */
+  /** Overrides the current range's accent, for a screen about a different one. */
   accent?: string;
   /** Set to 0 where the surrounding `Screen` already provides the inset. */
   inset?: number;
@@ -75,8 +75,8 @@ export function ScreenHeader({
   style,
 }: ScreenHeaderProps) {
   const { colour, scheme } = useTheme();
-  const brand = useBrand();
-  const tint = accent ?? resolveAccent(brand.accent, scheme);
+  const range = useRange();
+  const tint = accent ?? resolveAccent(range.accent, scheme);
   /**
    * Squares the title's box about its capitals, so plain centring in the band
    * puts the marks where the eye says the middle is.

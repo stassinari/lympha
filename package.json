@@ -44,7 +44,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "font-metrics": "node scripts/font-metrics.mjs",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "release": "npm run check && npx eas-cli build --profile production --platform all --auto-submit --non-interactive"
   },
   "private": true
 }

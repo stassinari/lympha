@@ -9,10 +9,10 @@
  *
  * ---
  *
- * Two brands, not one with a toggle
+ * Two ranges, not one with a toggle
  *
  * Apax ships as two separate ranges. The current range has four concentrates;
- * the pre-KONFLUX range has three. Modelling this as one brand with an optional
+ * the pre-KONFLUX range has three. Modelling this as one range with an optional
  * fourth bottle would be wrong on the facts: Apax re-balanced the other recipes
  * when KONFLUX arrived rather than simply adding it, Light and Dark Roast
  * effectively swapped character between versions, and six of the current rows
@@ -27,7 +27,7 @@
  */
 
 import source from './sources/apax-lab.json';
-import type { Anomaly, Brand, Component, Recipe, RecipeGroup } from './types';
+import type { Anomaly, Range, Component, Recipe, RecipeGroup } from './types';
 
 /** 1.000 g of concentrate = 15 drops, from Apax's own table. This is a property
  *  of *their* dropper and has nothing to do with a Lotus drop. */
@@ -87,7 +87,7 @@ export const APAX_ANOMALIES: Record<string, Anomaly> = {
   },
 };
 
-type SourceBrand = (typeof source.brands)[number];
+type SourceRange = (typeof source.brands)[number];
 
 const dispensersFor = () => [
   {
@@ -117,36 +117,40 @@ const dispensersFor = () => [
  * How the ranges are named and ordered on screen. The source keeps the research's
  * own labels and default as provenance; what the app shows is copy, and lives here.
  *
- * The three-bottle range is plain "Apax" and comes first: it is the base set, and
- * KONFLUX is an addition to it. "[K]" is Apax's own shorthand for that addition.
+ * "[K]" is Apax's own shorthand for the KONFLUX addition. The three-bottle range is
+ * first in the registry: it is the base set, and the default.
  */
 const DISPLAY: Record<
   string,
-  Pick<Brand, 'name' | 'shortName'> &
-    Partial<Pick<Brand, 'spokenShortName' | 'displayNote' | 'isDefault'>>
+  Pick<Range, 'name' | 'shortName' | 'rangeLabel'> &
+    Partial<Pick<Range, 'spokenShortName' | 'displayNote' | 'isDefault'>>
 > = {
   'apax-lab-original': {
     name: 'Apax Lab',
-    shortName: 'Apax',
+    shortName: 'Apax Lab',
+    rangeLabel: 'Without KONFLUX',
     displayNote:
-      'From Apax Lab’s last three-bottle calculator, so a few amounts differ slightly from the card that comes with the set.',
+      'Apax Lab’s website lists recipes with KONFLUX only. The recipes without it are from its earlier calculator, so a few amounts differ slightly from the card in the box.',
     isDefault: true,
   },
   'apax-lab': {
     name: 'Apax Lab with KONFLUX',
-    shortName: 'Apax [K]',
-    spokenShortName: 'Apax with KONFLUX',
+    shortName: 'Apax Lab [K]',
+    spokenShortName: 'Apax Lab with KONFLUX',
+    rangeLabel: 'With KONFLUX',
   },
 };
 
 const DISPLAY_ORDER = ['apax-lab-original', 'apax-lab'];
 
-function buildBrand(sb: SourceBrand): Brand {
+function buildRange(sb: SourceRange): Range {
   const display = DISPLAY[sb.id]!;
   return {
     id: sb.id,
+    kit: 'apax',
     name: display.name,
     shortName: display.shortName,
+    rangeLabel: display.rangeLabel,
     ...(display.spokenShortName ? { spokenShortName: display.spokenShortName } : {}),
     subtitle: sb.subtitle,
     source: {
@@ -157,23 +161,19 @@ function buildBrand(sb: SourceBrand): Brand {
     },
     ...(display.displayNote ? { displayNote: display.displayNote } : {}),
     ...(display.isDefault ? { isDefault: true } : {}),
-    // Both ranges are the same physical concentrates on the same scale, so they
-    // share one unit preference.
-    unitGroup: 'apax',
     accent: ACCENT,
   };
 }
 
 /**
- * Components are namespaced per range rather than shared. The two ranges are
- * modelled as separate brands, and a component belonging to exactly one brand is
- * an invariant worth keeping — the duplication is three records, generated, not
- * transcribed.
+ * Components are namespaced per range rather than shared. A component belonging
+ * to exactly one range is an invariant worth keeping — the duplication is three
+ * records, generated, not transcribed.
  */
-function buildComponents(sb: SourceBrand): Component[] {
+function buildComponents(sb: SourceRange): Component[] {
   return sb.concentrates.map((c) => ({
     id: `${sb.id}-${c.id}`,
-    brand: sb.id,
+    range: sb.id,
     name: c.name,
     kind: 'product' as const,
     doseUnit: 'g' as const,
@@ -183,14 +183,14 @@ function buildComponents(sb: SourceBrand): Component[] {
   }));
 }
 
-function buildRecipes(sb: SourceBrand): Recipe[] {
+function buildRecipes(sb: SourceRange): Recipe[] {
   return sb.recipes.map((r) => {
     const id = `${sb.id}-${r.id}`;
     const doses: Record<string, number> = r.doses;
 
     return {
       id,
-      brand: sb.id,
+      range: sb.id,
       name: r.name,
       referenceVolumeMl: source.units.base_volume_ml,
       statedAs: 'dose' as const,
@@ -210,8 +210,8 @@ function buildRecipes(sb: SourceBrand): Recipe[] {
   });
 }
 
-export const apaxBrands: Brand[] = source.brands
-  .map(buildBrand)
+export const apaxRanges: Range[] = source.brands
+  .map(buildRange)
   .sort((a, b) => DISPLAY_ORDER.indexOf(a.id) - DISPLAY_ORDER.indexOf(b.id));
 export const apaxComponents: Component[] = source.brands.flatMap(buildComponents);
 export const apaxRecipes: Recipe[] = source.brands.flatMap(buildRecipes);

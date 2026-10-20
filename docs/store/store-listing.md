@@ -30,7 +30,7 @@ Lympha works out how much of each mineral concentrate to add for the water you�
 Recipes are written for a litre, so at different volumes the numbers will likely come out wonky. Most calculators round this away to keep things simple, but at smaller quantities it can make a real difference. Lympha shows what you’ll actually be adding and how far you are from the recipe. If that’s enough to matter, it says so and suggests a nearby volume that works out evenly, when there is one.
 
 Works with:
-Lotus Coffee Products, with Lotus’s published recipes
+Lotus Water, with Lotus’s published recipes
 Apax Lab, both the three-bottle range and the range with KONFLUX
 
 There are no accounts, ads or tracking, and everything works offline.

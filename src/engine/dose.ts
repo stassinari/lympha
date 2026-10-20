@@ -46,8 +46,14 @@ export type Dose = {
 };
 
 export type DoseOptions = {
-  /** Per brand, from settings. `auto` lets magnitude decide. */
+  /** Per kit, from settings. `auto` lets magnitude decide. */
   unitPreference?: UnitPreference;
+  /**
+   * A share of every amount in the recipe, 1 for the recipe as published. Never
+   * applied to the volume: the water is what is in the kettle, and the target
+   * scales with the doses so lighter water still reads as on target.
+   */
+  strength?: number;
 };
 
 export function computeDose(
@@ -56,7 +62,8 @@ export function computeDose(
   components: ReadonlyMap<string, Component>,
   options: DoseOptions = {},
 ): Dose {
-  const scaled = scaleAdditions(recipe, volumeMl);
+  const strength = options.strength ?? 1;
+  const scaled = scaleAdditions(recipe, volumeMl, strength);
 
   const resolved = scaled.map((addition) => {
     const component = components.get(addition.component);
@@ -98,7 +105,7 @@ export function computeDose(
     showsRounding,
     worstError: showsRounding ? Math.max(0, ...lines.map((l) => l.relativeError)) : 0,
     zeroed,
-    profile: profileFor(recipe, lines, components, volumeMl),
+    profile: profileFor(recipe, lines, components, volumeMl, strength),
   };
 }
 
@@ -107,11 +114,16 @@ function profileFor(
   lines: DoseLine[],
   components: ReadonlyMap<string, Component>,
   volumeMl: number,
+  strength: number,
 ): ProfileComparison | null {
   if (!canComputeProfile(recipe, components)) return null;
 
-  const target = targetProfile(recipe, components);
-  if (!target) return null;
+  const published = targetProfile(recipe, components);
+  if (!published) return null;
+  const target = {
+    hardness: published.hardness * strength,
+    alkalinity: published.alkalinity * strength,
+  };
 
   // Back into dose units: the profile is a property of what is in the jug, so it
   // has to be computed from the quantised reading rather than from the ideal.

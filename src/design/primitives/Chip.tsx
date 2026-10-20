@@ -1,5 +1,5 @@
 /**
- * A selection chip, for brand switching.
+ * A selection chip.
  *
  * The one place the two platforms genuinely diverge in appearance, because the
  * unselected state means different things in each idiom: iOS shows a filled pill

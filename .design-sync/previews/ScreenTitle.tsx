@@ -1,4 +1,4 @@
-import { View, ScreenTitle, ActionText, LymphaProvider, getBrand, space } from 'lympha';
+import { View, ScreenTitle, ActionText, LymphaProvider, getRange, space } from 'lympha';
 
 export const Titles = () => (
   <View style={{ gap: space.tight }}>
@@ -11,7 +11,7 @@ export const Titles = () => (
 export const HeaderRow = () => (
   <View style={{ width: 354, flexDirection: 'row', alignItems: 'center' }}>
     <ScreenTitle style={{ flex: 1 }}>Settings</ScreenTitle>
-    <ActionText style={{ color: getBrand('lotus')?.accent.light }}>Done</ActionText>
+    <ActionText style={{ color: getRange('lotus')?.accent.light }}>Done</ActionText>
   </View>
 );
 
@@ -21,6 +21,6 @@ export const Dark = () => (
     style={{ padding: space.blocks, width: 354, flexDirection: 'row', alignItems: 'center' }}
   >
     <ScreenTitle style={{ flex: 1 }}>Rounding</ScreenTitle>
-    <ActionText style={{ color: getBrand('lotus')?.accent.dark }}>Done</ActionText>
+    <ActionText style={{ color: getRange('lotus')?.accent.dark }}>Done</ActionText>
   </LymphaProvider>
 );

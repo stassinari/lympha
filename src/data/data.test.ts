@@ -1,31 +1,74 @@
 import { describe, expect, it } from 'vitest';
-import { APAX_ANOMALIES, APAX_TOTAL_G_PER_L, apaxBrands, apaxRecipes, dropsForGrams } from './apax';
+import { APAX_ANOMALIES, APAX_TOTAL_G_PER_L, apaxRanges, apaxRecipes, dropsForGrams } from './apax';
 import { lotusConstants, lotusRecipes } from './lotus';
 import {
-  brands,
+  ranges,
   componentMap,
   components,
-  componentsForBrand,
+  componentsForRange,
   defaultDispenser,
   getComponent,
-  groupedRecipesForBrand,
+  getKit,
+  getRange,
+  groupedRecipesForRange,
+  kitOf,
+  kits,
   recipes,
-  recipesForBrand,
+  recipesForRange,
 } from './index';
 import { caco3PerDoseUnitPerLitre } from '@/engine/resolve';
 
+describe('kits', () => {
+  it('keep the ids unit preferences were stored under before kits existed', () => {
+    expect(kits.map((k) => k.id)).toEqual(['lotus', 'apax']);
+  });
+
+  it('list exactly the ranges that name them', () => {
+    for (const kit of kits) {
+      expect(kit.rangeIds.length).toBeGreaterThan(0);
+      const naming = ranges.filter((r) => r.kit === kit.id).map((r) => r.id);
+      expect([...kit.rangeIds].sort()).toEqual(naming.sort());
+    }
+    for (const range of ranges) expect(getKit(range.kit), range.id).toBeDefined();
+  });
+
+  it('have exactly one default range where there is a choice', () => {
+    for (const kit of kits.filter((k) => k.rangeIds.length > 1)) {
+      const defaults = kit.rangeIds.filter((id) => getRange(id)?.isDefault);
+      expect(defaults, kit.id).toHaveLength(1);
+    }
+  });
+
+  it('resolve from any of their ranges', () => {
+    expect(kitOf('apax-lab').id).toBe('apax');
+    expect(kitOf('apax-lab-original').id).toBe('apax');
+    expect(kitOf('lotus').id).toBe('lotus');
+  });
+
+  it('offer strength on Apax only', () => {
+    expect(getKit('apax')?.strength).toBe(true);
+    expect(getKit('lotus')?.strength).toBe(false);
+  });
+
+  it('name the Apax ranges with the vendor in full', () => {
+    expect(getRange('apax-lab-original')?.shortName).toBe('Apax Lab');
+    expect(getRange('apax-lab')?.shortName).toBe('Apax Lab [K]');
+    expect(getRange('apax-lab')?.spokenShortName).toBe('Apax Lab with KONFLUX');
+  });
+});
+
 describe('registry integrity', () => {
   it('has unique ids within each collection', () => {
-    for (const collection of [brands, components, recipes]) {
+    for (const collection of [ranges, components, recipes]) {
       const ids = collection.map((x) => x.id);
       expect(new Set(ids).size).toBe(ids.length);
     }
   });
 
-  it('names a brand that exists, from every component and recipe', () => {
-    const brandIds = new Set(brands.map((b) => b.id));
-    for (const c of components) expect(brandIds).toContain(c.brand);
-    for (const r of recipes) expect(brandIds).toContain(r.brand);
+  it('names a range that exists, from every component and recipe', () => {
+    const rangeIds = new Set(ranges.map((b) => b.id));
+    for (const c of components) expect(rangeIds).toContain(c.range);
+    for (const r of recipes) expect(rangeIds).toContain(r.range);
   });
 
   it('names a component that exists, from every addition and target', () => {
@@ -39,10 +82,10 @@ describe('registry integrity', () => {
     }
   });
 
-  it('keeps a recipe’s components within its own brand', () => {
+  it('keeps a recipe’s components within its own range', () => {
     for (const recipe of recipes) {
       for (const addition of recipe.additions) {
-        expect(getComponent(addition.component)?.brand).toBe(recipe.brand);
+        expect(getComponent(addition.component)?.range).toBe(recipe.range);
       }
     }
   });
@@ -240,7 +283,7 @@ describe('the case that justifies the app', () => {
 
 describe('Apax', () => {
   // The base range first, then the one that adds KONFLUX.
-  const APAX_BRAND_IDS = ['apax-lab-original', 'apax-lab'];
+  const APAX_RANGE_IDS = ['apax-lab-original', 'apax-lab'];
   const totalGPerLitre = (recipeId: string) => {
     const recipe = apaxRecipes.find((r) => r.id === recipeId);
     if (!recipe) throw new Error(`no recipe ${recipeId}`);
@@ -248,25 +291,25 @@ describe('Apax', () => {
     return total / (recipe.referenceVolumeMl / 1000);
   };
 
-  it('ships as two ranges, not one brand with an optional bottle', () => {
+  it('ships as two ranges, not one range with an optional bottle', () => {
     // KONFLUX did not simply get added to the old recipes — Apax rebalanced the
     // rest — so the ranges are not derivable from one another.
-    expect(apaxBrands.map((b) => b.id)).toEqual(APAX_BRAND_IDS);
-    expect(apaxBrands.find((b) => b.id === 'apax-lab-original')?.isDefault).toBe(true);
-    expect(componentsForBrand('apax-lab')).toHaveLength(4);
-    expect(componentsForBrand('apax-lab-original')).toHaveLength(3);
-    expect(recipesForBrand('apax-lab')).toHaveLength(15);
-    expect(recipesForBrand('apax-lab-original')).toHaveLength(8);
+    expect(apaxRanges.map((b) => b.id)).toEqual(APAX_RANGE_IDS);
+    expect(apaxRanges.find((b) => b.id === 'apax-lab-original')?.isDefault).toBe(true);
+    expect(componentsForRange('apax-lab')).toHaveLength(4);
+    expect(componentsForRange('apax-lab-original')).toHaveLength(3);
+    expect(recipesForRange('apax-lab')).toHaveLength(15);
+    expect(recipesForRange('apax-lab-original')).toHaveLength(8);
   });
 
-  it('namespaces concentrates per range so a component belongs to one brand', () => {
-    expect(getComponent('apax-lab-tonik')?.brand).toBe('apax-lab');
-    expect(getComponent('apax-lab-original-tonik')?.brand).toBe('apax-lab-original');
+  it('namespaces concentrates per range so a component belongs to one range', () => {
+    expect(getComponent('apax-lab-tonik')?.range).toBe('apax-lab');
+    expect(getComponent('apax-lab-original-tonik')?.range).toBe('apax-lab-original');
     expect(getComponent('apax-lab-original-konflux')).toBeUndefined();
   });
 
   it('tells the user the original range came from the calculator, not the card', () => {
-    const original = apaxBrands.find((b) => b.id === 'apax-lab-original');
+    const original = apaxRanges.find((b) => b.id === 'apax-lab-original');
     expect(original?.displayNote).toMatch(/calculator/i);
     expect(original?.displayNote).toMatch(/card/i);
   });
@@ -307,10 +350,10 @@ describe('Apax', () => {
   });
 
   it("keeps Martin Wölfl's recipe identical across both ranges, using no KONFLUX", () => {
-    const doses = (brandId: string) =>
+    const doses = (rangeId: string) =>
       apaxRecipes
-        .find((r) => r.id === `${brandId}-martin-wolfl-2024`)
-        ?.additions.map((a) => [a.component.replace(`${brandId}-`, ''), a.amount]);
+        .find((r) => r.id === `${rangeId}-martin-wolfl-2024`)
+        ?.additions.map((a) => [a.component.replace(`${rangeId}-`, ''), a.amount]);
 
     expect(doses('apax-lab')).toEqual([
       ['tonik', 1.0],
@@ -335,7 +378,7 @@ describe('Apax', () => {
   });
 
   it('doses in grams, with the dropper as the alternative', () => {
-    for (const c of components.filter((x) => APAX_BRAND_IDS.includes(x.brand))) {
+    for (const c of components.filter((x) => APAX_RANGE_IDS.includes(x.range))) {
       expect(c.doseUnit).toBe('g');
       expect(defaultDispenser(c)?.unit).toBe('g');
       const dropper = c.dispensers.find((d) => d.unit === 'drop');
@@ -344,14 +387,14 @@ describe('Apax', () => {
     }
   });
 
-  it('publishes no ion data, so cannot join a cross-brand comparison', () => {
-    for (const c of components.filter((x) => APAX_BRAND_IDS.includes(x.brand))) {
+  it('publishes no ion data, so cannot join a cross-range comparison', () => {
+    for (const c of components.filter((x) => APAX_RANGE_IDS.includes(x.range))) {
       expect(c.ions).toBeUndefined();
     }
   });
 
   it('groups its recipes, because fifteen is too many to read as a flat list', () => {
-    const groups = groupedRecipesForBrand('apax-lab').map((g) => g.group);
+    const groups = groupedRecipesForRange('apax-lab').map((g) => g.group);
     expect(groups).toEqual(['process', 'roast', 'brew-method', 'varietal', 'barista']);
   });
 });

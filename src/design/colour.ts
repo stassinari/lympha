@@ -1,7 +1,7 @@
 /**
  * Resolving a bottle's label colour for the active scheme.
  *
- * The rules the identity system rests on (`docs/designs/v1`):
+ * The rules the identity system rests on (the v1 design):
  *
  *   1. Colour never carries meaning alone. A name and a number are always
  *      present too, for colour-blind users and for very pale labels.

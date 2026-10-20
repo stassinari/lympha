@@ -34,7 +34,7 @@ import type { DoseLine } from '@/engine';
  * A row marked as added recedes rather than disappearing, so the list keeps its
  * shape and you can still see what you poured.
  *
- * Not a group alpha on the whole row, as `docs/designs/v1` draws it: on Android a
+ * Not a group alpha on the whole row, as the v1 design draws it: on Android a
  * group alpha over a card, its elevation shadow and its text children composites
  * badly, leaving a pale band the height of the numeral's cap block across an
  * otherwise grey row. The recession is three separate things, none of which is a
@@ -66,7 +66,7 @@ const UNIT_OVERLAY_WIDTH = 200;
 
 export type DoseRowProps = {
   line: DoseLine;
-  /** Marked off as poured. Changing volume, brand or recipe clears these. */
+  /** Marked off as poured. Anything that changes the dose clears these. */
   done?: boolean;
   onPress?: () => void;
 };

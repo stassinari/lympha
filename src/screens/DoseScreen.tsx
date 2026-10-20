@@ -6,7 +6,7 @@
  * looking at the screen. So everything needed to make water is visible without
  * scrolling or tapping, and nothing on it teaches, persuades or onboards.
  *
- * Brand, recipe and volume come from the store and survive a cold start.
+ * Kit, recipe and volume come from the store and survive a cold start.
  */
 
 import { ScrollView, View } from 'react-native';
@@ -19,10 +19,11 @@ import {
   RoundingLine,
   VolumeCard,
 } from '@/components';
-import { useBrand, useDose, useRecipe, useRoundingSummary, useStore } from '@/state';
+import { useDose, useRange, useRecipe, useRoundingSummary, useStore, useStrength } from '@/state';
 
 export type DoseScreenProps = {
   onEditVolume: () => void;
+  onOpenKits: () => void;
   onChangeRecipe: () => void;
   onOpenSettings: () => void;
   onOpenDetails: () => void;
@@ -30,11 +31,13 @@ export type DoseScreenProps = {
 
 export function DoseScreen({
   onEditVolume,
+  onOpenKits,
   onChangeRecipe,
   onOpenSettings,
   onOpenDetails,
 }: DoseScreenProps) {
-  const brand = useBrand();
+  const range = useRange();
+  const strength = useStrength();
   const recipe = useRecipe();
   const dose = useDose();
   const summary = useRoundingSummary(dose);
@@ -66,7 +69,7 @@ export function DoseScreen({
         paddingHorizontal: reflowed ? 0 : space.screenH,
       }}
     >
-      <RoundingLine summary={summary} brandAccent={brand.accent} onDetails={onOpenDetails} />
+      <RoundingLine summary={summary} rangeAccent={range.accent} onDetails={onOpenDetails} />
     </View>
   );
 
@@ -75,7 +78,13 @@ export function DoseScreen({
       {/* Outside the scroller: app chrome does not scroll away, and settings should
           be reachable whatever the list is doing. */}
       <View style={{ paddingHorizontal: space.screenH }}>
-        <AppHeader onOpenSettings={onOpenSettings} />
+        <AppHeader
+          label={range.shortName}
+          spokenLabel={range.spokenShortName ?? range.shortName}
+          strength={strength}
+          onOpenKits={onOpenKits}
+          onOpenSettings={onOpenSettings}
+        />
       </View>
 
       <ScrollView
@@ -89,7 +98,6 @@ export function DoseScreen({
       >
         <RecipeHeader
           recipeName={recipe.name}
-          brandName={brand.name}
           bottleColours={dose.lines.map((l) => l.component.colour)}
           onPress={onChangeRecipe}
         />
@@ -97,7 +105,7 @@ export function DoseScreen({
         <VolumeCard volumeMl={dose.volumeMl} onEdit={onEditVolume} />
 
         <View style={{ gap: space.rows }}>
-          <DoseProgress done={doneCount} total={dose.lines.length} brandAccent={brand.accent} />
+          <DoseProgress done={doneCount} total={dose.lines.length} rangeAccent={range.accent} />
           {dose.lines.map((line) => (
             <DoseRow
               key={line.component.id}
