@@ -161,10 +161,26 @@ self-hosted, so the pages make no third-party requests either. Contact is GitHub
 issues, except on Google Play, which requires a public email address:
 `hello@saverio.dev`.
 
-**Releases go through EAS: `eas build --profile production --auto-submit`.** The
-build number is held remotely by EAS and incremented per production build. Android
-submits to Play's internal track. The Play service-account key is stored in EAS,
-because the repository is public.
+**Releases are cut by hand from `main`: `npm run release`.** It runs `check`, then
+an EAS production build of both platforms with auto-submit. Builds are started
+deliberately rather than by CI, so no push spends build credits. Android submits to
+Play's internal track; iOS uploads to TestFlight, which never touches a version in
+App Review. The Play service-account key is stored in EAS, because the repository
+is public.
+
+- **Features merge to `main` from branches**; store builds come only from `main`.
+- **Every store build is tagged** `v<version>`, so the code behind any binary can
+  be found. A fix to a released version branches from its tag.
+- **The version in `app.json` is semver-ish**: a feature bumps the minor, a fix the
+  patch. Apple closes a version to uploads once it is released, so new work always
+  takes a new version.
+- **The build number is held remotely by EAS** and incremented per production build,
+  across versions.
+- **Release notes are the GitHub release on the tag**, written for users under
+  *Copy*. They are pasted into the stores' What's New and TestFlight's What to Test.
+  Internal history is git.
+- **No EAS Update.** Over-the-air JS would make "what does this binary run?" a
+  question; a store build per release keeps it answered by the tag.
 
 **New design work starts in Claude Design, from the app's own components.** The
 private Claude Design project "Lympha" holds `src/design`, `src/components` and
