@@ -6,16 +6,16 @@
  * visible text field means an offscreen `TextInput` holding focus while the value
  * is drawn here — see `HiddenInput`.
  *
- * Three states. At rest the value is plain. Focused and untouched, a selection band
- * sits behind it: the first keystroke replaces it. Once typing, a caret follows the
- * last digit. Everything is placed from the type role's metrics, read at the
+ * Three states. At rest a dotted underline marks the value as something to tap.
+ * Focused and untouched, a selection band sits behind it instead: the first keystroke
+ * replaces it. Once typing, a caret follows the last digit. Everything is placed from the type role's metrics, read at the
  * reader's text size, so the field looks the same on both platforms at any size.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { Keyboard, View } from 'react-native';
 import type { TextInputInstance } from 'react-native';
-import { AppText, Touchable, space, useTypeMetrics } from '@/design';
+import { AppText, Touchable, space, useTheme, useTypeMetrics } from '@/design';
 import type { TypeRole } from '@/design';
 import { HiddenInput } from './HiddenInput';
 
@@ -61,6 +61,15 @@ const SELECTION_PAD_Y = 0.1;
 const SELECTION_RADIUS = 0.06;
 const CARET_WIDTH = 0.04;
 const CARET_GAP = 0.11;
+
+/**
+ * The resting underline: dots, drawn rather than a text decoration. Android draws
+ * every `textDecorationStyle` solid, and a decoration's position belongs to the
+ * font, so it could not sit this close to the digits. Placed from the baseline,
+ * like the band from the cap box, it lands the same on both platforms.
+ */
+const UNDERLINE_DOT = 0.05;
+const UNDERLINE_GAP = 0.1;
 
 /**
  * A caret bar that blinks in hard steps rather than fading, as a text cursor does.
@@ -122,12 +131,6 @@ export type NumberFieldProps = {
   unit: React.ReactNode;
   /** Anchors the unit to the row's end, so it holds still as digits arrive. */
   unitAtEnd?: boolean;
-  /**
-   * Squares the value's box about its digits, so a container centring or padding
-   * it lands where the eye says it should. Without it, iOS puts all the line-height
-   * slack below the digits and a card around them looks top-heavy.
-   */
-  squared?: boolean;
   /** Focused on arrival, for a screen that exists to take the number. */
   autoFocus?: boolean;
   accessibilityLabel: string;
@@ -146,7 +149,6 @@ export function NumberField({
   accent,
   unit,
   unitAtEnd = false,
-  squared = false,
   autoFocus = false,
   accessibilityLabel,
   accessibilityHint,
@@ -169,23 +171,28 @@ export function NumberField({
    *  keystroke replaces it. Exactly the state a text selection describes. */
   const selected = focused && entry === null;
   const display = entry === null ? String(value) : entry === '' ? '0' : entry;
-  const padding = squared ? metrics.capBoxPadding : { paddingTop: 0, paddingBottom: 0 };
+  const { colour } = useTheme();
 
   /**
-   * The band, in the row's own coordinates. `capBlockBox.top` is measured from the
-   * top of the value's line box, which sits below any squaring padding; the value is
-   * the tallest thing in a baseline-aligned row, so its box top is the row's top.
+   * The band and the underline, in the row's own coordinates. `capBlockBox` is
+   * measured from the top of the value's line box, and the value is the tallest
+   * thing in a baseline-aligned row, so its box top is the row's top. A container
+   * spacing the field should measure to the digits with `inkInsets`, since each
+   * platform leaves different slack around them.
    */
   const padX = metrics.fontSize * SELECTION_PAD_X;
   const padY = metrics.fontSize * SELECTION_PAD_Y;
   const band = {
     left: -padX,
     width: valueWidth + padX * 2,
-    top: padding.paddingTop + metrics.capBlockBox.top - padY,
+    top: metrics.capBlockBox.top - padY,
     height: metrics.capBlockBox.height + padY * 2,
     borderRadius: metrics.fontSize * SELECTION_RADIUS,
     backgroundColor: `${accent}${SELECTION_ALPHA}`,
   };
+  const baseline = metrics.capBlockBox.top + metrics.capBlockBox.height;
+  const dot = Math.max(2, Math.round(metrics.fontSize * UNDERLINE_DOT));
+  const dots = Math.max(0, Math.floor((valueWidth + dot) / (dot * 2)));
 
   return (
     <Touchable
@@ -205,11 +212,30 @@ export function NumberField({
       {/* First child, so it paints behind the digits. Absolute, so it is not part
           of the baseline row and cannot move anything. */}
       {selected && valueWidth > 0 ? <View style={{ position: 'absolute', ...band }} /> : null}
-      <AppText
-        variant={role}
-        onLayout={(e) => setValueWidth(e.nativeEvent.layout.width)}
-        style={padding}
-      >
+      {!focused && dots > 0 ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: baseline + metrics.fontSize * UNDERLINE_GAP,
+            flexDirection: 'row',
+            gap: dot,
+          }}
+        >
+          {Array.from({ length: dots }, (_, i) => (
+            <View
+              key={i}
+              style={{
+                width: dot,
+                height: dot,
+                borderRadius: dot / 2,
+                backgroundColor: colour.textSecondary,
+              }}
+            />
+          ))}
+        </View>
+      ) : null}
+      <AppText variant={role} onLayout={(e) => setValueWidth(e.nativeEvent.layout.width)}>
         {display}
       </AppText>
       {/* Immediately after the digits, where the next one will appear. */}

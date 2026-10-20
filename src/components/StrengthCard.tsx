@@ -10,7 +10,16 @@ import * as Haptics from 'expo-haptics';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { View } from 'react-native';
 import type { AccessibilityActionEvent, LayoutChangeEvent } from 'react-native';
-import { Caption, Card, UnitLabel, space, useTheme, useTypeMetrics } from '@/design';
+import {
+  Caption,
+  Card,
+  UnitLabel,
+  opticalGap,
+  opticalPadding,
+  space,
+  useTheme,
+  useTypeMetrics,
+} from '@/design';
 import {
   STRENGTH_MAX,
   STRENGTH_MIN,
@@ -55,6 +64,21 @@ export function StrengthCard({
   const [width, setWidth] = useState(0);
   const [entry, setEntry] = useState<string | null>(null);
   const caption = useTypeMetrics('caption');
+  const digits = useTypeMetrics('doseValue');
+  /**
+   * Spacing measured to the marks, not to the text boxes. iOS reserves the font's
+   * full descent below the digits, about a third of their size, where Android
+   * splits the slack above and below; spacing the boxes would leave the card
+   * visibly taller on iOS. The gaps asked for exceed both platforms' slack, so
+   * neither clamps and the two match.
+   */
+  const cardPadding = opticalPadding(
+    { top: space.cardV, bottom: space.cardV },
+    { top: digits.inkInsets.top, bottom: caption.inkInsets.bottom },
+  );
+  // The thumb is the slider's highest mark, and the top of its box.
+  const sliderGap = opticalGap(space.blocks, digits.inkInsets, { top: 0 });
+  const labelsGap = opticalGap(space.tight, { bottom: 0 }, caption.inkInsets);
   // The track's left edge on screen, for the length of a drag.
   const trackLeft = useRef(0);
   // The last value sent, so a burst of move events between renders ticks once.
@@ -106,8 +130,8 @@ export function StrengthCard({
   const thumbX = xFor(value);
 
   return (
-    <Card paddingVertical={space.cardV} paddingHorizontal={space.cardH}>
-      <View style={{ gap: space.blocks }}>
+    <Card paddingVertical={0} paddingHorizontal={space.cardH} style={cardPadding}>
+      <View style={{ gap: sliderGap }}>
         <NumberField
           role="doseValue"
           value={value}
@@ -118,50 +142,52 @@ export function StrengthCard({
           maxDigits={3}
           accent={accent}
           unit={<UnitLabel tone="secondary">%</UnitLabel>}
-          squared
           accessibilityLabel={`Strength, ${value} percent`}
           accessibilityHint="Types an exact strength"
         />
 
-        <View style={{ gap: space.snug }}>
-          {/* Children ignore touches, so the grant is in the track's own coordinates.
-              `locationX` is relative to whatever is under the finger, so moves are
-              read from `pageX` against the track's left edge, found at the grant. */}
-          <View
-            onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
-            accessible
-            accessibilityRole="adjustable"
-            accessibilityLabel="Strength"
-            accessibilityValue={{
-              min: STRENGTH_MIN,
-              max: STRENGTH_MAX,
-              now: value,
-              text: `${value} percent`,
-            }}
-            accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-            onAccessibilityAction={onAction}
-            onStartShouldSetResponder={() => true}
-            onMoveShouldSetResponder={() => true}
-            // Refuses other JS responders. Returning true from the grant blocks native
-            // ones on Android, so an enclosing scroller cannot intercept the drag;
-            // `onDragChange` lets the screen hold off its scroller on iOS.
-            onResponderTerminationRequest={() => false}
-            onResponderGrant={(e) => {
-              onDragChange?.(true);
-              trackLeft.current = e.nativeEvent.pageX - e.nativeEvent.locationX;
-              fromX(e.nativeEvent.locationX);
-              return true;
-            }}
-            // The release carries where the finger came to rest, which the last move
-            // may not have reached.
-            onResponderRelease={(e) => {
-              fromX(e.nativeEvent.pageX - trackLeft.current);
-              onDragChange?.(false);
-            }}
-            onResponderTerminate={() => onDragChange?.(false)}
-            onResponderMove={(e) => fromX(e.nativeEvent.pageX - trackLeft.current)}
-            style={{ height: 44, justifyContent: 'center' }}
-          >
+        {/* The rail and its labels are one target, together over 44pt tall, and a tap
+            on a label lands on its step. Children ignore touches, so the grant is in
+            the group's own coordinates. `locationX` is relative to whatever is under
+            the finger, so moves are read from `pageX` against the left edge, found at
+            the grant. */}
+        <View
+          onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
+          accessible
+          accessibilityRole="adjustable"
+          accessibilityLabel="Strength"
+          accessibilityValue={{
+            min: STRENGTH_MIN,
+            max: STRENGTH_MAX,
+            now: value,
+            text: `${value} percent`,
+          }}
+          accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+          onAccessibilityAction={onAction}
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          // Refuses other JS responders. Returning true from the grant blocks native
+          // ones on Android, so an enclosing scroller cannot intercept the drag;
+          // `onDragChange` lets the screen hold off its scroller on iOS.
+          onResponderTerminationRequest={() => false}
+          onResponderGrant={(e) => {
+            onDragChange?.(true);
+            trackLeft.current = e.nativeEvent.pageX - e.nativeEvent.locationX;
+            fromX(e.nativeEvent.locationX);
+            return true;
+          }}
+          // The release carries where the finger came to rest, which the last move
+          // may not have reached.
+          onResponderRelease={(e) => {
+            fromX(e.nativeEvent.pageX - trackLeft.current);
+            onDragChange?.(false);
+          }}
+          onResponderTerminate={() => onDragChange?.(false)}
+          onResponderMove={(e) => fromX(e.nativeEvent.pageX - trackLeft.current)}
+        >
+          {/* As tall as the thumb, so the rail sits close to the number above and the
+              labels below. */}
+          <View pointerEvents="none" style={{ height: THUMB, justifyContent: 'center' }}>
             <View
               pointerEvents="none"
               style={{
@@ -214,9 +240,10 @@ export function StrengthCard({
           </View>
 
           <View
+            pointerEvents="none"
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
-            style={{ height: caption.lineHeight }}
+            style={{ height: caption.lineHeight, marginTop: labelsGap }}
           >
             {STRENGTH_STEPS.map((step) => (
               <Caption

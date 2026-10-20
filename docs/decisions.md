@@ -284,7 +284,9 @@ multiplier rather than vendor data, so 73% invents no Apax number. A drag sticks
 Apax's steps within 2%, with a selection haptic as it lands on one; the exact value
 is typed, in the same field as water. The value sits on the card with no key
 surface: a faint one read as a mistake, and the slider is the way in, typing the
-way to precision. Per kit, so both Apax ranges share it; Apax only for now. Shown on the
+way to precision. The rail and its step labels are one touch target, so the track
+can be as tall as its thumb and sit close to the number, and a tap on a label lands
+on its step. Per kit, so both Apax ranges share it; Apax only for now. Shown on the
 dose screen and Recipe only below 100%. Decided 2026-10-19.
 
 - **Strength multiplies the recipe's amounts, never the volume.** Scaling the
@@ -369,6 +371,10 @@ one field (`NumberField`) for every number the app takes: water and strength.
 
 - **Rejected: a custom keypad grid.** More to maintain, and it loses haptics, key
   repeat and accessibility.
+- **At rest, a dotted underline** in the secondary tone, just under the digits, says
+  the value can be typed. It gives way to the band once focused. Drawn as dots, not
+  a text decoration: Android draws every decoration style solid, and the font, not
+  the app, decides where a decoration sits. Decided 2026-10-20.
 - **The first keystroke replaces the value.** An untouched value sits in a
   selection band with no caret; the caret appears with the first keystroke.
 - **Screen readers** hear "Selected. Type to replace the volume".
