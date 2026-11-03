@@ -839,8 +839,13 @@ American spellings split the search.
 **Other calculators are described as fact**: they round to keep things simple. Never
 as hiding anything.
 
-**Blossom Rain is credited** near the end of the description. Lympha started as an
+**Blossom Rain is credited** near the end of the description, as "an unofficial app
+for Lotus drops": like Lympha, it is not affiliated with Lotus. Lympha started as an
 attempt to bring it to more brands and to Android.
+
+**The store description names no platform.** Guideline 2.3.10 rejects App Store
+metadata that mentions other platforms (Lympha 1.0, rejected 2026-11-02, for "and to
+Android"). Naming none, iOS included, keeps one description valid for both stores.
 
 **The description is written by hand and edited lightly.** Generated drafts gave
 themselves away: mirrored pairs ("A small difference… A bigger one…"), runs of short

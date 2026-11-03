@@ -35,7 +35,7 @@ Apax Lab, both the three-bottle range and the range with KONFLUX
 
 There are no accounts, ads or tracking, and everything works offline.
 
-Lympha started as an attempt to bring Blossom Rain, the iOS app for Lotus drops, to more brands and to Android. Thanks to its developer for the idea.
+Lympha started as an attempt to bring Blossom Rain, an unofficial app for Lotus drops, to more brands. Thanks to its developer for the idea.
 
 Lympha is independent and not affiliated with Lotus Coffee Products, Apax Lab or Blossom Rain.
 ```
